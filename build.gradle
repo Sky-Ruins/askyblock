@@ -1,0 +1,45 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
+plugins {
+    id 'idea'
+    id 'java'
+    id 'com.github.johnrengelman.shadow' version '2.0.2'
+}
+
+group = pluginGroup
+version = pluginVersion
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    maven { url 'https://maven.sk89q.com/repo/' }
+    maven { url 'https://repo.mhdv-solutions.org/skyruins/' }
+}
+
+dependencies {
+    compileOnly 'org.spigotmc:spigot:+'
+    compileOnly 'com.neolumia:vault-api:+'
+}
+
+processResources {
+    from(sourceSets.main.resources.srcDirs) {
+        filter ReplaceTokens, tokens: [version: version]
+    }
+    from project.file('LICENSE')
+}
+
+shadowJar {
+    baseName = project.name.substring(0, 1).toUpperCase() + project.name.substring(1)
+    version = null
+    classifier = null
+
+    relocate 'co.aikar.timings.lib', "${group}.${project.name}.timings"
+}
+
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '4.4'
+}
+
+build.dependsOn shadowJar
