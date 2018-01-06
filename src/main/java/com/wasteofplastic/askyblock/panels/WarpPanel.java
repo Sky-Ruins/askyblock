@@ -22,6 +22,7 @@ import com.wasteofplastic.askyblock.Island;
 import com.wasteofplastic.askyblock.Island.SettingsFlag;
 import com.wasteofplastic.askyblock.Settings;
 import com.wasteofplastic.askyblock.util.Util;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -117,7 +118,8 @@ public class WarpPanel implements Listener {
         ItemStack playerSkull = new ItemStack(Material.SKULL_ITEM, 1, (short) 3);
         if (playerName == null) {
             if (DEBUG) {
-                plugin.getLogger().warning("Warp for Player: UUID " + playerUUID.toString() + " is unknown on this server, skipping...");
+                plugin.getLogger()
+                        .warning("Warp for Player: UUID " + playerUUID.toString() + " is unknown on this server, skipping...");
             }
             return null;
             //playerName = playerUUID.toString().substring(0, 10);
@@ -150,14 +152,17 @@ public class WarpPanel implements Listener {
         }
         //plugin.getLogger().info("DEBUG: block type = " + signLocation.getBlock().getType());
         // Get the sign info if it exists
-        if (signLocation.getBlock().getType().equals(Material.SIGN_POST) || signLocation.getBlock().getType().equals(Material.WALL_SIGN)) {
+        if (signLocation.getBlock().getType().equals(Material.SIGN_POST) || signLocation.getBlock()
+                .getType()
+                .equals(Material.WALL_SIGN)) {
             Sign sign = (Sign) signLocation.getBlock().getState();
             List<String> lines = new ArrayList<String>(Arrays.asList(sign.getLines()));
             // Check for PVP and add warning
             Island island = plugin.getGrid().getIsland(playerUUID);
             if (island != null) {
                 if ((signLocation.getWorld().equals(ASkyBlock.getIslandWorld()) && island.getIgsFlag(SettingsFlag.PVP))
-                        || (signLocation.getWorld().equals(ASkyBlock.getNetherWorld()) && island.getIgsFlag(SettingsFlag.NETHER_PVP))) {
+                        || (signLocation.getWorld().equals(ASkyBlock.getNetherWorld()) && island.getIgsFlag(
+                        SettingsFlag.NETHER_PVP))) {
                     if (DEBUG) {
                         plugin.getLogger().info("DEBUG: pvp warning added");
                     }
@@ -217,10 +222,12 @@ public class WarpPanel implements Listener {
                     // Add navigation buttons
                     if (panelNumber > 0) {
                         warpPanel.get(panelNumber).setItem(slot++,
-                                new CPItem(Material.SIGN, plugin.myLocale().warpsPrevious, "warps " + (panelNumber - 1), "").getItem());
+                                new CPItem(Material.SIGN, plugin.myLocale().warpsPrevious, "warps " + (panelNumber - 1),
+                                        "").getItem());
                     }
                     warpPanel.get(panelNumber)
-                            .setItem(slot, new CPItem(Material.SIGN, plugin.myLocale().warpsNext, "warps " + (panelNumber + 1), "").getItem());
+                            .setItem(slot, new CPItem(Material.SIGN, plugin.myLocale().warpsNext, "warps " + (panelNumber + 1),
+                                    "").getItem());
                     // Move onto the next panel
                     panelNumber++;
                     slot = 0;
@@ -229,7 +236,8 @@ public class WarpPanel implements Listener {
         }
         if (remainder != 0 && panelNumber > 0) {
             warpPanel.get(panelNumber)
-                    .setItem(slot++, new CPItem(Material.SIGN, plugin.myLocale().warpsPrevious, "warps " + (panelNumber - 1), "").getItem());
+                    .setItem(slot++,
+                            new CPItem(Material.SIGN, plugin.myLocale().warpsPrevious, "warps " + (panelNumber - 1), "").getItem());
         }
     }
 
@@ -335,7 +343,8 @@ public class WarpPanel implements Listener {
                 } else {
                     player.closeInventory();
                     Util.sendMessage(player,
-                            ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).warpswarpToPlayersSign.replace("<player>", command));
+                            ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).warpswarpToPlayersSign.replace("<player>",
+                                    command));
                     Util.runCommand(player, Settings.ISLANDCOMMAND + " warp " + command);
                 }
             }

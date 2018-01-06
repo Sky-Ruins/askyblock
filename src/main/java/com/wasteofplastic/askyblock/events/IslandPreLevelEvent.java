@@ -18,6 +18,7 @@
 package com.wasteofplastic.askyblock.events;
 
 import com.wasteofplastic.askyblock.Island;
+
 import org.bukkit.event.Cancellable;
 
 import java.util.UUID;

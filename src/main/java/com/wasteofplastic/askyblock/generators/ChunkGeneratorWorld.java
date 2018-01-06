@@ -19,6 +19,7 @@ package com.wasteofplastic.askyblock.generators;
 
 import com.wasteofplastic.askyblock.ASkyBlock;
 import com.wasteofplastic.askyblock.Settings;
+
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.World.Environment;
@@ -166,7 +167,8 @@ public class ChunkGeneratorWorld extends ChunkGenerator {
                                 if (x > 3 && z > 3) {
                                     for (int xx = 0; xx < 3; xx++) {
                                         for (int zz = 0; zz < 3; zz++) {
-                                            setBlock(result, x - xx, (maxHeight - 8 - random.nextInt(2)), z - xx, (byte) Material.GLOWSTONE.getId());
+                                            setBlock(result, x - xx, (maxHeight - 8 - random.nextInt(2)), z - xx,
+                                                    (byte) Material.GLOWSTONE.getId());
                                         }
                                     }
                                 }

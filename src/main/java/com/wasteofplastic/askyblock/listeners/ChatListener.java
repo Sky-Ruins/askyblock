@@ -20,6 +20,7 @@ package com.wasteofplastic.askyblock.listeners;
 import com.wasteofplastic.askyblock.ASkyBlock;
 import com.wasteofplastic.askyblock.Settings;
 import com.wasteofplastic.askyblock.util.Util;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -150,7 +151,8 @@ public class ChatListener implements Listener {
             if (Settings.chatIslandPlayer.isEmpty()) {
                 message = plugin.myLocale(playerUUID).teamChatPrefix + message;
             } else {
-                message = plugin.myLocale(playerUUID).teamChatPrefix.replace(Settings.chatIslandPlayer, player.getDisplayName()) + message;
+                message = plugin.myLocale(playerUUID).teamChatPrefix.replace(Settings.chatIslandPlayer, player.getDisplayName())
+                        + message;
             }
             for (UUID teamMember : teamMembers) {
                 Player teamPlayer = plugin.getServer().getPlayer(teamMember);

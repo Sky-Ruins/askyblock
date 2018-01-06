@@ -38,7 +38,8 @@ public final class FileLister {
                         return true;
                     } else {
                         if (lowercaseName.endsWith(".yml") && !lowercaseName.equals("locale.yml")) {
-                            plugin.getLogger().severe("Filename '" + name + "' is not in the correct format for a locale file - skipping...");
+                            plugin.getLogger()
+                                    .severe("Filename '" + name + "' is not in the correct format for a locale file - skipping...");
                         }
                         return false;
                     }

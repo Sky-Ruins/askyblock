@@ -5,6 +5,7 @@ import com.wasteofplastic.askyblock.commands.Challenges;
 import com.wasteofplastic.askyblock.listeners.LavaCheck;
 import com.wasteofplastic.askyblock.util.SpawnEgg1_9;
 import com.wasteofplastic.askyblock.util.Util;
+
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -67,7 +68,8 @@ public class PluginConfig {
         if (Settings.islandProtectionRange <= 0) {
             plugin.getLogger().warning("Protection range of 0 in config.yml: To disable protection, the range should");
             plugin.getLogger().warning("equal the island distance and then you should allow all island protection flags");
-            plugin.getLogger().warning("in config.yml. Protection range will be set to island distance (" + Settings.islandDistance + ")");
+            plugin.getLogger()
+                    .warning("in config.yml. Protection range will be set to island distance (" + Settings.islandDistance + ")");
             Settings.islandProtectionRange = Settings.islandDistance;
         }
         if (Settings.islandProtectionRange % 2 != 0) {
@@ -168,7 +170,9 @@ public class PluginConfig {
                     if (amountdata.length == 3 && amountdata[0].equalsIgnoreCase("MONSTER_EGG")) {
                         try {
                             EntityType type = EntityType.valueOf(amountdata[1].toUpperCase());
-                            if (Bukkit.getServer().getVersion().contains("(MC: 1.8") || Bukkit.getServer().getVersion().contains("(MC: 1.7")) {
+                            if (Bukkit.getServer().getVersion().contains("(MC: 1.8") || Bukkit.getServer()
+                                    .getVersion()
+                                    .contains("(MC: 1.7")) {
                                 tempChest[i] = new SpawnEgg(type).toItemStack(Integer.parseInt(amountdata[2]));
                             } else {
                                 try {
@@ -179,7 +183,8 @@ public class PluginConfig {
                                 }
                             }
                         } catch (Exception e) {
-                            plugin.getLogger().severe("Spawn eggs must be described by name. Try one of these (not all are possible):");
+                            plugin.getLogger()
+                                    .severe("Spawn eggs must be described by name. Try one of these (not all are possible):");
                             for (EntityType type : EntityType.values()) {
                                 if (type.isSpawnable() && type.isAlive()) {
                                     plugin.getLogger().severe(type.toString());
@@ -192,7 +197,8 @@ public class PluginConfig {
                         if (amountdata.length == 6) {
                             tempChest[i] = Challenges.getPotion(amountdata, Integer.parseInt(amountdata[5]), "config.yml");
                         } else {
-                            plugin.getLogger().severe("Problem loading chest item from config.yml so skipping it: " + chestItemString[i]);
+                            plugin.getLogger()
+                                    .severe("Problem loading chest item from config.yml so skipping it: " + chestItemString[i]);
                             plugin.getLogger()
                                     .severe("Potions for the chest must be fully defined as POTION:NAME:<LEVEL>:<EXTENDED>:<SPLASH/LINGER>:QTY");
                         }
@@ -626,7 +632,8 @@ public class PluginConfig {
 
         // Chat prefixes
         Settings.chatLevelPrefix = plugin.getConfig().getString("general.chatlevelprefix", "{ISLAND_LEVEL}");
-        Settings.chatChallengeLevelPrefix = plugin.getConfig().getString("general.chatchallanegelevelprefix", "{ISLAND_CHALLENGE_LEVEL}");
+        Settings.chatChallengeLevelPrefix = plugin.getConfig()
+                .getString("general.chatchallanegelevelprefix", "{ISLAND_CHALLENGE_LEVEL}");
         Settings.chatIslandPlayer = plugin.getConfig().getString("general.chatislandplayer", "{ISLAND_PLAYER}");
         // Chat team suffixes - Not public right now
         Settings.setTeamName = plugin.getConfig().getBoolean("general.setteamsuffix", false);
@@ -711,7 +718,9 @@ public class PluginConfig {
                         }
                         TreeMap<Double, Material> blockMapTree = new TreeMap<Double, Material>();
                         double chanceTotal = 0;
-                        for (String block : plugin.getConfig().getConfigurationSection("general.magiccobblegenchances." + level).getKeys(false)) {
+                        for (String block : plugin.getConfig()
+                                .getConfigurationSection("general.magiccobblegenchances." + level)
+                                .getKeys(false)) {
                             double chance = plugin.getConfig().getDouble("general.magiccobblegenchances." + level + "." + block, 0D);
                             if (chance > 0 && Material.getMaterial(block) != null && Material.getMaterial(block).isBlock()) {
                                 // Store the cumulative chance in the treemap. It does not need to add up to 100%
@@ -725,7 +734,8 @@ public class PluginConfig {
                         // Store the requested values as a % chance
                         Map<Material, Double> chances = new HashMap<Material, Double>();
                         for (Entry<Double, Material> en : blockMapTree.entrySet()) {
-                            double chance = plugin.getConfig().getDouble("general.magiccobblegenchances." + level + "." + en.getValue(), 0D);
+                            double chance = plugin.getConfig()
+                                    .getDouble("general.magiccobblegenchances." + level + "." + en.getValue(), 0D);
                             chances.put(en.getValue(), (chance / chanceTotal) * 100);
                         }
                         //plugin.getLogger().info("DEBUG: level = " + levelInt + " chances = " + chances.toString());
@@ -893,7 +903,8 @@ public class PluginConfig {
                     materialData.setData(data);
                     Settings.blockLimits.put(materialData, blockValuesConfig.getInt("limits." + material, 0));
                     if (DEBUG) {
-                        plugin.getLogger().info("Maximum number of " + materialData + " will be " + Settings.blockLimits.get(materialData));
+                        plugin.getLogger()
+                                .info("Maximum number of " + materialData + " will be " + Settings.blockLimits.get(materialData));
                     }
                 } catch (Exception e) {
                     plugin.getLogger().warning("Unknown material (" + material + ") in blockvalues.yml Limits section. Skipping...");

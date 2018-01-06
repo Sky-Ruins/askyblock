@@ -22,6 +22,7 @@ import com.wasteofplastic.org.jnbt.CompoundTag;
 import com.wasteofplastic.org.jnbt.ListTag;
 import com.wasteofplastic.org.jnbt.StringTag;
 import com.wasteofplastic.org.jnbt.Tag;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -192,7 +193,8 @@ public class IslandBlock {
             WEtoME.put("ARMORSTAND", EntityType.ARMOR_STAND);
         }
         // 1.10 entities and materials
-        if (!Bukkit.getServer().getVersion().contains("(MC: 1.7") && !Bukkit.getServer().getVersion().contains("(MC: 1.8") && !Bukkit.getServer()
+        if (!Bukkit.getServer().getVersion().contains("(MC: 1.7") && !Bukkit.getServer().getVersion().contains("(MC: 1.8")
+                && !Bukkit.getServer()
                 .getVersion().contains("(MC: 1.9")) {
             WEtoME.put("POLARBEAR", EntityType.POLAR_BEAR);
             WEtoM.put("ENDER_CRYSTAL", Material.END_CRYSTAL); // 1.11
@@ -403,7 +405,9 @@ public class IslandBlock {
                                             try {
                                                 lineText += ChatColor.valueOf(value.toUpperCase());
                                             } catch (Exception noColor) {
-                                                Bukkit.getLogger().warning("Unknown color " + value + " in sign when pasting schematic, skipping...");
+                                                Bukkit.getLogger()
+                                                        .warning("Unknown color " + value
+                                                                + " in sign when pasting schematic, skipping...");
                                             }
                                         } else if (key.equalsIgnoreCase("text")) {
                                             lineText += value;
@@ -421,7 +425,8 @@ public class IslandBlock {
                                                     // Ignore
                                                     //System.out.println("DEBUG3:" + key + "=>" + value);
                                                     Bukkit.getLogger()
-                                                            .warning("Unknown format " + value + " in sign when pasting schematic, skipping...");
+                                                            .warning("Unknown format " + value
+                                                                    + " in sign when pasting schematic, skipping...");
                                                 }
                                             }
                                         }
@@ -430,7 +435,8 @@ public class IslandBlock {
                                     // This is unformatted text. It is included in "". A reset is required to clear
                                     // any previous formatting
                                     if (format.length() > 1) {
-                                        lineText += ChatColor.RESET + format.substring(format.indexOf('"') + 1, format.lastIndexOf('"'));
+                                        lineText +=
+                                                ChatColor.RESET + format.substring(format.indexOf('"') + 1, format.lastIndexOf('"'));
                                     }
                                 }
                             }
@@ -529,7 +535,8 @@ public class IslandBlock {
                                 // Bukkit.getLogger().info(item.toString());
                                 // Bukkit.getLogger().info(((CompoundTag)item).getValue().get("id").getName());
                                 Bukkit.getLogger().severe(
-                                        "Could not parse item [" + itemType.substring(10).toUpperCase() + "] in schematic - skipping!");
+                                        "Could not parse item [" + itemType.substring(10).toUpperCase()
+                                                + "] in schematic - skipping!");
                                 // Bukkit.getLogger().severe(item.toString());
                                 exx.printStackTrace();
                             }

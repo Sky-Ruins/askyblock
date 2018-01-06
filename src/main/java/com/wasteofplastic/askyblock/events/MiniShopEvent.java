@@ -18,6 +18,7 @@
 package com.wasteofplastic.askyblock.events;
 
 import com.wasteofplastic.askyblock.panels.MiniShopItem;
+
 import org.bukkit.inventory.ItemStack;
 
 import java.util.UUID;
@@ -32,6 +33,7 @@ public class MiniShopEvent extends ASkyBlockEvent {
 
     private final MiniShopItem item;
     private final TransactionType type;
+
     /**
      * Called to create the event
      *

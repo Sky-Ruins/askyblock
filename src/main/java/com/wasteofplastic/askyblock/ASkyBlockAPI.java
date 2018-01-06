@@ -19,6 +19,7 @@ package com.wasteofplastic.askyblock;
 
 import com.wasteofplastic.askyblock.commands.Challenges;
 import com.wasteofplastic.askyblock.panels.SetBiome;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;

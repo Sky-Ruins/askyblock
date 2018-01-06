@@ -18,6 +18,7 @@
 package com.wasteofplastic.askyblock.events;
 
 import com.wasteofplastic.askyblock.Island;
+
 import org.bukkit.Location;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;

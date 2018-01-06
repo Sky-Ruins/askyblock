@@ -24,6 +24,7 @@ import com.wasteofplastic.askyblock.Settings;
 import com.wasteofplastic.askyblock.Settings.GameType;
 import com.wasteofplastic.askyblock.util.Util;
 import com.wasteofplastic.askyblock.util.VaultHelper;
+
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -68,6 +69,76 @@ public class AcidEffect implements Listener {
 
     public AcidEffect(final ASkyBlock pluginI) {
         plugin = pluginI;
+    }
+
+    /**
+     * @param player
+     * @return A double between 0.0 and 0.80 that reflects how much armor the
+     * player has on. The higher the value, the more protection they
+     * have.
+     */
+    static public double getDamageReduced(Player player) {
+        org.bukkit.inventory.PlayerInventory inv = player.getInventory();
+        ItemStack boots = inv.getBoots();
+        ItemStack helmet = inv.getHelmet();
+        ItemStack chest = inv.getChestplate();
+        ItemStack pants = inv.getLeggings();
+        double red = 0.0;
+        if (helmet != null) {
+            if (helmet.getType() == Material.LEATHER_HELMET) {
+                red = red + 0.04;
+            } else if (helmet.getType() == Material.GOLD_HELMET) {
+                red = red + 0.08;
+            } else if (helmet.getType() == Material.CHAINMAIL_HELMET) {
+                red = red + 0.08;
+            } else if (helmet.getType() == Material.IRON_HELMET) {
+                red = red + 0.08;
+            } else if (helmet.getType() == Material.DIAMOND_HELMET) {
+                red = red + 0.12;
+            }
+        }
+        if (boots != null) {
+            if (boots.getType() == Material.LEATHER_BOOTS) {
+                red = red + 0.04;
+            } else if (boots.getType() == Material.GOLD_BOOTS) {
+                red = red + 0.04;
+            } else if (boots.getType() == Material.CHAINMAIL_BOOTS) {
+                red = red + 0.04;
+            } else if (boots.getType() == Material.IRON_BOOTS) {
+                red = red + 0.08;
+            } else if (boots.getType() == Material.DIAMOND_BOOTS) {
+                red = red + 0.12;
+            }
+        }
+        // Pants
+        if (pants != null) {
+            if (pants.getType() == Material.LEATHER_LEGGINGS) {
+                red = red + 0.08;
+            } else if (pants.getType() == Material.GOLD_LEGGINGS) {
+                red = red + 0.12;
+            } else if (pants.getType() == Material.CHAINMAIL_LEGGINGS) {
+                red = red + 0.16;
+            } else if (pants.getType() == Material.IRON_LEGGINGS) {
+                red = red + 0.20;
+            } else if (pants.getType() == Material.DIAMOND_LEGGINGS) {
+                red = red + 0.24;
+            }
+        }
+        // Chest plate
+        if (chest != null) {
+            if (chest.getType() == Material.LEATHER_CHESTPLATE) {
+                red = red + 0.12;
+            } else if (chest.getType() == Material.GOLD_CHESTPLATE) {
+                red = red + 0.20;
+            } else if (chest.getType() == Material.CHAINMAIL_CHESTPLATE) {
+                red = red + 0.20;
+            } else if (chest.getType() == Material.IRON_CHESTPLATE) {
+                red = red + 0.24;
+            } else if (chest.getType() == Material.DIAMOND_CHESTPLATE) {
+                red = red + 0.32;
+            }
+        }
+        return red;
     }
 
     @EventHandler(priority = EventPriority.LOW)
@@ -207,7 +278,8 @@ public class AcidEffect implements Listener {
                 } else {
                     if (!Settings.acidDamageType.isEmpty()) {
                         for (PotionEffectType t : Settings.acidDamageType) {
-                            if (t.equals(PotionEffectType.BLINDNESS) || t.equals(PotionEffectType.CONFUSION) || t.equals(PotionEffectType.HUNGER)
+                            if (t.equals(PotionEffectType.BLINDNESS) || t.equals(PotionEffectType.CONFUSION) || t.equals(
+                                    PotionEffectType.HUNGER)
                                     || t.equals(PotionEffectType.SLOW) || t.equals(PotionEffectType.SLOW_DIGGING) || t
                                     .equals(PotionEffectType.WEAKNESS)) {
                                 player.addPotionEffect(new PotionEffect(t, 600, 1));
@@ -220,7 +292,9 @@ public class AcidEffect implements Listener {
                     // Apply damage if there is any
                     if (Settings.acidDamage > 0D) {
                         player.damage((Settings.acidDamage - Settings.acidDamage * getDamageReduced(player)));
-                        if (plugin.getServer().getVersion().contains("(MC: 1.8") || plugin.getServer().getVersion().contains("(MC: 1.7")) {
+                        if (plugin.getServer().getVersion().contains("(MC: 1.8") || plugin.getServer()
+                                .getVersion()
+                                .contains("(MC: 1.7")) {
                             player.getWorld().playSound(playerLoc, Sound.valueOf("FIZZ"), 3F, 3F);
                         } else {
                             player.getWorld().playSound(playerLoc, Sound.ENTITY_CREEPER_PRIMED, 3F, 3F);
@@ -269,7 +343,10 @@ public class AcidEffect implements Listener {
         }
         // Check if all air above player
         for (int y = player.getLocation().getBlockY() + 2; y < player.getLocation().getWorld().getMaxHeight(); y++) {
-            if (!player.getLocation().getWorld().getBlockAt(player.getLocation().getBlockX(), y, player.getLocation().getBlockZ()).getType()
+            if (!player.getLocation()
+                    .getWorld()
+                    .getBlockAt(player.getLocation().getBlockX(), y, player.getLocation().getBlockZ())
+                    .getType()
                     .equals(Material.AIR)) {
                 if (DEBUG) {
                     plugin.getLogger().info("DEBUG: something other than air above player");
@@ -310,8 +387,11 @@ public class AcidEffect implements Listener {
         }
         if (bodyMat != Material.WATER && headMat != Material.WATER) {
             if (DEBUG) {
-                plugin.getLogger().info("DEBUG: not in water " + player.getLocation().getBlock().isLiquid() + " " + player.getLocation().getBlock()
-                        .getRelative(BlockFace.UP).isLiquid());
+                plugin.getLogger()
+                        .info("DEBUG: not in water " + player.getLocation().getBlock().isLiquid() + " " + player.getLocation()
+                                .getBlock()
+                                .getRelative(BlockFace.UP)
+                                .isLiquid());
             }
             return true;
         }
@@ -364,7 +444,8 @@ public class AcidEffect implements Listener {
             }
             return true;
         }
-        if (island == null && !Settings.defaultWorldSettings.get(SettingsFlag.ACID_DAMAGE) && player.getLocation().getBlockY() > Settings.seaHeight) {
+        if (island == null && !Settings.defaultWorldSettings.get(SettingsFlag.ACID_DAMAGE)
+                && player.getLocation().getBlockY() > Settings.seaHeight) {
             if (DEBUG) {
                 plugin.getLogger().info("DEBUG: no acid damage above sea level");
             }
@@ -374,76 +455,6 @@ public class AcidEffect implements Listener {
             plugin.getLogger().info("DEBUG: burn in acid");
         }
         return false;
-    }
-
-    /**
-     * @param player
-     * @return A double between 0.0 and 0.80 that reflects how much armor the
-     * player has on. The higher the value, the more protection they
-     * have.
-     */
-    static public double getDamageReduced(Player player) {
-        org.bukkit.inventory.PlayerInventory inv = player.getInventory();
-        ItemStack boots = inv.getBoots();
-        ItemStack helmet = inv.getHelmet();
-        ItemStack chest = inv.getChestplate();
-        ItemStack pants = inv.getLeggings();
-        double red = 0.0;
-        if (helmet != null) {
-            if (helmet.getType() == Material.LEATHER_HELMET) {
-                red = red + 0.04;
-            } else if (helmet.getType() == Material.GOLD_HELMET) {
-                red = red + 0.08;
-            } else if (helmet.getType() == Material.CHAINMAIL_HELMET) {
-                red = red + 0.08;
-            } else if (helmet.getType() == Material.IRON_HELMET) {
-                red = red + 0.08;
-            } else if (helmet.getType() == Material.DIAMOND_HELMET) {
-                red = red + 0.12;
-            }
-        }
-        if (boots != null) {
-            if (boots.getType() == Material.LEATHER_BOOTS) {
-                red = red + 0.04;
-            } else if (boots.getType() == Material.GOLD_BOOTS) {
-                red = red + 0.04;
-            } else if (boots.getType() == Material.CHAINMAIL_BOOTS) {
-                red = red + 0.04;
-            } else if (boots.getType() == Material.IRON_BOOTS) {
-                red = red + 0.08;
-            } else if (boots.getType() == Material.DIAMOND_BOOTS) {
-                red = red + 0.12;
-            }
-        }
-        // Pants
-        if (pants != null) {
-            if (pants.getType() == Material.LEATHER_LEGGINGS) {
-                red = red + 0.08;
-            } else if (pants.getType() == Material.GOLD_LEGGINGS) {
-                red = red + 0.12;
-            } else if (pants.getType() == Material.CHAINMAIL_LEGGINGS) {
-                red = red + 0.16;
-            } else if (pants.getType() == Material.IRON_LEGGINGS) {
-                red = red + 0.20;
-            } else if (pants.getType() == Material.DIAMOND_LEGGINGS) {
-                red = red + 0.24;
-            }
-        }
-        // Chest plate
-        if (chest != null) {
-            if (chest.getType() == Material.LEATHER_CHESTPLATE) {
-                red = red + 0.12;
-            } else if (chest.getType() == Material.GOLD_CHESTPLATE) {
-                red = red + 0.20;
-            } else if (chest.getType() == Material.CHAINMAIL_CHESTPLATE) {
-                red = red + 0.20;
-            } else if (chest.getType() == Material.IRON_CHESTPLATE) {
-                red = red + 0.24;
-            } else if (chest.getType() == Material.DIAMOND_CHESTPLATE) {
-                red = red + 0.32;
-            }
-        }
-        return red;
     }
 
     /**
@@ -488,7 +499,8 @@ public class AcidEffect implements Listener {
                     }
                 }
                 if (!otherOb) {
-                    Util.sendMessage(e.getPlayer(), ChatColor.YELLOW + plugin.myLocale(e.getPlayer().getUniqueId()).changingObsidiantoLava);
+                    Util.sendMessage(e.getPlayer(),
+                            ChatColor.YELLOW + plugin.myLocale(e.getPlayer().getUniqueId()).changingObsidiantoLava);
                     e.getPlayer().getInventory().setItemInHand(null);
                     // e.getPlayer().getInventory().removeItem(new
                     // ItemStack(Material.BUCKET, 1));

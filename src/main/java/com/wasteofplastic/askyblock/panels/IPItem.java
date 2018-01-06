@@ -19,6 +19,7 @@ package com.wasteofplastic.askyblock.panels;
 
 import com.wasteofplastic.askyblock.ASkyBlock;
 import com.wasteofplastic.askyblock.util.Util;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -77,6 +78,20 @@ public class IPItem {
         createToggleableItem(flagValue, material, 0, name, uuid);
     }
 
+    /**
+     * @param flagValue
+     * @param material
+     * @param durability
+     * @param name
+     */
+    public IPItem(boolean flagValue, Material material, int durability, String name, UUID uuid) {
+        createToggleableItem(flagValue, material, durability, name, uuid);
+    }
+
+    public IPItem(Boolean boolean1, Material material, String name, UUID uuid) {
+        createToggleableItem(boolean1, material, 0, name, uuid);
+    }
+
     private void createToggleableItem(boolean flagValue, Material material, int durability, String name, UUID uuid) {
         this.flagValue = flagValue;
         this.slot = -1;
@@ -109,20 +124,6 @@ public class IPItem {
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
         item.setItemMeta(meta);
-    }
-
-    /**
-     * @param flagValue
-     * @param material
-     * @param durability
-     * @param name
-     */
-    public IPItem(boolean flagValue, Material material, int durability, String name, UUID uuid) {
-        createToggleableItem(flagValue, material, durability, name, uuid);
-    }
-
-    public IPItem(Boolean boolean1, Material material, String name, UUID uuid) {
-        createToggleableItem(boolean1, material, 0, name, uuid);
     }
 
     public void setLore(List<String> lore) {

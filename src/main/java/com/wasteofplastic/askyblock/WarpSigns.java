@@ -21,6 +21,7 @@ import com.wasteofplastic.askyblock.events.WarpListEvent;
 import com.wasteofplastic.askyblock.events.WarpRemoveEvent;
 import com.wasteofplastic.askyblock.util.Util;
 import com.wasteofplastic.askyblock.util.VaultHelper;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -80,15 +81,18 @@ public class WarpSigns implements Listener {
                             //plugin.getLogger().info("DEBUG: warp sign is in list");
                             // Welcome sign detected - check to see if it is
                             // this player's sign
-                            if ((warpList.containsKey(player.getUniqueId()) && warpList.get(player.getUniqueId()).equals(s.getLocation()))) {
+                            if ((warpList.containsKey(player.getUniqueId()) && warpList.get(player.getUniqueId())
+                                    .equals(s.getLocation()))) {
                                 // Player removed sign
                                 removeWarp(s.getLocation());
-                                Bukkit.getPluginManager().callEvent(new WarpRemoveEvent(plugin, s.getLocation(), player.getUniqueId()));
+                                Bukkit.getPluginManager()
+                                        .callEvent(new WarpRemoveEvent(plugin, s.getLocation(), player.getUniqueId()));
                             } else if (player.isOp() || player.hasPermission(Settings.PERMPREFIX + "mod.removesign")) {
                                 // Op or mod removed sign
                                 Util.sendMessage(player, ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).warpsremoved);
                                 removeWarp(s.getLocation());
-                                Bukkit.getPluginManager().callEvent(new WarpRemoveEvent(plugin, s.getLocation(), player.getUniqueId()));
+                                Bukkit.getPluginManager()
+                                        .callEvent(new WarpRemoveEvent(plugin, s.getLocation(), player.getUniqueId()));
                             } else {
                                 // Someone else's sign - not allowed
                                 Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).warpserrorNoRemove);
@@ -230,7 +234,8 @@ public class WarpSigns implements Listener {
                                     oldSign.update(true, false);
                                     Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).warpsdeactivate);
                                     removeWarp(player.getUniqueId());
-                                    Bukkit.getPluginManager().callEvent(new WarpRemoveEvent(plugin, oldSign.getLocation(), player.getUniqueId()));
+                                    Bukkit.getPluginManager()
+                                            .callEvent(new WarpRemoveEvent(plugin, oldSign.getLocation(), player.getUniqueId()));
                                 }
                             }
                         }

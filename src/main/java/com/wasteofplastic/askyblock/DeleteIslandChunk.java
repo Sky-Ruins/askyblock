@@ -19,6 +19,7 @@ package com.wasteofplastic.askyblock;
 import com.wasteofplastic.askyblock.nms.NMSAbstraction;
 import com.wasteofplastic.askyblock.util.Pair;
 import com.wasteofplastic.askyblock.util.Util;
+
 import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -185,7 +186,8 @@ public class DeleteIslandChunk {
                                                 break;
                                         }
                                         // Nether, if it exists
-                                        if (Settings.newNether && Settings.createNether && y < ASkyBlock.getNetherWorld().getMaxHeight() - 8) {
+                                        if (Settings.newNether && Settings.createNether
+                                                && y < ASkyBlock.getNetherWorld().getMaxHeight() - 8) {
                                             b = ASkyBlock.getNetherWorld().getBlockAt(xCoord, y, zCoord);
                                             bt = b.getType();
                                             if (!b.equals(Material.AIR)) {

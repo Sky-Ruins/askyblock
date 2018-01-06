@@ -24,6 +24,7 @@ import com.wasteofplastic.askyblock.Island;
 import com.wasteofplastic.askyblock.Island.SettingsFlag;
 import com.wasteofplastic.askyblock.Settings;
 import com.wasteofplastic.askyblock.util.Util;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -200,7 +201,8 @@ public class SettingsPanel implements Listener {
                             long secondsLeft = Settings.pvpRestartCooldown - (System.currentTimeMillis() - setTime) / 1000;
                             //plugin.getLogger().info("DEBUG: seconds left = " + secondsLeft);
                             if (secondsLeft > 0) {
-                                Util.sendMessage(player, ChatColor.RED + "You must wait " + secondsLeft + " seconds until you can do that again!");
+                                Util.sendMessage(player,
+                                        ChatColor.RED + "You must wait " + secondsLeft + " seconds until you can do that again!");
                                 return;
                             }
                             // Tidy up
@@ -211,15 +213,19 @@ public class SettingsPanel implements Listener {
                             if (island.onIsland(p.getLocation())) {
                                 if (flag.equals(SettingsFlag.NETHER_PVP)) {
                                     Util.sendMessage(p,
-                                            ChatColor.RED + "" + ChatColor.BOLD + plugin.myLocale(p.getUniqueId()).igs.get(SettingsFlag.NETHER_PVP)
+                                            ChatColor.RED + "" + ChatColor.BOLD + plugin.myLocale(p.getUniqueId()).igs.get(
+                                                    SettingsFlag.NETHER_PVP)
                                                     + " " + plugin.myLocale(p.getUniqueId()).igsAllowed);
                                 } else {
                                     Util.sendMessage(p,
-                                            ChatColor.RED + "" + ChatColor.BOLD + plugin.myLocale(p.getUniqueId()).igs.get(SettingsFlag.PVP) + " "
+                                            ChatColor.RED + "" + ChatColor.BOLD + plugin.myLocale(p.getUniqueId()).igs.get(
+                                                    SettingsFlag.PVP) + " "
                                                     + plugin.myLocale(p.getUniqueId()).igsAllowed);
                                 }
 
-                                if (plugin.getServer().getVersion().contains("(MC: 1.8") || plugin.getServer().getVersion().contains("(MC: 1.7")) {
+                                if (plugin.getServer().getVersion().contains("(MC: 1.8") || plugin.getServer()
+                                        .getVersion()
+                                        .contains("(MC: 1.7")) {
                                     player.getWorld().playSound(player.getLocation(), Sound.valueOf("ARROW_HIT"), 1F, 1F);
                                 } else {
                                     player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ARROW_HIT, 1F, 1F);
@@ -268,13 +274,17 @@ public class SettingsPanel implements Listener {
                                 // Deactivate PVP
                                 if (flag.equals(SettingsFlag.NETHER_PVP)) {
                                     Util.sendMessage(p,
-                                            ChatColor.GREEN + plugin.myLocale(p.getUniqueId()).igs.get(SettingsFlag.NETHER_PVP) + " " + plugin
+                                            ChatColor.GREEN + plugin.myLocale(p.getUniqueId()).igs.get(SettingsFlag.NETHER_PVP) + " "
+                                                    + plugin
                                                     .myLocale(p.getUniqueId()).igsDisallowed);
                                 } else {
-                                    Util.sendMessage(p, ChatColor.GREEN + plugin.myLocale(p.getUniqueId()).igs.get(SettingsFlag.PVP) + " " + plugin
-                                            .myLocale(p.getUniqueId()).igsDisallowed);
+                                    Util.sendMessage(p,
+                                            ChatColor.GREEN + plugin.myLocale(p.getUniqueId()).igs.get(SettingsFlag.PVP) + " " + plugin
+                                                    .myLocale(p.getUniqueId()).igsDisallowed);
                                 }
-                                if (plugin.getServer().getVersion().contains("(MC: 1.8") || plugin.getServer().getVersion().contains("(MC: 1.7")) {
+                                if (plugin.getServer().getVersion().contains("(MC: 1.8") || plugin.getServer()
+                                        .getVersion()
+                                        .contains("(MC: 1.7")) {
                                     p.getWorld().playSound(p.getLocation(), Sound.valueOf("FIREWORK_TWINKLE"), 1F, 1F);
                                 } else {
                                     p.getWorld().playSound(p.getLocation(), Sound.ENTITY_FIREWORK_TWINKLE, 1F, 1F);
@@ -307,7 +317,8 @@ public class SettingsPanel implements Listener {
         Inventory newPanel = null;
         if (island == null) {
             //plugin.getLogger().info("DEBUG: default world settings");
-            ip.add(new IPItem(Material.MAP, plugin.myLocale(uuid).igsSettingsGeneralTitle, plugin.myLocale(uuid).igsSettingsGeneralDesc));
+            ip.add(new IPItem(Material.MAP, plugin.myLocale(uuid).igsSettingsGeneralTitle,
+                    plugin.myLocale(uuid).igsSettingsGeneralDesc));
             // General settings all enum
             for (SettingsFlag flag : SettingsFlag.values()) {
                 //plugin.getLogger().info("DEBUG: flag = " + flag.name());
@@ -317,7 +328,8 @@ public class SettingsPanel implements Listener {
                 }
                 if (Settings.defaultWorldSettings.containsKey(flag) && lookup.inverse().containsKey(flag) && plugin.myLocale(uuid).igs
                         .containsKey(flag)) {
-                    ip.add(new IPItem(Settings.defaultWorldSettings.get(flag), lookup.inverse().get(flag), plugin.myLocale(uuid).igs.get(flag),
+                    ip.add(new IPItem(Settings.defaultWorldSettings.get(flag), lookup.inverse().get(flag),
+                            plugin.myLocale(uuid).igs.get(flag),
                             uuid));
                 }
             }
@@ -327,7 +339,8 @@ public class SettingsPanel implements Listener {
             ip.add(new IPItem(Settings.allowCreeperGriefing, Material.SKULL_ITEM, 4, plugin.myLocale(uuid).igsCreeperGriefing, uuid));
             ip.add(new IPItem(!Settings.restrictWither, Material.SKULL_ITEM, 1, plugin.myLocale(uuid).igsWitherDamage, uuid));
             ip.add(new IPItem(Settings.allowTNTDamage, Material.TNT, plugin.myLocale(uuid).igsTNT, uuid));
-            ip.add(new IPItem(Settings.allowVisitorKeepInvOnDeath, Material.IRON_CHESTPLATE, plugin.myLocale(uuid).igsVisitorKeep, uuid));
+            ip.add(new IPItem(Settings.allowVisitorKeepInvOnDeath, Material.IRON_CHESTPLATE, plugin.myLocale(uuid).igsVisitorKeep,
+                    uuid));
         } else if (island.isSpawn()) {
             ip.add(new IPItem(Material.MAP, plugin.myLocale(uuid).igsSettingsSpawnTitle, plugin.myLocale(uuid).igsSettingsSpawnDesc));
             // Spawn settings
@@ -343,7 +356,8 @@ public class SettingsPanel implements Listener {
         } else {
             // Standard island
             //plugin.getLogger().info("DEBUG: Standard island");
-            ip.add(new IPItem(Material.MAP, plugin.myLocale(uuid).igsSettingsIslandTitle, plugin.myLocale(uuid).igsSettingsIslandDesc));
+            ip.add(new IPItem(Material.MAP, plugin.myLocale(uuid).igsSettingsIslandTitle,
+                    plugin.myLocale(uuid).igsSettingsIslandDesc));
             for (SettingsFlag flag : Settings.visitorSettings.keySet()) {
                 if (DEBUG) {
                     plugin.getLogger().info("DEBUG: visitor flag = " + flag);
@@ -355,7 +369,8 @@ public class SettingsPanel implements Listener {
                 if (lookup.inverse().get(flag) != null) {
                     if (plugin.myLocale(uuid).igs.containsKey(flag)) {
                         //plugin.getLogger().info("DEBUG: Adding flag");
-                        ip.add(new IPItem(island.getIgsFlag(flag), lookup.inverse().get(flag), plugin.myLocale(uuid).igs.get(flag), uuid));
+                        ip.add(new IPItem(island.getIgsFlag(flag), lookup.inverse().get(flag), plugin.myLocale(uuid).igs.get(flag),
+                                uuid));
                     }
                 } else if (DEBUG) {
                     plugin.getLogger().severe("DEBUG: " + flag + " is missing an icon");

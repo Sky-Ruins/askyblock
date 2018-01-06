@@ -19,6 +19,7 @@ package com.wasteofplastic.askyblock.events;
 
 import com.wasteofplastic.askyblock.Island;
 import com.wasteofplastic.askyblock.schematics.Schematic;
+
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;

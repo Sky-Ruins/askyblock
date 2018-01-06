@@ -20,6 +20,8 @@ package com.wasteofplastic.askyblock;
 import com.wasteofplastic.askyblock.events.CoopJoinEvent;
 import com.wasteofplastic.askyblock.events.CoopLeaveEvent;
 import com.wasteofplastic.askyblock.util.Util;
+
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -30,12 +32,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Handles coop play interactions
@@ -45,16 +49,13 @@ import java.util.UUID;
 public class CoopPlay {
 
     private static CoopPlay instance = new CoopPlay(ASkyBlock.getPlugin());
-    // Stores all the coop islands, the coop player, the location and the
-    // inviter
-    private HashMap<UUID, HashMap<Location, UUID>> coopPlayers = new HashMap<>();
-    // Defines whether a player is on a coop island or not
-    // private HashMap<UUID, Location> onCoopIsland = new HashMap<UUID,
-    // Location>();
+    private static File coops;
+    private Map<UUID, Map<Location, UUID>> coopPlayers = new HashMap<>();
     private ASkyBlock plugin;
 
     private CoopPlay(ASkyBlock plugin) {
         this.plugin = plugin;
+        coops = new File(plugin.getDataFolder(), "coops.yml");
     }
 
     /**
@@ -66,6 +67,7 @@ public class CoopPlay {
 
     /**
      * Adds a player to an island as a coop player.
+     *
      * @return true if successful, otherwise false
      */
     public boolean addCoopPlayer(Player requester, Player newPlayer) {
@@ -75,56 +77,47 @@ public class CoopPlay {
         if (plugin.getPlayers().inTeam(requester.getUniqueId())) {
             islandLoc = plugin.getPlayers().getTeamIslandLocation(requester.getUniqueId());
             // Tell the team owner
-            UUID leaderUUID = plugin.getPlayers().getTeamLeader(requester.getUniqueId());
-            // Check if only leader can coop
-            if (Settings.onlyLeaderCanCoop && (!requester.getUniqueId().equals(leaderUUID))) {
+            UUID leader = plugin.getPlayers().getTeamLeader(requester.getUniqueId());
+            if (Settings.onlyLeaderCanCoop && !requester.getUniqueId().equals(leader)) {
                 Util.sendMessage(requester, ChatColor.RED + plugin.myLocale(requester.getUniqueId()).cannotCoop);
                 return false;
             }
-            // Tell all the team members
-            for (UUID member : plugin.getPlayers().getMembers(leaderUUID)) {
-                // plugin.getLogger().info("DEBUG: " + member.toString());
-                if (!member.equals(requester.getUniqueId())) {
-                    Player player = plugin.getServer().getPlayer(member);
-                    if (player != null) {
-                        Util.sendMessage(player, ChatColor.GOLD
-                                + plugin.myLocale(player.getUniqueId()).coopInvited.replace("[name]", requester.getName())
-                                .replace("[player]", newPlayer.getName()));
-                        Util.sendMessage(player, ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).coopUseExpel);
-                    } else {
-                        if (member.equals(leaderUUID)) {
-                            // offline - tell leader
-                            plugin.getMessages().setMessage(leaderUUID,
-                                    plugin.myLocale(leaderUUID).coopInvited.replace("[name]", requester.getName())
-                                            .replace("[player]", newPlayer.getName()));
-                        }
-                    }
+
+            plugin.getPlayers().getMembers(leader).forEach(uuid -> {
+                if (uuid.equals(requester.getUniqueId())) {
+                    return;
                 }
-            }
+
+                Player player = plugin.getServer().getPlayer(uuid);
+                String msg = plugin.myLocale().coopInvited.replace("[name]", requester.getName())
+                        .replace("[player]", newPlayer.getName());
+                if (player != null) {
+                    Util.sendMessage(player, ChatColor.GOLD + msg);
+                } else if (uuid.equals(leader)) {
+                    plugin.getMessages().setMessage(uuid, msg);
+                }
+            });
         } else {
             islandLoc = plugin.getPlayers().getIslandLocation(requester.getUniqueId());
         }
+
         Island coopIsland = plugin.getGrid().getIslandAt(islandLoc);
         if (coopIsland == null) {
             return false;
         }
-        // Fire event and check if it is cancelled
+
         final CoopJoinEvent event = new CoopJoinEvent(newPlayer.getUniqueId(), coopIsland, requester.getUniqueId());
         plugin.getServer().getPluginManager().callEvent(event);
         if (event.isCancelled()) {
             return false;
         }
-        // Add the coop to the list. If the location already exists then the new
-        // requester will replace the old
-        if (coopPlayers.containsKey(newPlayer.getUniqueId())) {
-            // This is an existing player in the list
-            // Add this island to the set
+
+        if (!coopPlayers.containsKey(newPlayer.getUniqueId())) {
             coopPlayers.get(newPlayer.getUniqueId()).put(coopIsland.getCenter(), requester.getUniqueId());
         } else {
-            // First time. Create the hashmap
-            HashMap<Location, UUID> loc = new HashMap<Location, UUID>();
-            loc.put(coopIsland.getCenter(), requester.getUniqueId());
-            coopPlayers.put(newPlayer.getUniqueId(), loc);
+            coopPlayers.put(newPlayer.getUniqueId(), new HashMap<Location, UUID>() {{
+                put(coopIsland.getCenter(), requester.getUniqueId());
+            }});
         }
         return true;
     }
@@ -132,8 +125,6 @@ public class CoopPlay {
     /**
      * Removes a coop player
      *
-     * @param requester
-     * @param targetPlayer
      * @return true if the player was a coop player, and false if not
      */
     public boolean removeCoopPlayer(Player requester, Player targetPlayer) {
@@ -142,21 +133,13 @@ public class CoopPlay {
 
     public boolean removeCoopPlayer(Player requester, UUID targetPlayerUUID) {
         boolean removed = false;
-        /*
-        plugin.getLogger().info("DEBUG: requester is " + requester.getName());
-        plugin.getLogger().info("DEBUG: target = " + targetPlayerUUID.toString());
-        for (UUID key : coopPlayers.keySet()) {
-            plugin.getLogger().info("DEBUG: " + key + " ==> " + coopPlayers.get(key));
-        }*/
-        // Only bother if the player is in the list
         if (coopPlayers.containsKey(targetPlayerUUID)) {
             Island coopIsland = plugin.getGrid().getIsland(requester.getUniqueId());
             if (coopIsland != null) {
-                // Fire event
                 final CoopLeaveEvent event = new CoopLeaveEvent(targetPlayerUUID, requester.getUniqueId(), coopIsland);
                 plugin.getServer().getPluginManager().callEvent(event);
                 if (!event.isCancelled()) {
-                    removed = coopPlayers.get(targetPlayerUUID).remove(coopIsland.getCenter()) != null ? true : false;
+                    removed = coopPlayers.get(targetPlayerUUID).remove(coopIsland.getCenter()) != null;
                 }
             }
         }
@@ -166,95 +149,73 @@ public class CoopPlay {
     /**
      * Returns the list of islands that this player is coop on or empty if none
      *
-     * @param player
      * @return Set of locations
      */
     public Set<Location> getCoopIslands(Player player) {
-        if (coopPlayers.containsKey(player.getUniqueId())) {
-            return coopPlayers.get(player.getUniqueId()).keySet();
-        }
-        return new HashSet<Location>();
+        return Optional.ofNullable(coopPlayers.get(player.getUniqueId())).orElseGet(HashMap::new).keySet();
     }
 
     /**
      * Gets a list of all the players that are currently coop on this island
      *
-     * @param islandLoc
      * @return List of UUID's of players that have coop rights to the island
      */
     public List<UUID> getCoopPlayers(Location islandLoc) {
         Island coopIsland = plugin.getGrid().getIslandAt(islandLoc);
-        List<UUID> result = new ArrayList<UUID>();
+        List<UUID> result = new ArrayList<>();
         if (coopIsland != null) {
-            for (UUID player : coopPlayers.keySet()) {
-                if (coopPlayers.get(player).containsKey(coopIsland.getCenter())) {
-                    result.add(player);
-                }
-            }
+            coopPlayers.keySet().stream().filter(uuid -> coopPlayers.get(uuid).containsKey(coopIsland.getCenter())).forEach(result::add);
         }
         return result;
     }
 
     /**
      * Removes all coop players from an island - used when doing an island reset
-     *
-     * @param player
      */
     public void clearAllIslandCoops(UUID player) {
-        // Remove any and all islands related to requester
         Island island = plugin.getGrid().getIsland(player);
         if (island == null) {
             return;
         }
-        for (HashMap<Location, UUID> coopPlayer : coopPlayers.values()) {
-            for (UUID inviter : coopPlayer.values()) {
-                // Fire event
-                final CoopLeaveEvent event = new CoopLeaveEvent(player, inviter, island);
-                plugin.getServer().getPluginManager().callEvent(event);
-                // Cannot be cancelled
-            }
+
+        coopPlayers.values().forEach(coopPlayer -> {
+            coopPlayer.values().forEach(uuid -> Bukkit.getPluginManager().callEvent(new CoopLeaveEvent(player, uuid, island)));
             coopPlayer.remove(island.getCenter());
-        }
+        });
     }
 
     /**
      * Deletes all coops from player.
      * Used when player logs out.
-     *
-     * @param player
      */
     public void clearMyCoops(Player player) {
-        //plugin.getLogger().info("DEBUG: clear my coops - clearing coops memberships of " + player.getName());
         Island coopIsland = plugin.getGrid().getIsland(player.getUniqueId());
         if (coopPlayers.get(player.getUniqueId()) != null) {
-            //plugin.getLogger().info("DEBUG: " + player.getName() + " is a member of a coop");
-            boolean notCancelled = false;
-            for (UUID inviter : coopPlayers.get(player.getUniqueId()).values()) {
-                // Fire event
-                //plugin.getLogger().info("DEBUG: removing invite from " + plugin.getServer().getPlayer(inviter).getName());
-                final CoopLeaveEvent event = new CoopLeaveEvent(player.getUniqueId(), inviter, coopIsland);
-                plugin.getServer().getPluginManager().callEvent(event);
+            final AtomicBoolean notCancelled = new AtomicBoolean(false);
+            final Map<Location, UUID> map = coopPlayers.get(player.getUniqueId());
+
+            map.values().forEach(uuid -> {
+                final CoopLeaveEvent event = new CoopLeaveEvent(player.getUniqueId(), uuid, coopIsland);
+                Bukkit.getPluginManager().callEvent(event);
                 if (!event.isCancelled()) {
-                    coopPlayers.get(player.getUniqueId()).remove(inviter);
+                    map.entrySet().removeIf(entry -> uuid.equals(entry.getValue()));
                 } else {
-                    notCancelled = true;
+                    notCancelled.set(true);
                 }
-            }
-            // If the event was never cancelled, then delete the entry fully just in case. May not be needed.
-            if (notCancelled) {
+            });
+
+            if (notCancelled.get()) {
                 coopPlayers.remove(player.getUniqueId());
             }
         }
     }
 
     public void saveCoops() {
-        File coopFile = new File(plugin.getDataFolder(), "coops.yml");
         YamlConfiguration coopConfig = new YamlConfiguration();
-        for (UUID playerUUID : coopPlayers.keySet()) {
-            coopConfig.set(playerUUID.toString(), getMyCoops(playerUUID));
-        }
+        coopPlayers.keySet().forEach(uuid -> coopConfig.set(uuid.toString(), getMyCoops(uuid)));
+
         try {
-            coopConfig.save(coopFile);
+            coopConfig.save(coops);
         } catch (IOException e) {
             plugin.getLogger().severe("Could not save coop.yml file!");
         }
@@ -263,98 +224,69 @@ public class CoopPlay {
     /**
      * Gets a serialize list of all the coops for this player. Used when saving the player
      *
-     * @param playerUUID
      * @return List of island location | uuid of invitee
      */
-    private List<String> getMyCoops(UUID playerUUID) {
-        List<String> result = new ArrayList<String>();
-        if (coopPlayers.containsKey(playerUUID)) {
-            for (Entry<Location, UUID> entry : coopPlayers.get(playerUUID).entrySet()) {
-                result.add(Util.getStringLocation(entry.getKey()) + "|" + entry.getValue().toString());
-            }
+    private List<String> getMyCoops(UUID uuid) {
+        List<String> result = new ArrayList<>();
+        if (coopPlayers.containsKey(uuid)) {
+            coopPlayers.get(uuid).forEach((key, value) -> result.add(Util.getStringLocation(key) + "|" + value));
         }
         return result;
     }
 
     public void loadCoops() {
-        File coopFile = new File(plugin.getDataFolder(), "coops.yml");
-        if (!coopFile.exists()) {
+        if (!coops.exists()) {
             return;
         }
+
         YamlConfiguration coopConfig = new YamlConfiguration();
         try {
-            coopConfig.load(coopFile);
+            coopConfig.load(coops);
         } catch (IOException | InvalidConfigurationException e) {
             plugin.getLogger().severe("Could not load coop.yml file!");
         }
-        // Run through players
-        for (String playerUUID : coopConfig.getValues(false).keySet()) {
-            try {
-                setMyCoops(UUID.fromString(playerUUID), coopConfig.getStringList(playerUUID));
-            } catch (Exception e) {
-                plugin.getLogger().severe("Could not load coops for player UUID " + playerUUID + " skipping...");
-            }
-        }
+        coopConfig.getValues(false).keySet().forEach(uuid -> setMyCoops(UUID.fromString(uuid), coopConfig.getStringList(uuid)));
     }
 
     /**
      * Sets a player's coops from string. Used when loading a player.
-     *
-     * @param playerUUID
-     * @param coops
      */
-    private void setMyCoops(UUID playerUUID, List<String> coops) {
-        try {
-            HashMap<Location, UUID> temp = new HashMap<Location, UUID>();
-            for (String coop : coops) {
-                String[] split = coop.split("\\|");
-                if (split.length == 2) {
-                    Island coopIsland = plugin.getGrid().getIslandAt(Util.getLocationString(split[0]));
-                    if (coopIsland != null) {
-                        temp.put(coopIsland.getCenter(), UUID.fromString(split[1]));
-                    }
-                }
+    private void setMyCoops(UUID uuid, List<String> coops) {
+        Map<Location, UUID> temp = new HashMap<>();
+        coops.stream().map(s -> s.split("\\|")).filter(strings -> strings.length == 2).forEach(strings -> {
+            Island coopIsland = plugin.getGrid().getIslandAt(Util.getLocationString(strings[0]));
+            if (coopIsland != null) {
+                temp.put(coopIsland.getCenter(), UUID.fromString(strings[1]));
             }
-            coopPlayers.put(playerUUID, temp);
-        } catch (Exception e) {
-            plugin.getLogger().severe("Could not load coops for UUID " + playerUUID);
-            e.printStackTrace();
-        }
+        });
+        coopPlayers.put(uuid, temp);
     }
 
     /**
      * Goes through all the known coops and removes any that were invited by
      * clearer. Returns any inventory
      * Can be used when clearer logs out or when they are kicked or leave a team
-     *
-     * @param clearer
      */
     public void clearMyInvitedCoops(Player clearer) {
-        //plugin.getLogger().info("DEBUG: clear my invited coops - clearing coops that were invited by " + clearer.getName());
         Island coopIsland = plugin.getGrid().getIsland(clearer.getUniqueId());
-        for (UUID playerUUID : coopPlayers.keySet()) {
-            Iterator<Entry<Location, UUID>> en = coopPlayers.get(playerUUID).entrySet().iterator();
+        for (UUID uuid : coopPlayers.keySet()) {
+            Iterator<Entry<Location, UUID>> en = coopPlayers.get(uuid).entrySet().iterator();
             while (en.hasNext()) {
                 Entry<Location, UUID> entry = en.next();
-                // Check if this invite was sent by clearer
                 if (entry.getValue().equals(clearer.getUniqueId())) {
-                    // Fire event
-                    final CoopLeaveEvent event = new CoopLeaveEvent(playerUUID, clearer.getUniqueId(), coopIsland);
+                    final CoopLeaveEvent event = new CoopLeaveEvent(uuid, clearer.getUniqueId(), coopIsland);
                     plugin.getServer().getPluginManager().callEvent(event);
                     if (!event.isCancelled()) {
-                        // Yes, so get the invitee (target)
-                        Player target = plugin.getServer().getPlayer(playerUUID);
+                        Player target = plugin.getServer().getPlayer(uuid);
                         if (target != null) {
-                            Util.sendMessage(target, ChatColor.RED + plugin.myLocale(playerUUID).coopRemoved.replace("[name]", clearer.getName()));
+                            Util.sendMessage(target,
+                                    ChatColor.RED + plugin.myLocale(uuid).coopRemoved.replace("[name]", clearer.getName()));
                         } else {
-                            plugin.getMessages().setMessage(playerUUID,
-                                    ChatColor.RED + plugin.myLocale(playerUUID).coopRemoved.replace("[name]", clearer.getName()));
+                            plugin.getMessages().setMessage(uuid,
+                                    ChatColor.RED + plugin.myLocale(uuid).coopRemoved.replace("[name]", clearer.getName()));
                         }
-                        // Mark them as no longer on a coop island
-                        // setOnCoopIsland(players, null);
-                        // Remove this entry
                         en.remove();
-                    } // else do not remove
+                    }
                 }
             }
         }
@@ -362,24 +294,21 @@ public class CoopPlay {
 
     /**
      * Removes all coop players from an island - used when doing an island reset
-     *
-     * @param island
      */
     public void clearAllIslandCoops(Location island) {
         if (island == null) {
             return;
         }
+
         Island coopIsland = plugin.getGrid().getIslandAt(island);
         if (coopIsland == null) {
             return;
         }
-        // Remove any and all islands related to requester
-        for (HashMap<Location, UUID> coopPlayer : coopPlayers.values()) {
-            // Fire event
-            final CoopLeaveEvent event = new CoopLeaveEvent(coopPlayer.get(island), coopIsland.getOwner(), coopIsland);
-            plugin.getServer().getPluginManager().callEvent(event);
-            // Cannot be cancelled
-            coopPlayer.remove(island);
-        }
+
+        coopPlayers.values().forEach(map -> {
+            Bukkit.getPluginManager().callEvent(new CoopLeaveEvent(map.get(island), coopIsland.getOwner(), coopIsland));
+            map.remove(island);
+        });
     }
+
 }

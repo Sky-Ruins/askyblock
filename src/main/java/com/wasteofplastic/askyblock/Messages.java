@@ -18,6 +18,7 @@
 package com.wasteofplastic.askyblock;
 
 import com.wasteofplastic.askyblock.util.Util;
+
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 

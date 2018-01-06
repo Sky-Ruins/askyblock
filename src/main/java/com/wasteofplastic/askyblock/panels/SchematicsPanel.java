@@ -22,6 +22,7 @@ import com.wasteofplastic.askyblock.Settings;
 import com.wasteofplastic.askyblock.schematics.Schematic;
 import com.wasteofplastic.askyblock.util.Util;
 import com.wasteofplastic.askyblock.util.VaultHelper;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -142,7 +143,8 @@ public class SchematicsPanel implements Listener {
                 if (Settings.useEconomy && VaultHelper.setupEconomy() && !VaultHelper.econ.has(player, item.getCost())) {
                     // Too expensive
                     Util.sendMessage(player,
-                            ChatColor.RED + plugin.myLocale(player.getUniqueId()).minishopYouCannotAfford.replace("[description]", item.getName()));
+                            ChatColor.RED + plugin.myLocale(player.getUniqueId()).minishopYouCannotAfford.replace("[description]",
+                                    item.getName()));
                 } else {
                     // Do something
                     if (Settings.useEconomy && VaultHelper.setupEconomy()) {

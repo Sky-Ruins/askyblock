@@ -22,6 +22,7 @@ import com.wasteofplastic.askyblock.Island.SettingsFlag;
 import com.wasteofplastic.askyblock.Settings;
 import com.wasteofplastic.askyblock.util.Util;
 import com.wasteofplastic.askyblock.util.VaultHelper;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -165,7 +166,8 @@ public class IslandGuard1_8 implements Listener {
                 if (island == null && Settings.defaultWorldSettings.get(SettingsFlag.PLACE_BLOCKS)) {
                     return;
                 }
-                if (island != null && (island.getMembers().contains(p.getUniqueId()) || island.getIgsFlag(SettingsFlag.PLACE_BLOCKS))) {
+                if (island != null && (island.getMembers().contains(p.getUniqueId()) || island.getIgsFlag(
+                        SettingsFlag.PLACE_BLOCKS))) {
                     //plugin.getLogger().info("1.8 " + "DEBUG: armor stand place check");
                     if (Settings.limitedBlocks.containsKey("ARMOR_STAND") && Settings.limitedBlocks.get("ARMOR_STAND") > -1) {
                         //plugin.getLogger().info("1.8 " + "DEBUG: count armor stands");
@@ -173,7 +175,8 @@ public class IslandGuard1_8 implements Listener {
                         //plugin.getLogger().info("1.8 " + "DEBUG: count is " + count + " limit is " + Settings.limitedBlocks.get("ARMOR_STAND"));
                         if (Settings.limitedBlocks.get("ARMOR_STAND") <= count) {
                             Util.sendMessage(e.getPlayer(),
-                                    ChatColor.RED + (plugin.myLocale(e.getPlayer().getUniqueId()).entityLimitReached.replace("[entity]",
+                                    ChatColor.RED + (plugin.myLocale(e.getPlayer().getUniqueId()).entityLimitReached.replace(
+                                            "[entity]",
                                             Util.prettifyText(Material.ARMOR_STAND.toString())))
                                             .replace("[number]", String.valueOf(Settings.limitedBlocks.get("ARMOR_STAND"))));
                             e.setCancelled(true);

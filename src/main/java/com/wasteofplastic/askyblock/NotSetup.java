@@ -18,6 +18,7 @@
 package com.wasteofplastic.askyblock;
 
 import com.wasteofplastic.askyblock.util.Util;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.Command;
@@ -51,7 +52,8 @@ public class NotSetup implements CommandExecutor {
         switch (reason) {
             case DISTANCE:
                 Util.sendMessage(sender, ChatColor.RED + "Edit config.yml. Then restart server.");
-                Util.sendMessage(sender, ChatColor.RED + "Make sure you set island distance. If upgrading, set it to what it was before.");
+                Util.sendMessage(sender,
+                        ChatColor.RED + "Make sure you set island distance. If upgrading, set it to what it was before.");
                 break;
             case GENERATOR:
                 Util.sendMessage(sender, ChatColor.RED + "The world generator for the island world is not registered.");
@@ -60,13 +62,16 @@ public class NotSetup implements CommandExecutor {
                 Util.sendMessage(sender, ChatColor.RED + "     Make sure you have added the world to bukkit.yml");
                 Util.sendMessage(sender, ChatColor.RED + "  2. You reloaded instead of restarting the server. Reboot and try again.");
                 if (Bukkit.getServer().getPluginManager().isPluginEnabled("Multiverse-Core")) {
-                    Util.sendMessage(sender, ChatColor.RED + "  3. Your Multiverse plugin is out of date. Upgrade to the latest version.");
+                    Util.sendMessage(sender,
+                            ChatColor.RED + "  3. Your Multiverse plugin is out of date. Upgrade to the latest version.");
                 }
                 break;
             case WORLD_NAME:
-                Util.sendMessage(sender, ChatColor.RED + "The world name in config.yml is different to the world name in islands.yml.");
+                Util.sendMessage(sender,
+                        ChatColor.RED + "The world name in config.yml is different to the world name in islands.yml.");
                 Util.sendMessage(sender, ChatColor.RED + "If this is intentional, I assume you are doing a full reset. If so,");
-                Util.sendMessage(sender, ChatColor.RED + "delete islands.yml and the previous world. If not, correct the world name in");
+                Util.sendMessage(sender,
+                        ChatColor.RED + "delete islands.yml and the previous world. If not, correct the world name in");
                 Util.sendMessage(sender, ChatColor.RED + "config.yml and restart. This is probably the case if you are upgrading.");
             default:
                 break;

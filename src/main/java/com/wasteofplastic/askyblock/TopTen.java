@@ -19,6 +19,7 @@ package com.wasteofplastic.askyblock;
 
 import com.wasteofplastic.askyblock.util.MapUtil;
 import com.wasteofplastic.askyblock.util.Util;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -52,7 +53,7 @@ import java.util.UUID;
 public class TopTen implements Listener {
 
     private static final int GUISIZE = 27; // Must be a multiple of 9
-    private static final int[] SLOTS = new int[]{ 4, 12, 14, 19, 20, 21, 22, 23, 24, 25 };
+    private static final int[] SLOTS = new int[] {4, 12, 14, 19, 20, 21, 22, 23, 24, 25};
     private static final boolean DEBUG = false;
     private static ASkyBlock plugin = ASkyBlock.getPlugin();
     // Top ten list of players
@@ -73,7 +74,8 @@ public class TopTen implements Listener {
         // Check to see if the top ten list exists
         File topTenFile = new File(plugin.getDataFolder(), "topten.yml");
         if (!topTenFile.exists()) {
-            plugin.getLogger().warning("Top ten file does not exist - creating it. This could take some time with a large number of players");
+            plugin.getLogger()
+                    .warning("Top ten file does not exist - creating it. This could take some time with a large number of players");
             topTenCreate();
         } else {
             // Load the top ten
@@ -251,13 +253,15 @@ public class TopTen implements Listener {
                             memberList = new StringBuilder(memberList.substring(0, memberList.length() - 2));
                         }
                         Util.sendMessage(player,
-                                ChatColor.AQUA + "#" + i + ": " + plugin.getGrid().getIslandName(playerUUID) + ChatColor.AQUA + " (" + memberList
+                                ChatColor.AQUA + "#" + i + ": " + plugin.getGrid().getIslandName(playerUUID) + ChatColor.AQUA + " ("
+                                        + memberList
                                         + ") - "
                                         + plugin.myLocale(player.getUniqueId()).levelislandLevel + " " + m.getValue());
                     } else {
                         // Island name + Island level
-                        Util.sendMessage(player, ChatColor.AQUA + "#" + i + ": " + plugin.getGrid().getIslandName(playerUUID) + ChatColor.AQUA + " - "
-                                + plugin.myLocale(player.getUniqueId()).levelislandLevel + " " + m.getValue());
+                        Util.sendMessage(player,
+                                ChatColor.AQUA + "#" + i + ": " + plugin.getGrid().getIslandName(playerUUID) + ChatColor.AQUA + " - "
+                                        + plugin.myLocale(player.getUniqueId()).levelislandLevel + " " + m.getValue());
                     }
                     if (i++ == 10) {
                         break;
@@ -380,7 +384,8 @@ public class TopTen implements Listener {
         }
         event.setCancelled(true);
         player.updateInventory();
-        if (event.getCurrentItem() != null && event.getCurrentItem().getType().equals(Material.SKULL_ITEM) && event.getCurrentItem().hasItemMeta()) {
+        if (event.getCurrentItem() != null && event.getCurrentItem().getType().equals(Material.SKULL_ITEM) && event.getCurrentItem()
+                .hasItemMeta()) {
             Util.runCommand(player, "is warp " + ((SkullMeta) event.getCurrentItem().getItemMeta()).getOwner());
             player.closeInventory();
             return;

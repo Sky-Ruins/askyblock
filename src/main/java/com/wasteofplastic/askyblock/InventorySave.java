@@ -51,7 +51,8 @@ public class InventorySave {
     public void savePlayerInventory(Player player) {
         //plugin.getLogger().info("DEBUG: Saving inventory");
         // Save the player's armor and things
-        inventories.put(player.getUniqueId(), new InventoryStore(player.getInventory().getContents(), player.getInventory().getArmorContents()));
+        inventories.put(player.getUniqueId(),
+                new InventoryStore(player.getInventory().getContents(), player.getInventory().getArmorContents()));
     }
 
     /**

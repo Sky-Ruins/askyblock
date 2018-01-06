@@ -25,6 +25,7 @@ import com.wasteofplastic.org.jnbt.IntTag;
 import com.wasteofplastic.org.jnbt.ListTag;
 import com.wasteofplastic.org.jnbt.StringTag;
 import com.wasteofplastic.org.jnbt.Tag;
+
 import org.bukkit.Material;
 import org.bukkit.SkullType;
 import org.bukkit.block.Block;
@@ -87,26 +88,14 @@ public class SkullBlock {
     private String skullTextureValue = null;
     private String skullTextureSignature = null;
 
-    @SuppressWarnings("deprecation")
-    public boolean set(Block block) {
-        Skull skull = (Skull) block.getState();
-        if (skullOwnerName != null) {
-            skull.setOwner(skullOwnerName);
-        }
-        skull.setSkullType(skullType);
-        skull.setRotation(skullRotation);
-        skull.setRawData((byte) skullStanding);
-        // Texture update
-        if (skullTextureValue != null) {
-            setSkullWithNonPlayerProfile(skullTextureValue, skullTextureSignature, skullOwnerUUID, skullOwnerName, skull);
-        }
-        skull.update(true, false);
-        return true;
-    }
-
     // Credits: GermanCoding
     @SuppressWarnings("deprecation")
-    public static void setSkullWithNonPlayerProfile(String textureValue, String textureSignature, String ownerUUID, String ownerName, Skull skull) {
+    public static void setSkullWithNonPlayerProfile(
+            String textureValue,
+            String textureSignature,
+            String ownerUUID,
+            String ownerName,
+            Skull skull) {
         if (skull.getType() != Material.SKULL) {
             throw new IllegalArgumentException("Block must be a skull.");
         }
@@ -187,6 +176,23 @@ public class SkullBlock {
             b.append(chars.charAt(random.nextInt(chars.length())));
         }
         return b.toString();
+    }
+
+    @SuppressWarnings("deprecation")
+    public boolean set(Block block) {
+        Skull skull = (Skull) block.getState();
+        if (skullOwnerName != null) {
+            skull.setOwner(skullOwnerName);
+        }
+        skull.setSkullType(skullType);
+        skull.setRotation(skullRotation);
+        skull.setRawData((byte) skullStanding);
+        // Texture update
+        if (skullTextureValue != null) {
+            setSkullWithNonPlayerProfile(skullTextureValue, skullTextureSignature, skullOwnerUUID, skullOwnerName, skull);
+        }
+        skull.update(true, false);
+        return true;
     }
 
     public boolean prep(Map<String, Tag> tileData, int dataValue) {

@@ -22,6 +22,7 @@ import com.wasteofplastic.askyblock.Island;
 import com.wasteofplastic.askyblock.Settings;
 import com.wasteofplastic.askyblock.util.Util;
 import com.wasteofplastic.askyblock.util.VaultHelper;
+
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -91,7 +92,8 @@ public class BiomesPanel implements Listener {
                             plugin.getConfig().getString("biomes." + biomeName + ".friendlyname", Util.prettifyText(biomeName)));
                     // Get description
                     String description =
-                            ChatColor.translateAlternateColorCodes('&', plugin.getConfig().getString("biomes." + biomeName + ".description", ""));
+                            ChatColor.translateAlternateColorCodes('&',
+                                    plugin.getConfig().getString("biomes." + biomeName + ".description", ""));
                     // Get confirmation or not
                     boolean confirm = plugin.getConfig().getBoolean("biomes." + biomeName + ".confirm", false);
                     // Add item to list
@@ -204,7 +206,8 @@ public class BiomesPanel implements Listener {
             // Actually set the biome
             setIslandBiome(island, biome);
             Util.sendMessage(player,
-                    ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).biomeSet.replace("[biome]", thisPanel.get(slot).getName()));
+                    ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).biomeSet.replace("[biome]",
+                            thisPanel.get(slot).getName()));
             Util.sendMessage(player, ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).needRelog);
         }
         return;

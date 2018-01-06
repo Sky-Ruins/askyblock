@@ -20,6 +20,7 @@ package com.wasteofplastic.askyblock.util;
 import com.wasteofplastic.askyblock.ASkyBlock;
 import com.wasteofplastic.askyblock.Settings;
 import com.wasteofplastic.askyblock.nms.NMSAbstraction;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -282,7 +283,8 @@ public class Util {
         if (location == null || location.getWorld() == null) {
             return "";
         }
-        return location.getWorld().getName() + ":" + location.getBlockX() + ":" + location.getBlockY() + ":" + location.getBlockZ() + ":" + Float
+        return location.getWorld().getName() + ":" + location.getBlockX() + ":" + location.getBlockY() + ":" + location.getBlockZ()
+                + ":" + Float
                 .floatToIntBits(location.getYaw()) + ":" + Float.floatToIntBits(location.getPitch());
     }
 
@@ -408,7 +410,8 @@ public class Util {
      * @param newSetting
      * @throws IOException
      */
-    public static void setYamlConfig(String absoluteFilename, String setting, String oldSetting, String newSetting) throws IOException {
+    public static void setYamlConfig(String absoluteFilename, String setting, String oldSetting, String newSetting) throws
+            IOException {
         Path path = Paths.get(absoluteFilename);
         Charset charset = StandardCharsets.UTF_8;
         String content = new String(Files.readAllBytes(path), charset);

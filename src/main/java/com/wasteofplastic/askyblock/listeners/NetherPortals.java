@@ -28,6 +28,7 @@ import com.wasteofplastic.askyblock.schematics.Schematic;
 import com.wasteofplastic.askyblock.schematics.Schematic.PasteReason;
 import com.wasteofplastic.askyblock.util.Util;
 import com.wasteofplastic.askyblock.util.VaultHelper;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -160,7 +161,8 @@ public class NetherPortals implements Listener {
         // Check if player has permission
         Island island = plugin.getGrid().getIslandAt(currentLocation);
         if ((island == null && !Settings.defaultWorldSettings.get(SettingsFlag.PORTAL))
-                || (island != null && !(island.getIgsFlag(SettingsFlag.PORTAL) || island.getMembers().contains(event.getPlayer().getUniqueId())))) {
+                || (island != null && !(island.getIgsFlag(SettingsFlag.PORTAL) || island.getMembers()
+                .contains(event.getPlayer().getUniqueId())))) {
             // Portals use is not allowed
             if (!event.getPlayer().isOp() && !VaultHelper.checkPerm(event.getPlayer(), Settings.PERMPREFIX + "mod.bypassprotect")) {
                 Util.sendMessage(event.getPlayer(), ChatColor.RED + plugin.myLocale(event.getPlayer().getUniqueId()).islandProtected);
@@ -183,7 +185,8 @@ public class NetherPortals implements Listener {
                             // end_place.getBlock().getType(),end_place.getBlock().getData());
                             return;
                         } else {
-                            Util.sendMessage(event.getPlayer(), ChatColor.RED + plugin.myLocale(event.getPlayer().getUniqueId()).warpserrorNotSafe);
+                            Util.sendMessage(event.getPlayer(),
+                                    ChatColor.RED + plugin.myLocale(event.getPlayer().getUniqueId()).warpserrorNotSafe);
                             plugin.getGrid().homeTeleport(event.getPlayer());
                             return;
                         }
@@ -270,7 +273,8 @@ public class NetherPortals implements Listener {
                                     plugin.getLogger().info("DEBUG: big scan is null");
                                 }
                                 plugin.getLogger()
-                                        .warning("Creating nether island for " + event.getPlayer().getName() + " using default nether schematic");
+                                        .warning("Creating nether island for " + event.getPlayer().getName()
+                                                + " using default nether schematic");
                                 Schematic nether = IslandCmd.getSchematics().get("nether");
                                 if (nether != null) {
                                     if (DEBUG) {
@@ -279,7 +283,9 @@ public class NetherPortals implements Listener {
                                     plugin.getIslandCmd().pasteSchematic(nether, netherIsland, event.getPlayer(), PasteReason.PARTNER);
                                     if (nether.isPlayerSpawn()) {
                                         // Set partner home
-                                        plugin.getPlayers().setHomeLocation(event.getPlayer().getUniqueId(), nether.getPlayerSpawn(netherIsland), -2);
+                                        plugin.getPlayers()
+                                                .setHomeLocation(event.getPlayer().getUniqueId(), nether.getPlayerSpawn(netherIsland),
+                                                        -2);
                                     }
                                 } else {
                                     plugin.getLogger().severe("Cannot teleport player to nether because there is no nether schematic");
@@ -291,7 +297,10 @@ public class NetherPortals implements Listener {
                             }
                         }
                         if (DEBUG) {
-                            plugin.getLogger().info("DEBUG: Teleporting to " + event.getFrom().toVector().toLocation(ASkyBlock.getNetherWorld()));
+                            plugin.getLogger()
+                                    .info("DEBUG: Teleporting to " + event.getFrom()
+                                            .toVector()
+                                            .toLocation(ASkyBlock.getNetherWorld()));
                         }
                         event.setCancelled(true);
                         // Teleport using the new safeSpot teleport

@@ -24,7 +24,9 @@ import com.wasteofplastic.askyblock.panels.CPItem;
 import com.wasteofplastic.askyblock.util.SpawnEgg1_9;
 import com.wasteofplastic.askyblock.util.Util;
 import com.wasteofplastic.askyblock.util.VaultHelper;
+
 import net.milkbowl.vault.economy.EconomyResponse;
+
 import org.apache.commons.lang.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -161,7 +163,8 @@ public class Challenges implements CommandExecutor, TabCompleter {
                 }
                 PotionMeta potionMeta = (PotionMeta) result.getItemMeta();
                 try {
-                    PotionData potionData = new PotionData(PotionType.valueOf(element[1].toUpperCase()), extended, level > 1 ? true : false);
+                    PotionData potionData = new PotionData(PotionType.valueOf(element[1].toUpperCase()), extended,
+                            level > 1 ? true : false);
                     potionMeta.setBasePotionData(potionData);
                 } catch (IllegalArgumentException iae) {
                     Bukkit.getLogger().severe("Potion parsing problem with " + element[1] + ": " + iae.getMessage());
@@ -240,7 +243,8 @@ public class Challenges implements CommandExecutor, TabCompleter {
                     Util.sendMessage(sender, ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengeshelp1);
                     Util.sendMessage(sender, ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengeshelp2);
                 } else if (isLevelAvailable(player,
-                        getChallengeConfig().getString("challenges.challengeList." + cmd[0].toLowerCase().replaceAll("\\.", "") + ".level"))) {
+                        getChallengeConfig().getString(
+                                "challenges.challengeList." + cmd[0].toLowerCase().replaceAll("\\.", "") + ".level"))) {
                     // Provide info on the challenge
                     // Challenge Name
                     // Description
@@ -249,9 +253,11 @@ public class Challenges implements CommandExecutor, TabCompleter {
                     // island or not
                     final String challenge = cmd[0].toLowerCase().toLowerCase().replaceAll("\\.", "");
                     Util.sendMessage(sender,
-                            ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengesname + ": " + ChatColor.WHITE + challenge);
-                    Util.sendMessage(sender, ChatColor.WHITE + plugin.myLocale(player.getUniqueId()).challengeslevel + ": " + ChatColor.GOLD
-                            + getChallengeConfig().getString("challenges.challengeList." + challenge + ".level", ""));
+                            ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengesname + ": " + ChatColor.WHITE
+                                    + challenge);
+                    Util.sendMessage(sender,
+                            ChatColor.WHITE + plugin.myLocale(player.getUniqueId()).challengeslevel + ": " + ChatColor.GOLD
+                                    + getChallengeConfig().getString("challenges.challengeList." + challenge + ".level", ""));
                     String desc = ChatColor.translateAlternateColorCodes('&',
                             getChallengeConfig().getString("challenges.challengeList." + challenge + ".description", "")
                                     .replace("[label]", Settings.ISLANDCOMMAND));
@@ -264,7 +270,8 @@ public class Challenges implements CommandExecutor, TabCompleter {
                     for (String line : result) {
                         Util.sendMessage(sender, ChatColor.GOLD + line);
                     }
-                    final String type = getChallengeConfig().getString("challenges.challengeList." + challenge + ".type", "").toLowerCase();
+                    final String type = getChallengeConfig().getString("challenges.challengeList." + challenge + ".type", "")
+                            .toLowerCase();
                     if (type.equals("inventory")) {
                         if (getChallengeConfig().getBoolean("challenges.challengeList." + cmd[0].toLowerCase() + ".takeItems")) {
                             Util.sendMessage(sender, ChatColor.RED + plugin.myLocale(player.getUniqueId()).challengesitemTakeWarning);
@@ -284,18 +291,22 @@ public class Challenges implements CommandExecutor, TabCompleter {
 
                     if (!plugin.getPlayers().checkChallenge(player.getUniqueId(), challenge)) {
                         // First time
-                        moneyReward = getChallengeConfig().getDouble("challenges.challengeList." + challenge.toLowerCase() + ".moneyReward", 0D);
+                        moneyReward = getChallengeConfig().getDouble(
+                                "challenges.challengeList." + challenge.toLowerCase() + ".moneyReward", 0D);
                         rewardText = ChatColor.translateAlternateColorCodes('&',
-                                getChallengeConfig().getString("challenges.challengeList." + challenge.toLowerCase() + ".rewardText", "Goodies!"));
+                                getChallengeConfig().getString("challenges.challengeList." + challenge.toLowerCase() + ".rewardText",
+                                        "Goodies!"));
                         expReward = getChallengeConfig().getInt("challenges.challengeList." + challenge + ".expReward", 0);
                         Util.sendMessage(sender, ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengesfirstTimeRewards);
                     } else {
                         // Repeat challenge
                         moneyReward =
-                                getChallengeConfig().getDouble("challenges.challengeList." + challenge.toLowerCase() + ".repeatMoneyReward", 0D);
+                                getChallengeConfig().getDouble(
+                                        "challenges.challengeList." + challenge.toLowerCase() + ".repeatMoneyReward", 0D);
                         rewardText = ChatColor.translateAlternateColorCodes('&',
                                 getChallengeConfig()
-                                        .getString("challenges.challengeList." + challenge.toLowerCase() + ".repeatRewardText", "Goodies!"));
+                                        .getString("challenges.challengeList." + challenge.toLowerCase() + ".repeatRewardText",
+                                                "Goodies!"));
                         expReward = getChallengeConfig().getInt("challenges.challengeList." + challenge + ".repeatExpReward", 0);
                         Util.sendMessage(sender, ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengesrepeatRewards);
 
@@ -303,14 +314,17 @@ public class Challenges implements CommandExecutor, TabCompleter {
                     Util.sendMessage(sender, ChatColor.WHITE + rewardText);
                     if (expReward > 0) {
                         Util.sendMessage(sender,
-                                ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengesexpReward + ": " + ChatColor.WHITE + expReward);
+                                ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengesexpReward + ": " + ChatColor.WHITE
+                                        + expReward);
                     }
                     if (Settings.useEconomy && moneyReward > 0) {
-                        Util.sendMessage(sender, ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengesmoneyReward + ": " + ChatColor.WHITE
-                                + VaultHelper.econ.format(moneyReward));
+                        Util.sendMessage(sender,
+                                ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengesmoneyReward + ": " + ChatColor.WHITE
+                                        + VaultHelper.econ.format(moneyReward));
                     }
                     Util.sendMessage(sender,
-                            ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengestoCompleteUse + ChatColor.WHITE + " /" + label + " c "
+                            ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengestoCompleteUse + ChatColor.WHITE + " /"
+                                    + label + " c "
                                     + challenge);
                 } else {
                     Util.sendMessage(sender, ChatColor.RED + plugin.myLocale(player.getUniqueId()).challengesinvalidChallengeName);
@@ -350,19 +364,24 @@ public class Challenges implements CommandExecutor, TabCompleter {
                                 }
 
                                 String[] itemReward =
-                                        getChallengeConfig().getString("challenges.levelUnlock." + level + ".itemReward", "").split(" ");
-                                String rewardDesc = getChallengeConfig().getString("challenges.levelUnlock." + level + ".rewardDesc", "");
+                                        getChallengeConfig().getString("challenges.levelUnlock." + level + ".itemReward", "")
+                                                .split(" ");
+                                String rewardDesc = getChallengeConfig().getString("challenges.levelUnlock." + level + ".rewardDesc",
+                                        "");
                                 if (!rewardDesc.isEmpty()) {
                                     Util.sendMessage(player,
-                                            ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengesrewards + ": " + ChatColor.WHITE
+                                            ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengesrewards + ": "
+                                                    + ChatColor.WHITE
                                                     + rewardDesc);
                                 }
                                 List<ItemStack> rewardedItems = giveItems(player, itemReward);
-                                double moneyReward = getChallengeConfig().getDouble("challenges.levelUnlock." + level + ".moneyReward", 0D);
+                                double moneyReward = getChallengeConfig().getDouble("challenges.levelUnlock." + level + ".moneyReward",
+                                        0D);
                                 int expReward = getChallengeConfig().getInt("challenges.levelUnlock." + level + ".expReward", 0);
                                 if (expReward > 0) {
                                     Util.sendMessage(player,
-                                            ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengesexpReward + ": " + ChatColor.WHITE
+                                            ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengesexpReward + ": "
+                                                    + ChatColor.WHITE
                                                     + expReward);
                                     player.giveExp(expReward);
                                 }
@@ -370,16 +389,19 @@ public class Challenges implements CommandExecutor, TabCompleter {
                                     EconomyResponse e = VaultHelper.econ.depositPlayer(player, Settings.worldName, moneyReward);
                                     if (e.transactionSuccess()) {
                                         Util.sendMessage(player,
-                                                ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengesmoneyReward + ": " + ChatColor.WHITE
+                                                ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengesmoneyReward + ": "
+                                                        + ChatColor.WHITE
                                                         + VaultHelper.econ.format(moneyReward));
                                     } else {
                                         plugin.getLogger()
-                                                .severe("Error giving player " + player.getUniqueId() + " challenge money:" + e.errorMessage);
+                                                .severe("Error giving player " + player.getUniqueId() + " challenge money:"
+                                                        + e.errorMessage);
                                         plugin.getLogger().severe("Reward was $" + moneyReward);
                                     }
                                 }
                                 String[] permList =
-                                        getChallengeConfig().getString("challenges.levelUnlock." + level + ".permissionReward", "").split(" ");
+                                        getChallengeConfig().getString("challenges.levelUnlock." + level + ".permissionReward", "")
+                                                .split(" ");
 
                                 for (final String s : permList) {
                                     if (!s.isEmpty()) {
@@ -387,10 +409,12 @@ public class Challenges implements CommandExecutor, TabCompleter {
                                         plugin.getLogger().info("Added permission " + s + " to " + player.getName() + "");
                                     }
                                 }
-                                List<String> commands = getChallengeConfig().getStringList("challenges.levelUnlock." + level + ".commands");
+                                List<String> commands = getChallengeConfig().getStringList(
+                                        "challenges.levelUnlock." + level + ".commands");
                                 runCommands(player, commands);
                                 // Fire event
-                                ChallengeLevelCompleteEvent event = new ChallengeLevelCompleteEvent(player, oldLevel, newLevel, rewardedItems);
+                                ChallengeLevelCompleteEvent event = new ChallengeLevelCompleteEvent(player, oldLevel, newLevel,
+                                        rewardedItems);
                                 plugin.getServer().getPluginManager().callEvent(event);
                                 // Save player
                                 plugin.getPlayers().save(player.getUniqueId());
@@ -420,26 +444,31 @@ public class Challenges implements CommandExecutor, TabCompleter {
         String rewardText = "";
         // If the friendly name is available use it
         String challengeName =
-                ChatColor.translateAlternateColorCodes('&', getChallengeConfig().getString("challenges.challengeList." + challenge + ".friendlyname",
-                        challenge.substring(0, 1).toUpperCase() + challenge.substring(1)));
+                ChatColor.translateAlternateColorCodes('&',
+                        getChallengeConfig().getString("challenges.challengeList." + challenge + ".friendlyname",
+                                challenge.substring(0, 1).toUpperCase() + challenge.substring(1)));
 
         // Gather the rewards due
         // If player has done a challenge already, the rewards are different
         if (!plugin.getPlayers().checkChallenge(player.getUniqueId(), challenge)) {
             // First time
             Util.sendMessage(player,
-                    ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).challengesyouHaveCompleted.replace("[challenge]", challengeName));
+                    ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).challengesyouHaveCompleted.replace("[challenge]",
+                            challengeName));
             if (Settings.broadcastMessages) {
                 for (Player p : plugin.getServer().getOnlinePlayers()) {
                     Util.sendMessage(p,
-                            ChatColor.GOLD + plugin.myLocale(p.getUniqueId()).challengesnameHasCompleted.replace("[name]", player.getName())
+                            ChatColor.GOLD + plugin.myLocale(p.getUniqueId()).challengesnameHasCompleted.replace("[name]",
+                                    player.getName())
                                     .replace("[challenge]", challengeName));
                 }
             }
             plugin.getMessages().tellOfflineTeam(player.getUniqueId(),
-                    ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengesnameHasCompleted.replace("[name]", player.getName())
+                    ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengesnameHasCompleted.replace("[name]",
+                            player.getName())
                             .replace("[challenge]", challengeName));
-            itemRewards = getChallengeConfig().getString("challenges.challengeList." + challenge.toLowerCase() + ".itemReward", "").split(" ");
+            itemRewards = getChallengeConfig().getString("challenges.challengeList." + challenge.toLowerCase() + ".itemReward", "")
+                    .split(" ");
             moneyReward = getChallengeConfig().getDouble("challenges.challengeList." + challenge.toLowerCase() + ".moneyReward", 0D);
             rewardText = ChatColor.translateAlternateColorCodes('&',
                     getChallengeConfig().getString("challenges.challengeList." + challenge.toLowerCase() + ".rewardText", "Goodies!"));
@@ -447,25 +476,32 @@ public class Challenges implements CommandExecutor, TabCompleter {
         } else {
             // Repeat challenge
             Util.sendMessage(player,
-                    ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).challengesyouRepeated.replace("[challenge]", challengeName));
-            itemRewards = getChallengeConfig().getString("challenges.challengeList." + challenge.toLowerCase() + ".repeatItemReward", "").split(" ");
-            moneyReward = getChallengeConfig().getDouble("challenges.challengeList." + challenge.toLowerCase() + ".repeatMoneyReward", 0);
+                    ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).challengesyouRepeated.replace("[challenge]",
+                            challengeName));
+            itemRewards = getChallengeConfig().getString("challenges.challengeList." + challenge.toLowerCase() + ".repeatItemReward",
+                    "").split(" ");
+            moneyReward = getChallengeConfig().getDouble("challenges.challengeList." + challenge.toLowerCase() + ".repeatMoneyReward",
+                    0);
             rewardText = ChatColor.translateAlternateColorCodes('&',
-                    getChallengeConfig().getString("challenges.challengeList." + challenge.toLowerCase() + ".repeatRewardText", "Goodies!"));
+                    getChallengeConfig().getString("challenges.challengeList." + challenge.toLowerCase() + ".repeatRewardText",
+                            "Goodies!"));
             expReward = getChallengeConfig().getInt("challenges.challengeList." + challenge + ".repeatExpReward", 0);
         }
         // Report the rewards and give out exp, money and permissions if
         // appropriate
-        Util.sendMessage(player, ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengesrewards + ": " + ChatColor.WHITE + rewardText);
+        Util.sendMessage(player,
+                ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengesrewards + ": " + ChatColor.WHITE + rewardText);
         if (expReward > 0) {
-            Util.sendMessage(player, ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengesexpReward + ": " + ChatColor.WHITE + expReward);
+            Util.sendMessage(player,
+                    ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengesexpReward + ": " + ChatColor.WHITE + expReward);
             player.giveExp(expReward);
         }
         if (Settings.useEconomy && moneyReward > 0 && (VaultHelper.econ != null)) {
             EconomyResponse e = VaultHelper.econ.depositPlayer(player, Settings.worldName, moneyReward);
             if (e.transactionSuccess()) {
                 Util.sendMessage(player,
-                        ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengesmoneyReward + ": " + ChatColor.WHITE + VaultHelper.econ
+                        ChatColor.GOLD + plugin.myLocale(player.getUniqueId()).challengesmoneyReward + ": " + ChatColor.WHITE
+                                + VaultHelper.econ
                                 .format(moneyReward));
             } else {
                 plugin.getLogger().severe("Error giving player " + player.getUniqueId() + " challenge money:" + e.errorMessage);
@@ -474,7 +510,8 @@ public class Challenges implements CommandExecutor, TabCompleter {
         }
         // Dole out permissions
         //plugin.getLogger().info("DEBUG: dole out permissions");
-        permList = getChallengeConfig().getString("challenges.challengeList." + challenge.toLowerCase() + ".permissionReward", "").split(" ");
+        permList = getChallengeConfig().getString("challenges.challengeList." + challenge.toLowerCase() + ".permissionReward", "")
+                .split(" ");
         for (final String s : permList) {
             if (!s.isEmpty()) {
                 VaultHelper.addPerm(player, s);
@@ -490,12 +527,14 @@ public class Challenges implements CommandExecutor, TabCompleter {
         // Run reward commands
         if (!plugin.getPlayers().checkChallenge(player.getUniqueId(), challenge)) {
             // First time
-            List<String> commands = getChallengeConfig().getStringList("challenges.challengeList." + challenge.toLowerCase() + ".rewardcommands");
+            List<String> commands = getChallengeConfig().getStringList(
+                    "challenges.challengeList." + challenge.toLowerCase() + ".rewardcommands");
             runCommands(player, commands);
         } else {
             // Repeat challenge
             List<String> commands =
-                    getChallengeConfig().getStringList("challenges.challengeList." + challenge.toLowerCase() + ".repeatrewardcommands");
+                    getChallengeConfig().getStringList(
+                            "challenges.challengeList." + challenge.toLowerCase() + ".repeatrewardcommands");
             runCommands(player, commands);
         }
 
@@ -505,7 +544,8 @@ public class Challenges implements CommandExecutor, TabCompleter {
         // }
         // Call the Challenge Complete Event
         final ChallengeCompleteEvent event =
-                new ChallengeCompleteEvent(player, challenge, permList, itemRewards, moneyReward, expReward, rewardText, rewardedItems);
+                new ChallengeCompleteEvent(player, challenge, permList, itemRewards, moneyReward, expReward, rewardText,
+                        rewardedItems);
         plugin.getServer().getPluginManager().callEvent(event);
         return true;
     }
@@ -532,7 +572,8 @@ public class Challenges implements CommandExecutor, TabCompleter {
             }
             // Substitute in any references to player
             try {
-                if (!plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(), cmd.replace("[player]", player.getName()))) {
+                if (!plugin.getServer()
+                        .dispatchCommand(plugin.getServer().getConsoleSender(), cmd.replace("[player]", player.getName()))) {
                     plugin.getLogger().severe("Problem executing challenge reward commands - skipping!");
                     plugin.getLogger().severe("Command was : " + cmd);
                 }
@@ -569,7 +610,7 @@ public class Challenges implements CommandExecutor, TabCompleter {
                     rewardQty = Integer.parseInt(element[1]);
                     ItemStack item = new ItemStack(rewardItem, rewardQty);
                     rewardedItems.add(item);
-                    final HashMap<Integer, ItemStack> leftOvers = player.getInventory().addItem(new ItemStack[]{ item });
+                    final HashMap<Integer, ItemStack> leftOvers = player.getInventory().addItem(new ItemStack[] {item});
                     if (!leftOvers.isEmpty()) {
                         player.getWorld().dropItemNaturally(player.getLocation(), leftOvers.get(0));
                     }
@@ -581,7 +622,8 @@ public class Challenges implements CommandExecutor, TabCompleter {
                 } catch (Exception e) {
                     Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).challengeserrorRewardProblem);
                     plugin.getLogger()
-                            .severe("Could not give " + element[0] + ":" + element[1] + " to " + player.getName() + " for challenge reward!");
+                            .severe("Could not give " + element[0] + ":" + element[1] + " to " + player.getName()
+                                    + " for challenge reward!");
                     String materialList = "";
                     boolean hint = false;
                     for (Material m : Material.values()) {
@@ -616,7 +658,9 @@ public class Challenges implements CommandExecutor, TabCompleter {
 
                             try {
                                 EntityType type = EntityType.valueOf(element[1].toUpperCase());
-                                if (Bukkit.getServer().getVersion().contains("(MC: 1.8") || Bukkit.getServer().getVersion().contains("(MC: 1.7")) {
+                                if (Bukkit.getServer().getVersion().contains("(MC: 1.8") || Bukkit.getServer()
+                                        .getVersion()
+                                        .contains("(MC: 1.7")) {
                                     item = new SpawnEgg(type).toItemStack(rewardQty);
                                 } else {
                                     try {
@@ -627,7 +671,8 @@ public class Challenges implements CommandExecutor, TabCompleter {
                                     }
                                 }
                             } catch (Exception e) {
-                                Bukkit.getLogger().severe("Spawn eggs must be described by name. Try one of these (not all are possible):");
+                                Bukkit.getLogger()
+                                        .severe("Spawn eggs must be described by name. Try one of these (not all are possible):");
                                 for (EntityType type : EntityType.values()) {
                                     if (type.isSpawnable() && type.isAlive()) {
                                         plugin.getLogger().severe(type.toString());
@@ -641,7 +686,7 @@ public class Challenges implements CommandExecutor, TabCompleter {
                         if (item != null) {
                             rewardedItems.add(item);
                             final HashMap<Integer, ItemStack> leftOvers = player.getInventory().addItem(
-                                    new ItemStack[]{ item });
+                                    new ItemStack[] {item});
                             if (!leftOvers.isEmpty()) {
                                 player.getWorld().dropItemNaturally(player.getLocation(), leftOvers.get(0));
                             }
@@ -655,7 +700,8 @@ public class Challenges implements CommandExecutor, TabCompleter {
                 } catch (Exception e) {
                     Util.sendMessage(player, ChatColor.RED + "There was a problem giving your reward. Ask Admin to check log!");
                     plugin.getLogger()
-                            .severe("Could not give " + element[0] + ":" + element[1] + " to " + player.getName() + " for challenge reward!");
+                            .severe("Could not give " + element[0] + ":" + element[1] + " to " + player.getName()
+                                    + " for challenge reward!");
                     /*
                     if (element[0].equalsIgnoreCase("POTION")) {
                         String potionList = "";
@@ -794,7 +840,8 @@ public class Challenges implements CommandExecutor, TabCompleter {
         // Check if this challenge level is available
         String level = getChallengeConfig().getString("challenges.challengeList." + challenge + ".level");
         if (level == null) {
-            Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).challengesunknownChallenge + " '" + challenge + "'");
+            Util.sendMessage(player,
+                    ChatColor.RED + plugin.myLocale(player.getUniqueId()).challengesunknownChallenge + " '" + challenge + "'");
             return false;
         }
         // Only check if the challenge has a level, otherwise it's a free level
@@ -927,7 +974,9 @@ public class Challenges implements CommandExecutor, TabCompleter {
                     challengeList.put(level, t);
                 }
             } else {
-                plugin.getServer().getLogger().severe("Level (" + level + ") for challenge " + s + " does not exist. Check challenges.yml.");
+                plugin.getServer()
+                        .getLogger()
+                        .severe("Level (" + level + ") for challenge " + s + " does not exist. Check challenges.yml.");
             }
         }
     }
@@ -1016,7 +1065,8 @@ public class Challenges implements CommandExecutor, TabCompleter {
                                 // check amount
                                 int amount = 0;
                                 if (DEBUG) {
-                                    plugin.getLogger().info("DEBUG: Amount in inventory = " + player.getInventory().all(reqItem).size());
+                                    plugin.getLogger()
+                                            .info("DEBUG: Amount in inventory = " + player.getInventory().all(reqItem).size());
                                 }
                                 // Go through all the inventory and try to find
                                 // enough required items
@@ -1057,13 +1107,15 @@ public class Challenges implements CommandExecutor, TabCompleter {
                                             amount += i.getAmount();
                                             if (DEBUG) {
                                                 plugin.getLogger()
-                                                        .info("DEBUG: amount is <= req Remove " + i.toString() + ":" + i.getDurability() + " x " + i
+                                                        .info("DEBUG: amount is <= req Remove " + i.toString() + ":"
+                                                                + i.getDurability() + " x " + i
                                                                 .getAmount());
                                             }
                                         } else if ((amount + i.getAmount()) == reqAmount) {
                                             if (DEBUG) {
                                                 plugin.getLogger()
-                                                        .info("DEBUG: amount is = req Remove " + i.toString() + ":" + i.getDurability() + " x " + i
+                                                        .info("DEBUG: amount is = req Remove " + i.toString() + ":" + i.getDurability()
+                                                                + " x " + i
                                                                 .getAmount());
                                             }
                                             toBeRemoved.add(i.clone());
@@ -1073,7 +1125,8 @@ public class Challenges implements CommandExecutor, TabCompleter {
                                             // Remove a portion of this item
                                             if (DEBUG) {
                                                 plugin.getLogger()
-                                                        .info("DEBUG: amount is > req Remove " + i.toString() + ":" + i.getDurability() + " x " + i
+                                                        .info("DEBUG: amount is > req Remove " + i.toString() + ":" + i.getDurability()
+                                                                + " x " + i
                                                                 .getAmount());
                                             }
 
@@ -1171,8 +1224,10 @@ public class Challenges implements CommandExecutor, TabCompleter {
                                     toBeRemoved.add(i.clone());
                                     amount += i.getAmount();
                                     if (DEBUG) {
-                                        plugin.getLogger().info("DEBUG: amount is <= req Remove " + i.toString() + ":" + i.getDurability() + " x " + i
-                                                .getAmount());
+                                        plugin.getLogger()
+                                                .info("DEBUG: amount is <= req Remove " + i.toString() + ":" + i.getDurability()
+                                                        + " x " + i
+                                                        .getAmount());
                                     }
                                 } else if ((amount + i.getAmount()) == reqAmount) {
                                     toBeRemoved.add(i.clone());
@@ -1181,8 +1236,10 @@ public class Challenges implements CommandExecutor, TabCompleter {
                                 } else {
                                     // Remove a portion of this item
                                     if (DEBUG) {
-                                        plugin.getLogger().info("DEBUG: amount is > req Remove " + i.toString() + ":" + i.getDurability() + " x " + i
-                                                .getAmount());
+                                        plugin.getLogger()
+                                                .info("DEBUG: amount is > req Remove " + i.toString() + ":" + i.getDurability() + " x "
+                                                        + i
+                                                        .getAmount());
                                     }
 
                                     item.setAmount(reqAmount - amount);
@@ -1200,14 +1257,16 @@ public class Challenges implements CommandExecutor, TabCompleter {
                         if (amount < reqAmount) {
                             if (DEBUG) {
                                 plugin.getLogger()
-                                        .info("DEBUG: Failure! Insufficient amount of " + item.toString() + " required = " + reqAmount + " actual = "
+                                        .info("DEBUG: Failure! Insufficient amount of " + item.toString() + " required = " + reqAmount
+                                                + " actual = "
                                                 + amount);
                             }
                             return false;
                         }
                         if (DEBUG) {
                             plugin.getLogger()
-                                    .info("DEBUG: before set amount " + item.toString() + ":" + item.getDurability() + " x " + item.getAmount());
+                                    .info("DEBUG: before set amount " + item.toString() + ":" + item.getDurability() + " x "
+                                            + item.getAmount());
                         }
 
                     } else if (part.length == 6 && part[0].contains("POTION")) {
@@ -1228,7 +1287,9 @@ public class Challenges implements CommandExecutor, TabCompleter {
                             if (i != null && i.getType().toString().contains("POTION")) {
                                 //plugin.getLogger().info("DEBUG:6 part potion check!");
                                 // POTION:NAME:<LEVEL>:<EXTENDED>:<SPLASH/LINGER>:QTY
-                                if (plugin.getServer().getVersion().contains("(MC: 1.8") || plugin.getServer().getVersion().contains("(MC: 1.7")) {
+                                if (plugin.getServer().getVersion().contains("(MC: 1.8") || plugin.getServer()
+                                        .getVersion()
+                                        .contains("(MC: 1.7")) {
                                     // Test potion
                                     Potion potion = null;
                                     try {
@@ -1504,7 +1565,8 @@ public class Challenges implements CommandExecutor, TabCompleter {
                     HashMap<Integer, ItemStack> leftOver = player.getInventory().removeItem(i);
                     if (!leftOver.isEmpty()) {
                         plugin.getLogger().warning(
-                                "Exploit? Could not remove the following in challenge " + challenge + " for player " + player.getName() + ":");
+                                "Exploit? Could not remove the following in challenge " + challenge + " for player " + player.getName()
+                                        + ":");
                         for (ItemStack left : leftOver.values()) {
                             plugin.getLogger().info(left.toString());
                         }
@@ -1518,7 +1580,8 @@ public class Challenges implements CommandExecutor, TabCompleter {
                         plugin.getLogger().warning(
                                 "Exploit? Could not remove " + VaultHelper.econ.format(moneyReq) + " from " + player.getName()
                                         + " in challenge " + challenge);
-                        plugin.getLogger().warning("Player's balance is " + VaultHelper.econ.format(VaultHelper.econ.getBalance(player)));
+                        plugin.getLogger()
+                                .warning("Player's balance is " + VaultHelper.econ.format(VaultHelper.econ.getBalance(player)));
                     }
                 }
                 // plugin.getLogger().info("DEBUG: total = " + qty);
@@ -1566,12 +1629,15 @@ public class Challenges implements CommandExecutor, TabCompleter {
                                 // Material.getMaterial(sPart[0]).toString());
 
                             } else {
-                                plugin.getLogger().warning("Problem parsing required item for challenge " + challenge + " in challenges.yml!");
+                                plugin.getLogger()
+                                        .warning("Problem parsing required item for challenge " + challenge + " in challenges.yml!");
                                 return false;
                             }
                         }
                     } catch (Exception intEx) {
-                        plugin.getLogger().warning("Problem parsing required items for challenge " + challenge + " in challenges.yml - skipping");
+                        plugin.getLogger()
+                                .warning(
+                                        "Problem parsing required items for challenge " + challenge + " in challenges.yml - skipping");
                         return false;
                     }
                 }
@@ -1611,7 +1677,8 @@ public class Challenges implements CommandExecutor, TabCompleter {
                 // plugin.getLogger().info("DEBUG: Insufficient items around");
                 for (Material missing : neededItem.keySet()) {
                     Util.sendMessage(player,
-                            ChatColor.RED + plugin.myLocale(player.getUniqueId()).challengeserrorYouAreMissing + " " + neededItem.get(missing) + " x "
+                            ChatColor.RED + plugin.myLocale(player.getUniqueId()).challengeserrorYouAreMissing + " " + neededItem.get(
+                                    missing) + " x "
                                     + Util.prettifyText(missing.toString()));
                 }
                 return false;
@@ -1639,7 +1706,8 @@ public class Challenges implements CommandExecutor, TabCompleter {
                 } else {
                     for (EntityType missing : neededEntities.keySet()) {
                         Util.sendMessage(player,
-                                ChatColor.RED + plugin.myLocale(player.getUniqueId()).challengeserrorYouAreMissing + " " + neededEntities.get(missing)
+                                ChatColor.RED + plugin.myLocale(player.getUniqueId()).challengeserrorYouAreMissing + " "
+                                        + neededEntities.get(missing)
                                         + " x "
                                         + Util.prettifyText(missing.toString()));
                     }
@@ -1720,7 +1788,8 @@ public class Challenges implements CommandExecutor, TabCompleter {
                 if (i <= levelDone) {
                     CPItem item = new CPItem(Material.BOOK_AND_QUILL, ChatColor.GOLD + Settings.challengeLevels.get(i), null, null);
                     lore = Util.chop(ChatColor.WHITE,
-                            plugin.myLocale(player.getUniqueId()).challengesNavigation.replace("[level]", Settings.challengeLevels.get(i)), 25);
+                            plugin.myLocale(player.getUniqueId()).challengesNavigation.replace("[level]",
+                                    Settings.challengeLevels.get(i)), 25);
                     item.setNextSection(Settings.challengeLevels.get(i));
                     item.setLore(lore);
                     cp.add(item);
@@ -1731,7 +1800,8 @@ public class Challenges implements CommandExecutor, TabCompleter {
                     int toDo = checkLevelCompletion(player, Settings.challengeLevels.get(i - 1));
                     lore = Util.chop(
                             ChatColor.WHITE,
-                            plugin.myLocale(player.getUniqueId()).challengestoComplete.replace("[challengesToDo]", String.valueOf(toDo))
+                            plugin.myLocale(player.getUniqueId()).challengestoComplete.replace("[challengesToDo]",
+                                    String.valueOf(toDo))
                                     .replace("[thisLevel]",
                                             Settings.challengeLevels.get(i - 1)), 25);
                     item.setLore(lore);
@@ -1814,7 +1884,9 @@ public class Challenges implements CommandExecutor, TabCompleter {
                     }
                     // Check POTION for V1.9 - for some reason, it must be declared as WATER otherwise comparison later causes an NPE
                     if (icon.getType().name().contains("POTION")) {
-                        if (!plugin.getServer().getVersion().contains("(MC: 1.8") && !plugin.getServer().getVersion().contains("(MC: 1.7")) {
+                        if (!plugin.getServer().getVersion().contains("(MC: 1.8") && !plugin.getServer()
+                                .getVersion()
+                                .contains("(MC: 1.7")) {
                             PotionMeta potionMeta = (PotionMeta) icon.getItemMeta();
                             potionMeta.setBasePotionData(new PotionData(PotionType.WATER));
                             icon.setItemMeta(potionMeta);
@@ -1828,13 +1900,16 @@ public class Challenges implements CommandExecutor, TabCompleter {
                     }
                     // Check POTION for V1.9 - for some reason, it must be declared as WATER otherwise comparison later causes an NPE
                     if (icon.getType().name().contains("POTION")) {
-                        if (!plugin.getServer().getVersion().contains("(MC: 1.8") && !plugin.getServer().getVersion().contains("(MC: 1.7")) {
+                        if (!plugin.getServer().getVersion().contains("(MC: 1.8") && !plugin.getServer()
+                                .getVersion()
+                                .contains("(MC: 1.7")) {
                             PotionMeta potionMeta = (PotionMeta) icon.getItemMeta();
                             try {
                                 potionMeta.setBasePotionData(new PotionData(PotionType.valueOf(split[1].toUpperCase())));
                             } catch (Exception e) {
                                 plugin.getLogger()
-                                        .severe("Challenges icon: Potion type of " + split[1] + " is unknown, setting to WATER. Valid types are:");
+                                        .severe("Challenges icon: Potion type of " + split[1]
+                                                + " is unknown, setting to WATER. Valid types are:");
                                 for (PotionType type : PotionType.values()) {
                                     plugin.getLogger().severe(type.name());
                                 }
@@ -1846,7 +1921,9 @@ public class Challenges implements CommandExecutor, TabCompleter {
                         // Handle monster egg icons
                         try {
                             EntityType type = EntityType.valueOf(split[1].toUpperCase());
-                            if (Bukkit.getServer().getVersion().contains("(MC: 1.8") || Bukkit.getServer().getVersion().contains("(MC: 1.7")) {
+                            if (Bukkit.getServer().getVersion().contains("(MC: 1.8") || Bukkit.getServer()
+                                    .getVersion()
+                                    .contains("(MC: 1.7")) {
                                 icon = new SpawnEgg(type).toItemStack();
                             } else {
                                 try {
@@ -1856,7 +1933,8 @@ public class Challenges implements CommandExecutor, TabCompleter {
                                 }
                             }
                         } catch (Exception e) {
-                            Bukkit.getLogger().severe("Spawn eggs must be described by name. Try one of these (not all are possible):");
+                            Bukkit.getLogger()
+                                    .severe("Spawn eggs must be described by name. Try one of these (not all are possible):");
                             for (EntityType type : EntityType.values()) {
                                 if (type.isSpawnable() && type.isAlive()) {
                                     plugin.getLogger().severe(type.toString());
@@ -1882,8 +1960,9 @@ public class Challenges implements CommandExecutor, TabCompleter {
         }
         String description = ChatColor.GREEN
                 + ChatColor
-                .translateAlternateColorCodes('&', getChallengeConfig().getString("challenges.challengeList." + challengeName + ".friendlyname",
-                        challengeName.substring(0, 1).toUpperCase() + challengeName.substring(1)));
+                .translateAlternateColorCodes('&',
+                        getChallengeConfig().getString("challenges.challengeList." + challengeName + ".friendlyname",
+                                challengeName.substring(0, 1).toUpperCase() + challengeName.substring(1)));
         // Remove extraneous info
         ItemMeta im = icon.getItemMeta();
         if (!plugin.getServer().getVersion().contains("1.7")) {
@@ -1966,11 +2045,13 @@ public class Challenges implements CommandExecutor, TabCompleter {
             } else {
                 // Check if the player has maxed out the challenge
                 if (doneTimes < maxTimes) {
-                    result.add(plugin.myLocale(player.getUniqueId()).challengescompletedtimes.replace("[donetimes]", String.valueOf(doneTimes))
+                    result.add(plugin.myLocale(player.getUniqueId()).challengescompletedtimes.replace("[donetimes]",
+                            String.valueOf(doneTimes))
                             .replace("[maxtimes]", String.valueOf(maxTimes)));
                 } else {
                     repeatable = false;
-                    result.add(plugin.myLocale(player.getUniqueId()).challengesmaxreached.replace("[donetimes]", String.valueOf(doneTimes))
+                    result.add(plugin.myLocale(player.getUniqueId()).challengesmaxreached.replace("[donetimes]",
+                            String.valueOf(doneTimes))
                             .replace("[maxtimes]", String.valueOf(maxTimes)));
                 }
             }
@@ -2014,7 +2095,8 @@ public class Challenges implements CommandExecutor, TabCompleter {
             }
         } else {
             // Repeat challenge
-            moneyReward = getChallengeConfig().getDouble("challenges.challengeList." + challenge.toLowerCase() + ".repeatMoneyReward", 0);
+            moneyReward = getChallengeConfig().getDouble("challenges.challengeList." + challenge.toLowerCase() + ".repeatMoneyReward",
+                    0);
             rewardText = ChatColor.translateAlternateColorCodes('&',
                     getChallengeConfig().getString("challenges.challengeList." + challenge.toLowerCase() + ".repeatRewardText", ""));
             expReward = getChallengeConfig().getInt("challenges.challengeList." + challenge + ".repeatExpReward", 0);
@@ -2027,12 +2109,14 @@ public class Challenges implements CommandExecutor, TabCompleter {
             result.addAll(Util.chop(ChatColor.WHITE, rewardText, length));
         }
         if (expReward > 0) {
-            result.addAll(Util.chop(ChatColor.GOLD, plugin.myLocale(player.getUniqueId()).challengesexpReward + ": " + ChatColor.WHITE + expReward,
+            result.addAll(Util.chop(ChatColor.GOLD,
+                    plugin.myLocale(player.getUniqueId()).challengesexpReward + ": " + ChatColor.WHITE + expReward,
                     length));
         }
         if (Settings.useEconomy && moneyReward > 0) {
             result.addAll(Util.chop(ChatColor.GOLD,
-                    plugin.myLocale(player.getUniqueId()).challengesmoneyReward + ": " + ChatColor.WHITE + VaultHelper.econ.format(moneyReward),
+                    plugin.myLocale(player.getUniqueId()).challengesmoneyReward + ": " + ChatColor.WHITE + VaultHelper.econ.format(
+                            moneyReward),
                     length));
         }
         return result;
@@ -2322,7 +2406,8 @@ public class Challenges implements CommandExecutor, TabCompleter {
             if (!duration.isEmpty()) {
                 duration = plugin.myLocale().adminResetChallengeForAllRepeating.replace("[duration]", duration);
             }
-            result.add(challenge + ": " + plugin.myLocale().adminResetChallengeForAllReset.replace("[date]", date.toString()) + " " + duration);
+            result.add(challenge + ": " + plugin.myLocale().adminResetChallengeForAllReset.replace("[date]", date.toString()) + " "
+                    + duration);
         }
         if (result.isEmpty()) {
             result.add(plugin.myLocale().banNone);

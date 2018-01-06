@@ -50,7 +50,8 @@ public class ChallengeCompleteEvent extends Event {
      * @param expReward
      * @param rewardText
      */
-    public ChallengeCompleteEvent(Player player, String challengeName, String[] permList, String[] itemRewards, double moneyReward, int expReward,
+    public ChallengeCompleteEvent(
+            Player player, String challengeName, String[] permList, String[] itemRewards, double moneyReward, int expReward,
             String rewardText, List<ItemStack> rewardedItems) {
         this.player = player;
         this.challengeName = challengeName;

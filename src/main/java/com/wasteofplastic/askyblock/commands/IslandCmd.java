@@ -36,6 +36,7 @@ import com.wasteofplastic.askyblock.schematics.Schematic;
 import com.wasteofplastic.askyblock.schematics.Schematic.PasteReason;
 import com.wasteofplastic.askyblock.util.Util;
 import com.wasteofplastic.askyblock.util.VaultHelper;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.bukkit.Bukkit;
@@ -129,6 +130,72 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
     }
 
     /**
+     * @return the schematics
+     */
+    public static HashMap<String, Schematic> getSchematics() {
+        return schematics;
+    }
+
+    /**
+     * One-to-one relationship, you can return the first matched key
+     *
+     * @param map
+     * @param value
+     * @return key
+     */
+    public static <T, E> T getKeyByValue(Map<T, E> map, E value) {
+        for (Entry<T, E> entry : map.entrySet()) {
+            if (value.equals(entry.getValue())) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Runs commands when a player resets or leaves a team, etc.
+     * Can be run for offline players
+     *
+     * @param commands
+     * @param offlinePlayer
+     */
+    public static void runCommands(List<String> commands, OfflinePlayer offlinePlayer) {
+        // Run commands
+        for (String cmd : commands) {
+            if (cmd.startsWith("[SELF]")) {
+                cmd = cmd.substring(6, cmd.length()).replace("[player]", offlinePlayer.getName()).trim();
+                if (offlinePlayer.isOnline()) {
+                    try {
+                        Bukkit.getLogger().info("Running command '" + cmd + "' as " + offlinePlayer.getName());
+                        ((Player) offlinePlayer).performCommand(cmd);
+                    } catch (Exception e) {
+                        Bukkit.getLogger().severe("Problem executing island command executed by player - skipping!");
+                        Bukkit.getLogger().severe("Command was : " + cmd);
+                        Bukkit.getLogger().severe("Error was: " + e.getMessage());
+                        e.printStackTrace();
+                    }
+                }
+                continue;
+            }
+            // Substitute in any references to player
+            try {
+                //plugin.getLogger().info("Running command " + cmd + " as console.");
+                if (!Bukkit.getServer()
+                        .dispatchCommand(Bukkit.getServer().getConsoleSender(), cmd.replace("[player]", offlinePlayer.getName()))) {
+                    Bukkit.getLogger().severe("Problem executing island command - skipping!");
+                    Bukkit.getLogger().severe("Command was : " + cmd);
+                }
+            } catch (Exception e) {
+                Bukkit.getLogger().severe("Problem executing island command - skipping!");
+                Bukkit.getLogger().severe("Command was : " + cmd);
+                Bukkit.getLogger().severe("Error was: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }
+
+    }
+
+    /**
      * Loads schematics from the config.yml file. If the default
      * island is not included, it will be made up
      */
@@ -159,7 +226,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                 }
                 // If this is repeated later due to the schematic config, fine, it will only add info
             } else {
-                // No islands.schematic in the jar, so just make the default using 
+                // No islands.schematic in the jar, so just make the default using
                 // built-in island generation
                 schematics.put("default", new Schematic(plugin));
             }
@@ -295,7 +362,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                             newSchem.setIcon(Material.MAP);
                         }
                         // Friendly name
-                        String name = ChatColor.translateAlternateColorCodes('&', schemSection.getString("schematics." + key + ".name", ""));
+                        String name = ChatColor.translateAlternateColorCodes('&',
+                                schemSection.getString("schematics." + key + ".name", ""));
                         newSchem.setName(name);
                         // Rating - Rating is not used right now
                         int rating = schemSection.getInt("schematics." + key + ".rating", 50);
@@ -313,7 +381,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                         newSchem.setCost(cost);
                         // Description
                         String description =
-                                ChatColor.translateAlternateColorCodes('&', schemSection.getString("schematics." + key + ".description", ""));
+                                ChatColor.translateAlternateColorCodes('&',
+                                        schemSection.getString("schematics." + key + ".description", ""));
                         description = description.replace("[rating]", String.valueOf(rating));
                         if (Settings.useEconomy) {
                             description = description.replace("[cost]", String.valueOf(cost));
@@ -338,7 +407,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                         // Paste Entities or not
                         newSchem.setPasteEntities(schemSection.getBoolean("schematics." + key + ".pasteentities", false));
                         // Paste air or not. Default is false - huge performance savings!
-                        //newSchem.setPasteAir(schemSection.getBoolean("schematics." + key + ".pasteair",false));	    
+                        //newSchem.setPasteAir(schemSection.getBoolean("schematics." + key + ".pasteair",false));
                         // Visible in GUI or not
                         newSchem.setVisible(schemSection.getBoolean("schematics." + key + ".show", true));
                         // Partner schematic
@@ -415,12 +484,14 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                         if (amountdata.length == 2) {
                                             tempChest[i++] = new ItemStack(mat, Integer.parseInt(amountdata[1]));
                                         } else if (amountdata.length == 3) {
-                                            tempChest[i++] = new ItemStack(mat, Integer.parseInt(amountdata[2]), Short.parseShort(amountdata[1]));
+                                            tempChest[i++] = new ItemStack(mat, Integer.parseInt(amountdata[2]),
+                                                    Short.parseShort(amountdata[1]));
                                         }
                                     }
                                 } catch (java.lang.IllegalArgumentException ex) {
                                     plugin.getLogger()
-                                            .severe("Problem loading chest item for schematic '" + name + "' so skipping it: " + chestItemString);
+                                            .severe("Problem loading chest item for schematic '" + name + "' so skipping it: "
+                                                    + chestItemString);
                                     plugin.getLogger().severe("Error is : " + ex.getMessage());
                                     plugin.getLogger().info("Potential potion types are: ");
                                     for (PotionType c : PotionType.values()) {
@@ -428,7 +499,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                     }
                                 } catch (Exception e) {
                                     plugin.getLogger()
-                                            .severe("Problem loading chest item for schematic '" + name + "' so skipping it: " + chestItemString);
+                                            .severe("Problem loading chest item for schematic '" + name + "' so skipping it: "
+                                                    + chestItemString);
                                     plugin.getLogger().info("Potential material types are: ");
                                     for (Material c : Material.values()) {
                                         plugin.getLogger().info(c.name());
@@ -459,7 +531,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                 }
                             } catch (Exception e) {
                                 plugin.getLogger()
-                                        .severe("Problem with schematic '" + name + "'. Spawn block '" + spawnBlock + "' is unknown. Skipping...");
+                                        .severe("Problem with schematic '" + name + "'. Spawn block '" + spawnBlock
+                                                + "' is unknown. Skipping...");
                             }
                         } else {
                             // plugin.getLogger().info("No spawn block found");
@@ -474,7 +547,9 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                         } else {
                             perm = "player with " + perm + " permission";
                         }
-                        plugin.getLogger().info("Loading schematic " + name + " (" + filename + ") for " + perm + ", order " + newSchem.getOrder());
+                        plugin.getLogger()
+                                .info("Loading schematic " + name + " (" + filename + ") for " + perm + ", order "
+                                        + newSchem.getOrder());
                     } else {
                         plugin.getLogger().warning("Could not find " + filename + " in the schematics folder! Skipping...");
                     }
@@ -494,71 +569,6 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
         plugin.getLogger().warning("* 'schematics' section in config.yml has been deprecated.     *");
         plugin.getLogger().warning("* See 'schematicsection' in config.new.yml for replacement.   *");
         plugin.getLogger().warning("***************************************************************");
-    }
-
-    /**
-     * @return the schematics
-     */
-    public static HashMap<String, Schematic> getSchematics() {
-        return schematics;
-    }
-
-    /**
-     * One-to-one relationship, you can return the first matched key
-     *
-     * @param map
-     * @param value
-     * @return key
-     */
-    public static <T, E> T getKeyByValue(Map<T, E> map, E value) {
-        for (Entry<T, E> entry : map.entrySet()) {
-            if (value.equals(entry.getValue())) {
-                return entry.getKey();
-            }
-        }
-        return null;
-    }
-
-    /**
-     * Runs commands when a player resets or leaves a team, etc.
-     * Can be run for offline players
-     *
-     * @param commands
-     * @param offlinePlayer
-     */
-    public static void runCommands(List<String> commands, OfflinePlayer offlinePlayer) {
-        // Run commands
-        for (String cmd : commands) {
-            if (cmd.startsWith("[SELF]")) {
-                cmd = cmd.substring(6, cmd.length()).replace("[player]", offlinePlayer.getName()).trim();
-                if (offlinePlayer.isOnline()) {
-                    try {
-                        Bukkit.getLogger().info("Running command '" + cmd + "' as " + offlinePlayer.getName());
-                        ((Player) offlinePlayer).performCommand(cmd);
-                    } catch (Exception e) {
-                        Bukkit.getLogger().severe("Problem executing island command executed by player - skipping!");
-                        Bukkit.getLogger().severe("Command was : " + cmd);
-                        Bukkit.getLogger().severe("Error was: " + e.getMessage());
-                        e.printStackTrace();
-                    }
-                }
-                continue;
-            }
-            // Substitute in any references to player
-            try {
-                //plugin.getLogger().info("Running command " + cmd + " as console.");
-                if (!Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(), cmd.replace("[player]", offlinePlayer.getName()))) {
-                    Bukkit.getLogger().severe("Problem executing island command - skipping!");
-                    Bukkit.getLogger().severe("Command was : " + cmd);
-                }
-            } catch (Exception e) {
-                Bukkit.getLogger().severe("Problem executing island command - skipping!");
-                Bukkit.getLogger().severe("Command was : " + cmd);
-                Bukkit.getLogger().severe("Error was: " + e.getMessage());
-                e.printStackTrace();
-            }
-        }
-
     }
 
     /**
@@ -1000,7 +1010,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
         if (sender instanceof Player) {
             Player asker = (Player) sender;
             // Player asking for their own island calc
-            if (asker.getUniqueId().equals(targetPlayer) || asker.isOp() || VaultHelper.checkPerm(asker, Settings.PERMPREFIX + "mod.info")) {
+            if (asker.getUniqueId().equals(targetPlayer) || asker.isOp() || VaultHelper.checkPerm(asker,
+                    Settings.PERMPREFIX + "mod.info")) {
                 // Newer better system - uses chunks
                 if (!onLevelWaitTime(asker) || Settings.levelWait <= 0 || asker.isOp() || VaultHelper
                         .checkPerm(asker, Settings.PERMPREFIX + "mod.info")) {
@@ -1151,8 +1162,9 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                     // Get the max value should there be more than one
                                     if (spl.length > 1) {
                                         if (!NumberUtils.isDigits(spl[1])) {
-                                            plugin.getLogger().severe("Player " + player.getName() + " has permission: " + perms.getPermission()
-                                                    + " <-- the last part MUST be a number! Ignoring...");
+                                            plugin.getLogger()
+                                                    .severe("Player " + player.getName() + " has permission: " + perms.getPermission()
+                                                            + " <-- the last part MUST be a number! Ignoring...");
 
                                         } else {
                                             multiplier = Math.max(multiplier, Integer.valueOf(spl[1]));
@@ -1178,7 +1190,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                             if (value > 0) {
                                 // [name] placed here may be worth [value]
                                 Util.sendMessage(player, ChatColor.GREEN + (plugin.myLocale(player.getUniqueId()).islandblockValue
-                                        .replace("[name]", Util.prettifyText(item.getType().name())).replace("[value]", String.valueOf(value))));
+                                        .replace("[name]", Util.prettifyText(item.getType().name()))
+                                        .replace("[value]", String.valueOf(value))));
                             } else {
                                 // [name] is worthless
                                 Util.sendMessage(player, ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).islandblockWorthless
@@ -1195,7 +1208,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.name")
                             && plugin.getPlayers().hasIsland(playerUUID)) {
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " name <name>: " + ChatColor.WHITE + plugin
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " name <name>: " + ChatColor.WHITE
+                                        + plugin
                                         .myLocale(player.getUniqueId()).islandHelpName);
                         return true;
                     }
@@ -1213,7 +1227,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                     // Explain command
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "coop")) {
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " coop <player>: " + ChatColor.WHITE + plugin
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " coop <player>: " + ChatColor.WHITE
+                                        + plugin
                                         .myLocale(player.getUniqueId()).islandhelpCoop);
                         return true;
                     }
@@ -1221,7 +1236,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                     // Explain command
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "coop")) {
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " uncoop <player>: " + ChatColor.WHITE + plugin
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " uncoop <player>: " + ChatColor.WHITE
+                                        + plugin
                                         .myLocale(player.getUniqueId()).islandhelpUnCoop);
                         return true;
                     }
@@ -1229,7 +1245,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                     // Explain command
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.expel")) {
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " expel <player>: " + ChatColor.WHITE + plugin
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " expel <player>: " + ChatColor.WHITE
+                                        + plugin
                                         .myLocale(player.getUniqueId()).islandhelpExpel);
                         return true;
                     }
@@ -1280,7 +1297,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                             Util.sendMessage(player, ChatColor.RED + plugin.myLocale(playerUUID).banNone);
                         } else {
                             for (UUID bannedPlayers : bannedList) {
-                                Util.sendMessage(player, plugin.myLocale(playerUUID).helpColor + plugin.getPlayers().getName(bannedPlayers));
+                                Util.sendMessage(player,
+                                        plugin.myLocale(playerUUID).helpColor + plugin.getPlayers().getName(bannedPlayers));
                             }
                         }
                         return true;
@@ -1291,8 +1309,9 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                 } else if (split[0].equalsIgnoreCase("ban")) {
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.ban")) {
                         // Just show ban help
-                        Util.sendMessage(player, plugin.myLocale(playerUUID).helpColor + "/" + label + " ban <player>: " + ChatColor.WHITE + plugin
-                                .myLocale(playerUUID).islandhelpBan);
+                        Util.sendMessage(player,
+                                plugin.myLocale(playerUUID).helpColor + "/" + label + " ban <player>: " + ChatColor.WHITE + plugin
+                                        .myLocale(playerUUID).islandhelpBan);
                     } else {
                         Util.sendMessage(player, plugin.myLocale(playerUUID).errorNoPermission);
                     }
@@ -1300,8 +1319,9 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                 } else if (split[0].equalsIgnoreCase("unban") && VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.ban")) {
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.ban")) {
                         // Just show unban help
-                        Util.sendMessage(player, plugin.myLocale(playerUUID).helpColor + "/" + label + " unban <player>: " + ChatColor.WHITE + plugin
-                                .myLocale(playerUUID).islandhelpUnban);
+                        Util.sendMessage(player,
+                                plugin.myLocale(playerUUID).helpColor + "/" + label + " unban <player>: " + ChatColor.WHITE + plugin
+                                        .myLocale(playerUUID).islandhelpUnban);
                     } else {
                         Util.sendMessage(player, plugin.myLocale(playerUUID).errorNoPermission);
                     }
@@ -1360,7 +1380,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                         if (!island.isLocked()) {
                             // Remove any visitors
                             for (Player target : plugin.getServer().getOnlinePlayers()) {
-                                if (target == null || target.hasMetadata("NPC") || target.isOp() || player.equals(target) || VaultHelper
+                                if (target == null || target.hasMetadata("NPC") || target.isOp() || player.equals(target)
+                                        || VaultHelper
                                         .checkPerm(target, Settings.PERMPREFIX + "mod.bypassprotect")) {
                                     continue;
                                 }
@@ -1368,7 +1389,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                 if (plugin.getGrid().isOnIsland(player, target)
                                         && !CoopPlay.getInstance().getCoopPlayers(island.getCenter()).contains(target.getUniqueId())) {
                                     // Send them home
-                                    if (plugin.getPlayers().inTeam(target.getUniqueId()) || plugin.getPlayers().hasIsland(target.getUniqueId())) {
+                                    if (plugin.getPlayers().inTeam(target.getUniqueId()) || plugin.getPlayers()
+                                            .hasIsland(target.getUniqueId())) {
                                         plugin.getGrid().homeTeleport(target);
                                     } else {
                                         // Just move target to spawn
@@ -1377,24 +1399,31 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                         }
                                     }
                                     Util.sendMessage(target, ChatColor.RED + plugin.myLocale(target.getUniqueId()).expelExpelled);
-                                    plugin.getLogger().info(player.getName() + " expelled " + target.getName() + " from their island when locking.");
+                                    plugin.getLogger()
+                                            .info(player.getName() + " expelled " + target.getName()
+                                                    + " from their island when locking.");
                                     // Yes they are
                                     Util.sendMessage(player,
-                                            ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).expelSuccess.replace("[name]", target.getName()));
+                                            ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).expelSuccess.replace("[name]",
+                                                    target.getName()));
                                 }
                             }
                             Util.sendMessage(player, ChatColor.GREEN + plugin.myLocale(playerUUID).lockLocking);
                             plugin.getMessages()
-                                    .tellOfflineTeam(playerUUID, plugin.myLocale(playerUUID).lockPlayerLocked.replace("[name]", player.getName()));
+                                    .tellOfflineTeam(playerUUID,
+                                            plugin.myLocale(playerUUID).lockPlayerLocked.replace("[name]", player.getName()));
                             plugin.getMessages()
-                                    .tellTeam(playerUUID, plugin.myLocale(playerUUID).lockPlayerLocked.replace("[name]", player.getName()));
+                                    .tellTeam(playerUUID,
+                                            plugin.myLocale(playerUUID).lockPlayerLocked.replace("[name]", player.getName()));
                             island.setLocked(true);
                         } else {
                             Util.sendMessage(player, ChatColor.GREEN + plugin.myLocale(playerUUID).lockUnlocking);
                             plugin.getMessages()
-                                    .tellOfflineTeam(playerUUID, plugin.myLocale(playerUUID).lockPlayerUnlocked.replace("[name]", player.getName()));
+                                    .tellOfflineTeam(playerUUID,
+                                            plugin.myLocale(playerUUID).lockPlayerUnlocked.replace("[name]", player.getName()));
                             plugin.getMessages()
-                                    .tellTeam(playerUUID, plugin.myLocale(playerUUID).lockPlayerUnlocked.replace("[name]", player.getName()));
+                                    .tellTeam(playerUUID,
+                                            plugin.myLocale(playerUUID).lockPlayerUnlocked.replace("[name]", player.getName()));
                             island.setLocked(false);
                         }
                         return true;
@@ -1417,7 +1446,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                     return true;
                 } else if (split[0].equalsIgnoreCase("about")) {
                     Util.sendMessage(player,
-                            ChatColor.GOLD + "About " + ChatColor.GREEN + plugin.getDescription().getName() + ChatColor.GOLD + " v" + ChatColor.AQUA
+                            ChatColor.GOLD + "About " + ChatColor.GREEN + plugin.getDescription().getName() + ChatColor.GOLD + " v"
+                                    + ChatColor.AQUA
                                     + plugin.getDescription().getVersion() + ChatColor.GOLD + ":");
                     Util.sendMessage(player, ChatColor.GOLD + "This plugin is free software: you can redistribute");
                     Util.sendMessage(player, ChatColor.GOLD + "it and/or modify it under the terms of the GNU");
@@ -1453,7 +1483,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                             Util.sendMessage(player, plugin.myLocale(playerUUID).errorCommandNotReady);
                             plugin.getLogger()
                                     .severe("There is a problem with the controlpanel.yml file - it is probably corrupted. Delete it and let it be "
-                                    + "regenerated.");
+                                            + "regenerated.");
                             return true;
                         }
                     }
@@ -1466,7 +1496,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                             Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).errorNoIsland);
                             return true;
                         }
-                        if (player.getWorld().equals(ASkyBlock.getIslandWorld()) || player.getWorld().equals(ASkyBlock.getNetherWorld())) {
+                        if (player.getWorld().equals(ASkyBlock.getIslandWorld()) || player.getWorld()
+                                .equals(ASkyBlock.getNetherWorld())) {
                             if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.minishop")) {
                                 if (ControlPanel.miniShop != null) {
                                     player.openInventory(ControlPanel.miniShop);
@@ -1474,7 +1505,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                     Util.sendMessage(player, plugin.myLocale(playerUUID).errorCommandNotReady);
                                     plugin.getLogger()
                                             .severe("Player tried to open the minishop, but it does not exist. Look for errors in the console about"
-                                            + " the minishop loading.");
+                                                    + " the minishop loading.");
                                 }
                                 return true;
                             }
@@ -1500,7 +1531,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                         Collection<UUID> warpList = plugin.getWarpSignsListener().listWarps();
                         if (warpList.isEmpty()) {
                             Util.sendMessage(player, ChatColor.YELLOW + plugin.myLocale(player.getUniqueId()).warpserrorNoWarpsYet);
-                            if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.addwarp") && plugin.getGrid().playerIsOnIsland(player)) {
+                            if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.addwarp") && plugin.getGrid()
+                                    .playerIsOnIsland(player)) {
                                 Util.sendMessage(player, ChatColor.YELLOW + plugin.myLocale().warpswarpTip);
                             }
                             return true;
@@ -1525,7 +1557,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                     }
                                 }
                                 Util.sendMessage(player,
-                                        ChatColor.YELLOW + plugin.myLocale(player.getUniqueId()).warpswarpsAvailable + ": " + ChatColor.WHITE
+                                        ChatColor.YELLOW + plugin.myLocale(player.getUniqueId()).warpswarpsAvailable + ": "
+                                                + ChatColor.WHITE
                                                 + wlist);
                                 if (!hasWarp && (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.addwarp"))) {
                                     Util.sendMessage(player, ChatColor.YELLOW + plugin.myLocale().warpswarpTip);
@@ -1549,7 +1582,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                         if (!plugin.getPlayers().getTeamLeader(playerUUID).equals(playerUUID)) {
                             Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).islandresetOnlyOwner);
                         } else {
-                            Util.sendMessage(player, ChatColor.YELLOW + plugin.myLocale(player.getUniqueId()).islandresetMustRemovePlayers);
+                            Util.sendMessage(player,
+                                    ChatColor.YELLOW + plugin.myLocale(player.getUniqueId()).islandresetMustRemovePlayers);
                         }
                         return true;
                     }
@@ -1632,8 +1666,9 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                         }
                         return true;
                     } else {
-                        Util.sendMessage(player, plugin.myLocale(player.getUniqueId()).helpColor + "/island restart: " + ChatColor.WHITE + plugin
-                                .myLocale(player.getUniqueId()).islandhelpRestart);
+                        Util.sendMessage(player,
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/island restart: " + ChatColor.WHITE + plugin
+                                        .myLocale(player.getUniqueId()).islandhelpRestart);
                         return true;
                     }
                 } else if (split[0].equalsIgnoreCase("sethome")) {
@@ -1650,14 +1685,18 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                         return true;
                     }
                 } else if (split[0].equalsIgnoreCase("help")) {
-                    Util.sendMessage(player, plugin.myLocale(player.getUniqueId()).helpColor + plugin.myLocale(player.getUniqueId()).helpHeader
-                            .replace("[plugin]", plugin.getDescription().getName()).replace("[version]", plugin.getDescription().getVersion()));
+                    Util.sendMessage(player,
+                            plugin.myLocale(player.getUniqueId()).helpColor + plugin.myLocale(player.getUniqueId()).helpHeader
+                                    .replace("[plugin]", plugin.getDescription().getName())
+                                    .replace("[version]", plugin.getDescription().getVersion()));
                     if (Settings.useControlPanel) {
-                        Util.sendMessage(player, plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + ": " + ChatColor.WHITE + plugin
-                                .myLocale(player.getUniqueId()).islandhelpControlPanel);
+                        Util.sendMessage(player,
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + ": " + ChatColor.WHITE + plugin
+                                        .myLocale(player.getUniqueId()).islandhelpControlPanel);
                     } else {
-                        Util.sendMessage(player, plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + ": " + ChatColor.WHITE + plugin
-                                .myLocale(player.getUniqueId()).islandhelpIsland);
+                        Util.sendMessage(player,
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + ": " + ChatColor.WHITE + plugin
+                                        .myLocale(player.getUniqueId()).islandhelpIsland);
                     }
                     // Dynamic home sizes with permissions
                     int maxHomes = Settings.maxHomes;
@@ -1672,8 +1711,9 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                 if (spl.length > 1) {
                                     // Check that it is a number
                                     if (!NumberUtils.isDigits(spl[1])) {
-                                        plugin.getLogger().severe("Player " + player.getName() + " has permission: " + perms.getPermission()
-                                                + " <-- the last part MUST be a number! Ignoring...");
+                                        plugin.getLogger()
+                                                .severe("Player " + player.getName() + " has permission: " + perms.getPermission()
+                                                        + " <-- the last part MUST be a number! Ignoring...");
 
                                     } else {
                                         maxHomes = Math.max(maxHomes, Integer.valueOf(spl[1]));
@@ -1688,25 +1728,30 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                     }
                     if (maxHomes > 1 && VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.go")) {
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " go <1 - " + maxHomes + ">: " + ChatColor.WHITE
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " go <1 - " + maxHomes + ">: "
+                                        + ChatColor.WHITE
                                         + plugin.myLocale(player.getUniqueId()).islandhelpTeleport);
                     } else if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.go")) {
-                        Util.sendMessage(player, plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " go: " + ChatColor.WHITE + plugin
-                                .myLocale(player.getUniqueId()).islandhelpTeleport);
+                        Util.sendMessage(player,
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " go: " + ChatColor.WHITE + plugin
+                                        .myLocale(player.getUniqueId()).islandhelpTeleport);
                     }
                     if (plugin.getGrid() != null && plugin.getGrid().getSpawn() != null && VaultHelper
                             .checkPerm(player, Settings.PERMPREFIX + "island.spawn")) {
-                        Util.sendMessage(player, plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " spawn: " + ChatColor.WHITE + plugin
-                                .myLocale(player.getUniqueId()).islandhelpSpawn);
+                        Util.sendMessage(player,
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " spawn: " + ChatColor.WHITE + plugin
+                                        .myLocale(player.getUniqueId()).islandhelpSpawn);
                     }
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.controlpanel")) {
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " controlpanel or cp [on/off]: " + ChatColor.WHITE
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " controlpanel or cp [on/off]: "
+                                        + ChatColor.WHITE
                                         + plugin.myLocale(player.getUniqueId()).islandhelpControlPanel);
                     }
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.reset")) {
-                        Util.sendMessage(player, plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " reset: " + ChatColor.WHITE + plugin
-                                .myLocale(player.getUniqueId()).islandhelpRestart);
+                        Util.sendMessage(player,
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " reset: " + ChatColor.WHITE + plugin
+                                        .myLocale(player.getUniqueId()).islandhelpRestart);
                     }
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.sethome")) {
                         if (maxHomes > 1) {
@@ -1715,71 +1760,87 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                             + ChatColor.WHITE + plugin.myLocale(player.getUniqueId()).islandhelpSetHome);
                         } else {
                             Util.sendMessage(player,
-                                    plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " sethome: " + ChatColor.WHITE + plugin
+                                    plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " sethome: " + ChatColor.WHITE
+                                            + plugin
                                             .myLocale(player.getUniqueId()).islandhelpSetHome);
                         }
                     }
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.info")) {
-                        Util.sendMessage(player, plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " level: " + ChatColor.WHITE + plugin
-                                .myLocale(player.getUniqueId()).islandhelpLevel);
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " level <player>: " + ChatColor.WHITE + plugin
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " level: " + ChatColor.WHITE + plugin
+                                        .myLocale(player.getUniqueId()).islandhelpLevel);
+                        Util.sendMessage(player,
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " level <player>: " + ChatColor.WHITE
+                                        + plugin
                                         .myLocale(player.getUniqueId()).islandhelpLevelPlayer);
                     }
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.name")
                             && plugin.getPlayers().hasIsland(playerUUID)) {
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " name <name>: " + ChatColor.WHITE + plugin
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " name <name>: " + ChatColor.WHITE
+                                        + plugin
                                         .myLocale(player.getUniqueId()).islandHelpName);
                     }
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.topten")) {
-                        Util.sendMessage(player, plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " top: " + ChatColor.WHITE + plugin
-                                .myLocale(player.getUniqueId()).islandhelpTop);
+                        Util.sendMessage(player,
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " top: " + ChatColor.WHITE + plugin
+                                        .myLocale(player.getUniqueId()).islandhelpTop);
                     }
                     if (Settings.useEconomy && VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.minishop")) {
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " minishop or ms: " + ChatColor.WHITE + plugin
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " minishop or ms: " + ChatColor.WHITE
+                                        + plugin
                                         .myLocale(player.getUniqueId()).islandhelpMiniShop);
                     }
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.value")) {
-                        Util.sendMessage(player, plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " value: " + ChatColor.WHITE + plugin
-                                .myLocale(player.getUniqueId()).islandhelpValue);
+                        Util.sendMessage(player,
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " value: " + ChatColor.WHITE + plugin
+                                        .myLocale(player.getUniqueId()).islandhelpValue);
                     }
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.warp")) {
-                        Util.sendMessage(player, plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " warps: " + ChatColor.WHITE + plugin
-                                .myLocale(player.getUniqueId()).islandhelpWarps);
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " warp <player>: " + ChatColor.WHITE + plugin
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " warps: " + ChatColor.WHITE + plugin
+                                        .myLocale(player.getUniqueId()).islandhelpWarps);
+                        Util.sendMessage(player,
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " warp <player>: " + ChatColor.WHITE
+                                        + plugin
                                         .myLocale(player.getUniqueId()).islandhelpWarp);
                     }
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "team.create")) {
-                        Util.sendMessage(player, plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " team: " + ChatColor.WHITE + plugin
-                                .myLocale(player.getUniqueId()).islandhelpTeam);
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " invite <player>: " + ChatColor.WHITE + plugin
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " team: " + ChatColor.WHITE + plugin
+                                        .myLocale(player.getUniqueId()).islandhelpTeam);
+                        Util.sendMessage(player,
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " invite <player>: " + ChatColor.WHITE
+                                        + plugin
                                         .myLocale(player.getUniqueId()).islandhelpInvite);
-                        Util.sendMessage(player, plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " leave: " + ChatColor.WHITE + plugin
-                                .myLocale(player.getUniqueId()).islandhelpLeave);
+                        Util.sendMessage(player,
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " leave: " + ChatColor.WHITE + plugin
+                                        .myLocale(player.getUniqueId()).islandhelpLeave);
                     }
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "team.kick")) {
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " kick <player>: " + ChatColor.WHITE + plugin
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " kick <player>: " + ChatColor.WHITE
+                                        + plugin
                                         .myLocale(player.getUniqueId()).islandhelpKick);
                     }
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "team.join")) {
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " <accept/reject>: " + ChatColor.WHITE + plugin
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " <accept/reject>: " + ChatColor.WHITE
+                                        + plugin
                                         .myLocale(player.getUniqueId()).islandhelpAcceptReject);
                     }
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "team.makeleader")) {
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " makeleader <player>: " + ChatColor.WHITE + plugin
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " makeleader <player>: "
+                                        + ChatColor.WHITE + plugin
                                         .myLocale(player.getUniqueId()).islandhelpMakeLeader);
                     }
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "team.chat")
                             && plugin.getPlayers().inTeam(playerUUID)) {
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " teamchat: " + ChatColor.WHITE + plugin
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " teamchat: " + ChatColor.WHITE
+                                        + plugin
                                         .myLocale(player.getUniqueId()).teamChatHelp);
                     }
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.biomes")) {
@@ -1790,54 +1851,66 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                     // if (!Settings.allowPvP) {
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.expel")) {
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " expel <player>: " + ChatColor.WHITE + plugin
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " expel <player>: " + ChatColor.WHITE
+                                        + plugin
                                         .myLocale(player.getUniqueId()).islandhelpExpel);
                     }
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.ban")) {
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " ban <player>: " + ChatColor.WHITE + plugin
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " ban <player>: " + ChatColor.WHITE
+                                        + plugin
                                         .myLocale(player.getUniqueId()).islandhelpBan);
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " banlist <player>: " + ChatColor.WHITE + plugin
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " banlist <player>: " + ChatColor.WHITE
+                                        + plugin
                                         .myLocale(player.getUniqueId()).islandhelpBanList);
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " unban <player>: " + ChatColor.WHITE + plugin
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " unban <player>: " + ChatColor.WHITE
+                                        + plugin
                                         .myLocale(player.getUniqueId()).islandhelpUnban);
                     }
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "coop")) {
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " coop <player>: " + ChatColor.WHITE + plugin
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " coop <player>: " + ChatColor.WHITE
+                                        + plugin
                                         .myLocale(player.getUniqueId()).islandhelpCoop);
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " uncoop <player>: " + ChatColor.WHITE + plugin
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " uncoop <player>: " + ChatColor.WHITE
+                                        + plugin
                                         .myLocale(player.getUniqueId()).islandhelpUnCoop);
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " listcoops: " + ChatColor.WHITE + plugin
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " listcoops: " + ChatColor.WHITE
+                                        + plugin
                                         .myLocale(player.getUniqueId()).islandhelpListCoops);
 
                     }
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.lock")) {
-                        Util.sendMessage(player, plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " lock: " + ChatColor.WHITE + plugin
-                                .myLocale(player.getUniqueId()).islandHelpLock);
+                        Util.sendMessage(player,
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " lock: " + ChatColor.WHITE + plugin
+                                        .myLocale(player.getUniqueId()).islandHelpLock);
                     }
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.name")
                             && plugin.getPlayers().hasIsland(playerUUID)) {
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " resetname: " + ChatColor.WHITE + plugin
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " resetname: " + ChatColor.WHITE
+                                        + plugin
                                         .myLocale(player.getUniqueId()).islandhelpResetName);
                     }
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.settings")) {
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " settings: " + ChatColor.WHITE + plugin
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " settings: " + ChatColor.WHITE
+                                        + plugin
                                         .myLocale(player.getUniqueId()).islandHelpSettings);
                     }
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.challenges")) {
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + plugin.myLocale(player.getUniqueId()).islandHelpChallenges);
+                                plugin.myLocale(player.getUniqueId()).helpColor + plugin.myLocale(
+                                        player.getUniqueId()).islandHelpChallenges);
                     }
                     if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.lang")) {
                         Util.sendMessage(player,
-                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " lang <#>: " + ChatColor.WHITE + plugin
+                                plugin.myLocale(player.getUniqueId()).helpColor + "/" + label + " lang <#>: " + ChatColor.WHITE
+                                        + plugin
                                         .myLocale(player.getUniqueId()).islandHelpSelectLanguage);
                     }
                     // DEBUG - used to find meta tags
@@ -1964,7 +2037,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                             if (spl.length > 1) {
                                                 if (!NumberUtils.isDigits(spl[1])) {
                                                     plugin.getLogger()
-                                                            .severe("Player " + player.getName() + " has permission: " + perms.getPermission()
+                                                            .severe("Player " + player.getName() + " has permission: "
+                                                                    + perms.getPermission()
                                                                     + " <-- the last part MUST be a number! Ignoring...");
 
                                                 } else {
@@ -1983,12 +2057,14 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                             + plugin.myLocale(player.getUniqueId()).inviteyouCanInvite
                                             .replace("[number]", String.valueOf(maxSize - teamMembers.size())));
                                 } else {
-                                    Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).inviteerrorYourIslandIsFull);
+                                    Util.sendMessage(player,
+                                            ChatColor.RED + plugin.myLocale(player.getUniqueId()).inviteerrorYourIslandIsFull);
                                 }
                                 return true;
                             }
 
-                            Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).inviteerrorYouMustHaveIslandToInvite);
+                            Util.sendMessage(player,
+                                    ChatColor.RED + plugin.myLocale(player.getUniqueId()).inviteerrorYouMustHaveIslandToInvite);
                             return true;
                         }
 
@@ -2027,7 +2103,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                 //plugin.getLogger().info("DEBUG: Executing new island commands");
                                 runCommands(Settings.teamStartCommands, player);
                             }
-                            Util.sendMessage(player, ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).inviteyouHaveJoinedAnIsland);
+                            Util.sendMessage(player,
+                                    ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).inviteyouHaveJoinedAnIsland);
                             if (plugin.getServer().getPlayer(inviteList.get(playerUUID)) != null) {
                                 Util.sendMessage(plugin.getServer().getPlayer(inviteList.get(playerUUID)),
                                         ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).invitehasJoinedYourIsland
@@ -2047,7 +2124,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                 } else if (split[0].equalsIgnoreCase("reject")) {
                     // Reject /island reject
                     if (inviteList.containsKey(player.getUniqueId())) {
-                        Util.sendMessage(player, ChatColor.YELLOW + plugin.myLocale(player.getUniqueId()).rejectyouHaveRejectedInvitation);
+                        Util.sendMessage(player,
+                                ChatColor.YELLOW + plugin.myLocale(player.getUniqueId()).rejectyouHaveRejectedInvitation);
                         // If the player is online still then tell them directly
                         // about the rejection
                         if (Bukkit.getPlayer(inviteList.get(player.getUniqueId())) != null) {
@@ -2069,9 +2147,11 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                 (Settings.createNether && Settings.newNether &&
                                         ASkyBlock.getNetherWorld() != null && player.getWorld().equals(ASkyBlock.getNetherWorld()))) {
                             if (plugin.getPlayers().inTeam(playerUUID)) {
-                                if (plugin.getPlayers().getTeamLeader(playerUUID) != null && plugin.getPlayers().getTeamLeader(playerUUID)
+                                if (plugin.getPlayers().getTeamLeader(playerUUID) != null && plugin.getPlayers()
+                                        .getTeamLeader(playerUUID)
                                         .equals(playerUUID)) {
-                                    Util.sendMessage(player, ChatColor.YELLOW + plugin.myLocale(player.getUniqueId()).leaveerrorYouAreTheLeader);
+                                    Util.sendMessage(player,
+                                            ChatColor.YELLOW + plugin.myLocale(player.getUniqueId()).leaveerrorYouAreTheLeader);
                                     return true;
                                 }
                                 // Check for confirmation
@@ -2085,7 +2165,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                             // If the player is still on the list, remove them and cancel the leave
                                             if (leavingPlayers.contains(playerUUID)) {
                                                 leavingPlayers.remove(playerUUID);
-                                                Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).leaveCanceled);
+                                                Util.sendMessage(player,
+                                                        ChatColor.RED + plugin.myLocale(player.getUniqueId()).leaveCanceled);
                                             }
                                         }
 
@@ -2109,11 +2190,13 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
 
                                 // Log the location that this player left so they
                                 // cannot join again before the cool down ends
-                                plugin.getPlayers().startInviteCoolDownTimer(playerUUID, plugin.getPlayers().getTeamIslandLocation(teamLeader));
+                                plugin.getPlayers()
+                                        .startInviteCoolDownTimer(playerUUID, plugin.getPlayers().getTeamIslandLocation(teamLeader));
 
                                 // Remove any warps
                                 plugin.getWarpSignsListener().removeWarp(playerUUID);
-                                Util.sendMessage(player, ChatColor.YELLOW + plugin.myLocale(player.getUniqueId()).leaveyouHaveLeftTheIsland);
+                                Util.sendMessage(player,
+                                        ChatColor.YELLOW + plugin.myLocale(player.getUniqueId()).leaveyouHaveLeftTheIsland);
                                 // Tell the leader if they are online
                                 if (plugin.getServer().getPlayer(teamLeader) != null) {
                                     Player leader = plugin.getServer().getPlayer(teamLeader);
@@ -2121,8 +2204,10 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                             .replace("[name]", player.getName()));
                                 } else {
                                     // Leave them a message
-                                    plugin.getMessages().setMessage(teamLeader, ChatColor.RED + plugin.myLocale(teamLeader).leavenameHasLeftYourIsland
-                                            .replace("[name]", player.getName()));
+                                    plugin.getMessages()
+                                            .setMessage(teamLeader,
+                                                    ChatColor.RED + plugin.myLocale(teamLeader).leavenameHasLeftYourIsland
+                                                            .replace("[name]", player.getName()));
                                 }
                                 // Check if the size of the team is now 1
                                 // teamMembers.remove(playerUUID);
@@ -2140,7 +2225,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                 }
                                 return true;
                             } else {
-                                Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).leaveerrorYouCannotLeaveIsland);
+                                Util.sendMessage(player,
+                                        ChatColor.RED + plugin.myLocale(player.getUniqueId()).leaveerrorYouCannotLeaveIsland);
                                 return true;
                             }
                         } else {
@@ -2165,8 +2251,10 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                         String[] spl = perms.getPermission().split(Settings.PERMPREFIX + "team.maxsize.");
                                         if (spl.length > 1) {
                                             if (!NumberUtils.isDigits(spl[1])) {
-                                                plugin.getLogger().severe("Player " + player.getName() + " has permission: " + perms.getPermission()
-                                                        + " <-- the last part MUST be a number! Ignoring...");
+                                                plugin.getLogger()
+                                                        .severe("Player " + player.getName() + " has permission: "
+                                                                + perms.getPermission()
+                                                                + " <-- the last part MUST be a number! Ignoring...");
 
                                             } else {
                                                 maxSize = Math.max(maxSize, Integer.valueOf(spl[1]));
@@ -2183,7 +2271,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                 Util.sendMessage(player, ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).inviteyouCanInvite
                                         .replace("[number]", String.valueOf(maxSize - teamMembers.size())));
                             } else {
-                                Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).inviteerrorYourIslandIsFull);
+                                Util.sendMessage(player,
+                                        ChatColor.RED + plugin.myLocale(player.getUniqueId()).inviteerrorYourIslandIsFull);
                             }
                         }
                         Util.sendMessage(player, ChatColor.YELLOW + plugin.myLocale(player.getUniqueId()).teamlistingMembers + ":");
@@ -2229,7 +2318,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                             // Step through warp table
                             Set<UUID> warpList = plugin.getWarpSignsListener().listWarps();
                             if (warpList.isEmpty()) {
-                                Util.sendMessage(player, ChatColor.YELLOW + plugin.myLocale(player.getUniqueId()).warpserrorNoWarpsYet);
+                                Util.sendMessage(player,
+                                        ChatColor.YELLOW + plugin.myLocale(player.getUniqueId()).warpserrorNoWarpsYet);
                                 if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.addwarp") && plugin.getGrid()
                                         .playerIsOnIsland(player)) {
                                     Util.sendMessage(player, ChatColor.YELLOW + plugin.myLocale().warpswarpTip);
@@ -2343,7 +2433,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                                 if (spl.length > 1) {
                                                     if (!NumberUtils.isDigits(spl[1])) {
                                                         plugin.getLogger()
-                                                                .severe("Player " + player.getName() + " has permission: " + perms.getPermission()
+                                                                .severe("Player " + player.getName() + " has permission: "
+                                                                        + perms.getPermission()
                                                                         + " <-- the last part MUST be a number! Ignoring...");
 
                                                     } else {
@@ -2359,8 +2450,9 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                     }
                                     if (number > maxHomes) {
                                         if (maxHomes > 1) {
-                                            Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).setHomeerrorNumHomes
-                                                    .replace("[max]", String.valueOf(maxHomes)));
+                                            Util.sendMessage(player,
+                                                    ChatColor.RED + plugin.myLocale(player.getUniqueId()).setHomeerrorNumHomes
+                                                            .replace("[max]", String.valueOf(maxHomes)));
                                         } else {
                                             plugin.getGrid().homeTeleport(player, 1);
                                         }
@@ -2401,8 +2493,10 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                         String[] spl = perms.getPermission().split(Settings.PERMPREFIX + "island.maxhomes.");
                                         if (spl.length > 1) {
                                             if (!NumberUtils.isDigits(spl[1])) {
-                                                plugin.getLogger().severe("Player " + player.getName() + " has permission: " + perms.getPermission()
-                                                        + " <-- the last part MUST be a number! Ignoring...");
+                                                plugin.getLogger()
+                                                        .severe("Player " + player.getName() + " has permission: "
+                                                                + perms.getPermission()
+                                                                + " <-- the last part MUST be a number! Ignoring...");
 
                                             } else {
                                                 maxHomes = Math.max(maxHomes, Integer.valueOf(spl[1]));
@@ -2421,8 +2515,9 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                 try {
                                     number = Integer.valueOf(split[1]);
                                     if (number < 1 || number > maxHomes) {
-                                        Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).setHomeerrorNumHomes
-                                                .replace("[max]", String.valueOf(maxHomes)));
+                                        Util.sendMessage(player,
+                                                ChatColor.RED + plugin.myLocale(player.getUniqueId()).setHomeerrorNumHomes
+                                                        .replace("[max]", String.valueOf(maxHomes)));
                                     } else {
                                         plugin.getGrid().homeSet(player, number);
                                     }
@@ -2442,7 +2537,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                         if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.warp")) {
                             final Set<UUID> warpList = plugin.getWarpSignsListener().listWarps();
                             if (warpList.isEmpty()) {
-                                Util.sendMessage(player, ChatColor.YELLOW + plugin.myLocale(player.getUniqueId()).warpserrorNoWarpsYet);
+                                Util.sendMessage(player,
+                                        ChatColor.YELLOW + plugin.myLocale(player.getUniqueId()).warpserrorNoWarpsYet);
                                 if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.addwarp")) {
                                     Util.sendMessage(player, ChatColor.YELLOW + plugin.myLocale().warpswarpTip);
                                 } else {
@@ -2460,21 +2556,27 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                         if (plugin.getPlayers().getName(warp).toLowerCase().equals(split[1].toLowerCase())) {
                                             foundWarp = warp;
                                             break;
-                                        } else if (plugin.getPlayers().getName(warp).toLowerCase().startsWith(split[1].toLowerCase())) {
+                                        } else if (plugin.getPlayers()
+                                                .getName(warp)
+                                                .toLowerCase()
+                                                .startsWith(split[1].toLowerCase())) {
                                             foundWarp = warp;
                                         }
                                     }
                                 }
                                 if (foundWarp == null) {
-                                    Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).warpserrorDoesNotExist);
+                                    Util.sendMessage(player,
+                                            ChatColor.RED + plugin.myLocale(player.getUniqueId()).warpserrorDoesNotExist);
                                     return true;
                                 } else {
                                     // Warp exists!
                                     final Location warpSpot = plugin.getWarpSignsListener().getWarp(foundWarp);
                                     // Check if the warp spot is safe
                                     if (warpSpot == null) {
-                                        Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).warpserrorNotReadyYet);
-                                        plugin.getLogger().warning("Null warp found, owned by " + plugin.getPlayers().getName(foundWarp));
+                                        Util.sendMessage(player,
+                                                ChatColor.RED + plugin.myLocale(player.getUniqueId()).warpserrorNotReadyYet);
+                                        plugin.getLogger()
+                                                .warning("Null warp found, owned by " + plugin.getPlayers().getName(foundWarp));
                                         return true;
                                     }
                                     // Find out if island is locked
@@ -2492,7 +2594,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                             .checkPerm(player, Settings.PERMPREFIX + "mod.bypasslock")
                                             && !VaultHelper.checkPerm(player, Settings.PERMPREFIX + "mod.bypassprotect")) {
                                         // Always inform that the island is locked
-                                        Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).lockIslandLocked);
+                                        Util.sendMessage(player,
+                                                ChatColor.RED + plugin.myLocale(player.getUniqueId()).lockIslandLocked);
                                         // Check if this is the owner, team member or coop
                                         if (!plugin.getGrid().locationIsAtHome(player, true, warpSpot)) {
                                             //plugin.getLogger().info("DEBUG: not at home");
@@ -2523,12 +2626,14 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                         }
                                     } else {
                                         // Warp has been removed
-                                        Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).warpserrorDoesNotExist);
+                                        Util.sendMessage(player,
+                                                ChatColor.RED + plugin.myLocale(player.getUniqueId()).warpserrorDoesNotExist);
                                         plugin.getWarpSignsListener().removeWarp(warpSpot);
                                         return true;
                                     }
                                     if (!(GridManager.isSafeLocation(warpSpot))) {
-                                        Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).warpserrorNotSafe);
+                                        Util.sendMessage(player,
+                                                ChatColor.RED + plugin.myLocale(player.getUniqueId()).warpserrorNotSafe);
                                         // WALL_SIGN's will always be unsafe if the place in front is obscured.
                                         if (b.getType().equals(Material.SIGN_POST)) {
                                             plugin.getLogger().warning(
@@ -2543,8 +2648,10 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                                         warpSpot.getBlockZ() + 0.5D);
                                         player.teleport(actualWarp);
                                         if (pvp) {
-                                            Util.sendMessage(player, ChatColor.BOLD + "" + ChatColor.RED + plugin.myLocale(player.getUniqueId()).igs
-                                                    .get(SettingsFlag.PVP) + " " + plugin.myLocale(player.getUniqueId()).igsAllowed);
+                                            Util.sendMessage(player,
+                                                    ChatColor.BOLD + "" + ChatColor.RED + plugin.myLocale(player.getUniqueId()).igs
+                                                            .get(SettingsFlag.PVP) + " " + plugin.myLocale(
+                                                            player.getUniqueId()).igsAllowed);
                                             if (plugin.getServer().getVersion().contains("(MC: 1.8") || plugin.getServer().getVersion()
                                                     .contains("(MC: 1.7")) {
                                                 player.getWorld().playSound(player.getLocation(), Sound.valueOf("ARROW_HIT"), 1F, 1F);
@@ -2554,7 +2661,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                         } else {
                                             if (plugin.getServer().getVersion().contains("(MC: 1.8") || plugin.getServer().getVersion()
                                                     .contains("(MC: 1.7")) {
-                                                player.getWorld().playSound(player.getLocation(), Sound.valueOf("BAT_TAKEOFF"), 1F, 1F);
+                                                player.getWorld()
+                                                        .playSound(player.getLocation(), Sound.valueOf("BAT_TAKEOFF"), 1F, 1F);
                                             } else {
                                                 player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BAT_TAKEOFF, 1F, 1F);
                                             }
@@ -2601,18 +2709,22 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                             final UUID invitedPlayerUUID = invitedPlayer.getUniqueId();
                             // Player issuing the command must have an island
                             if (!plugin.getPlayers().hasIsland(player.getUniqueId())) {
-                                Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).inviteerrorYouMustHaveIslandToInvite);
+                                Util.sendMessage(player,
+                                        ChatColor.RED + plugin.myLocale(player.getUniqueId()).inviteerrorYouMustHaveIslandToInvite);
                                 return true;
                             }
                             // Player cannot invite themselves
                             if (player.getUniqueId().equals(invitedPlayer.getUniqueId())) {
-                                Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).inviteerrorYouCannotInviteYourself);
+                                Util.sendMessage(player,
+                                        ChatColor.RED + plugin.myLocale(player.getUniqueId()).inviteerrorYouCannotInviteYourself);
                                 return true;
                             }
                             // Check if this player can be invited to this island, or
                             // whether they are still on cooldown
                             long time =
-                                    plugin.getPlayers().getInviteCoolDownTime(invitedPlayerUUID, plugin.getPlayers().getIslandLocation(playerUUID));
+                                    plugin.getPlayers()
+                                            .getInviteCoolDownTime(invitedPlayerUUID,
+                                                    plugin.getPlayers().getIslandLocation(playerUUID));
                             if (time > 0 && !player.isOp()) {
                                 Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).inviteerrorCoolDown
                                         .replace("[time]", String.valueOf(time)));
@@ -2639,7 +2751,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                                     if (spl.length > 1) {
                                                         if (!NumberUtils.isDigits(spl[1])) {
                                                             plugin.getLogger()
-                                                                    .severe("Player " + player.getName() + " has permission: " + perms.getPermission()
+                                                                    .severe("Player " + player.getName() + " has permission: "
+                                                                            + perms.getPermission()
                                                                             + " <-- the last part MUST be a number! Ignoring...");
 
                                                         } else {
@@ -2669,17 +2782,21 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                             // then this invite will overwrite the
                                             // previous invite!
                                             inviteList.put(invitedPlayerUUID, player.getUniqueId());
-                                            Util.sendMessage(player, ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).inviteinviteSentTo
-                                                    .replace("[name]", invitedPlayer.getName()));
+                                            Util.sendMessage(player,
+                                                    ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).inviteinviteSentTo
+                                                            .replace("[name]", invitedPlayer.getName()));
                                             // Send message to online player
                                             Util.sendMessage(Bukkit.getPlayer(invitedPlayerUUID),
-                                                    plugin.myLocale(invitedPlayerUUID).invitenameHasInvitedYou.replace("[name]", player.getName()));
+                                                    plugin.myLocale(invitedPlayerUUID).invitenameHasInvitedYou.replace("[name]",
+                                                            player.getName()));
                                             Util.sendMessage(Bukkit.getPlayer(invitedPlayerUUID),
-                                                    ChatColor.WHITE + "/" + label + " [accept/reject]" + ChatColor.YELLOW + " " + plugin
+                                                    ChatColor.WHITE + "/" + label + " [accept/reject]" + ChatColor.YELLOW + " "
+                                                            + plugin
                                                             .myLocale(invitedPlayerUUID).invitetoAcceptOrReject);
                                             if (plugin.getPlayers().hasIsland(invitedPlayerUUID)) {
                                                 Util.sendMessage(Bukkit.getPlayer(invitedPlayerUUID),
-                                                        ChatColor.RED + plugin.myLocale(invitedPlayerUUID).invitewarningYouWillLoseIsland);
+                                                        ChatColor.RED + plugin.myLocale(
+                                                                invitedPlayerUUID).invitewarningYouWillLoseIsland);
                                             }
                                             // Start timeout on invite
                                             if (Settings.inviteTimeout > 0) {
@@ -2687,12 +2804,14 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
 
                                                     @Override
                                                     public void run() {
-                                                        if (inviteList.containsKey(invitedPlayerUUID) && inviteList.get(invitedPlayerUUID)
+                                                        if (inviteList.containsKey(invitedPlayerUUID) && inviteList.get(
+                                                                invitedPlayerUUID)
                                                                 .equals(playerUUID)) {
                                                             inviteList.remove(invitedPlayerUUID);
                                                             if (plugin.getServer().getPlayer(playerUUID) != null) {
-                                                                Util.sendMessage(plugin.getServer().getPlayer(playerUUID), ChatColor.YELLOW + plugin
-                                                                        .myLocale(player.getUniqueId()).inviteremovingInvite);
+                                                                Util.sendMessage(plugin.getServer().getPlayer(playerUUID),
+                                                                        ChatColor.YELLOW + plugin
+                                                                                .myLocale(player.getUniqueId()).inviteremovingInvite);
                                                             }
                                                             if (plugin.getServer().getPlayer(invitedPlayerUUID) != null) {
                                                                 Util.sendMessage(plugin.getServer().getPlayer(invitedPlayerUUID),
@@ -2710,11 +2829,13 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                         }
                                     } else {
                                         Util.sendMessage(player,
-                                                ChatColor.RED + plugin.myLocale(player.getUniqueId()).inviteerrorThatPlayerIsAlreadyInATeam);
+                                                ChatColor.RED + plugin.myLocale(
+                                                        player.getUniqueId()).inviteerrorThatPlayerIsAlreadyInATeam);
                                     }
                                 } else {
                                     Util.sendMessage(player,
-                                            ChatColor.RED + plugin.myLocale(player.getUniqueId()).inviteerrorYouMustHaveIslandToInvite);
+                                            ChatColor.RED + plugin.myLocale(
+                                                    player.getUniqueId()).inviteerrorYouMustHaveIslandToInvite);
                                 }
                             } else {
                                 // First-time invite player does not have a team
@@ -2724,14 +2845,16 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                     // it
                                     if (inviteList.containsValue(playerUUID)) {
                                         inviteList.remove(getKeyByValue(inviteList, player.getUniqueId()));
-                                        Util.sendMessage(player, ChatColor.YELLOW + plugin.myLocale(player.getUniqueId()).inviteremovingInvite);
+                                        Util.sendMessage(player,
+                                                ChatColor.YELLOW + plugin.myLocale(player.getUniqueId()).inviteremovingInvite);
                                     }
                                     // Place the player and invitee on the invite list
                                     inviteList.put(invitedPlayerUUID, player.getUniqueId());
                                     Util.sendMessage(player, ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).inviteinviteSentTo
                                             .replace("[name]", invitedPlayer.getName()));
                                     Util.sendMessage(Bukkit.getPlayer(invitedPlayerUUID),
-                                            plugin.myLocale(invitedPlayerUUID).invitenameHasInvitedYou.replace("[name]", player.getName()));
+                                            plugin.myLocale(invitedPlayerUUID).invitenameHasInvitedYou.replace("[name]",
+                                                    player.getName()));
                                     Util.sendMessage(Bukkit.getPlayer(invitedPlayerUUID),
                                             ChatColor.WHITE + "/" + label + " [accept/reject]" + ChatColor.YELLOW + " " + plugin
                                                     .myLocale(invitedPlayerUUID).invitetoAcceptOrReject);
@@ -2756,11 +2879,13 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                                     inviteList.remove(invitedPlayerUUID);
                                                     if (plugin.getServer().getPlayer(playerUUID) != null) {
                                                         Util.sendMessage(plugin.getServer().getPlayer(playerUUID),
-                                                                ChatColor.YELLOW + plugin.myLocale(player.getUniqueId()).inviteremovingInvite);
+                                                                ChatColor.YELLOW + plugin.myLocale(
+                                                                        player.getUniqueId()).inviteremovingInvite);
                                                     }
                                                     if (plugin.getServer().getPlayer(invitedPlayerUUID) != null) {
                                                         Util.sendMessage(plugin.getServer().getPlayer(invitedPlayerUUID),
-                                                                ChatColor.YELLOW + plugin.myLocale(player.getUniqueId()).inviteremovingInvite);
+                                                                ChatColor.YELLOW + plugin.myLocale(
+                                                                        player.getUniqueId()).inviteremovingInvite);
                                                     }
                                                 }
 
@@ -2769,7 +2894,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                     }
                                 } else {
                                     Util.sendMessage(player,
-                                            ChatColor.RED + plugin.myLocale(player.getUniqueId()).inviteerrorThatPlayerIsAlreadyInATeam);
+                                            ChatColor.RED + plugin.myLocale(
+                                                    player.getUniqueId()).inviteerrorThatPlayerIsAlreadyInATeam);
                                 }
                             }
                             return true;
@@ -2791,12 +2917,14 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                         }
                         UUID targetPlayerUUID = target.getUniqueId();                                // Player issuing the command must have an island
                         if (!plugin.getPlayers().hasIsland(playerUUID) && !plugin.getPlayers().inTeam(playerUUID)) {
-                            Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).inviteerrorYouMustHaveIslandToInvite);
+                            Util.sendMessage(player,
+                                    ChatColor.RED + plugin.myLocale(player.getUniqueId()).inviteerrorYouMustHaveIslandToInvite);
                             return true;
                         }
                         // Player cannot invite themselves
                         if (playerUUID.equals(targetPlayerUUID)) {
-                            Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).inviteerrorYouCannotInviteYourself);
+                            Util.sendMessage(player,
+                                    ChatColor.RED + plugin.myLocale(player.getUniqueId()).inviteerrorYouCannotInviteYourself);
                             return true;
                         }
                         // If target player is already on the team ignore
@@ -2815,9 +2943,11 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                         if (CoopPlay.getInstance().addCoopPlayer(player, target)) {
                             // Tell everyone what happened
                             Util.sendMessage(player,
-                                    ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).coopSuccess.replace("[name]", target.getName()));
+                                    ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).coopSuccess.replace("[name]",
+                                            target.getName()));
                             Util.sendMessage(target,
-                                    ChatColor.GREEN + plugin.myLocale(targetPlayerUUID).coopMadeYouCoop.replace("[name]", player.getName()));
+                                    ChatColor.GREEN + plugin.myLocale(targetPlayerUUID).coopMadeYouCoop.replace("[name]",
+                                            player.getName()));
                             // TODO: Give perms if the player is on the coop island
                         } // else fail silently
                         return true;
@@ -2843,7 +2973,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                             if (target.isOp() || VaultHelper.checkPerm(target, Settings.PERMPREFIX + "mod.bypassprotect")
                                     || VaultHelper.checkPerm(target, Settings.PERMPREFIX + "mod.bypassexpel")) {
                                 Util.sendMessage(player,
-                                        ChatColor.RED + plugin.myLocale(player.getUniqueId()).expelFail.replace("[name]", target.getName()));
+                                        ChatColor.RED + plugin.myLocale(player.getUniqueId()).expelFail.replace("[name]",
+                                                target.getName()));
                                 return true;
                             }
                         }
@@ -2852,10 +2983,12 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                         if (coop) {
                             if (target != null) {
                                 Util.sendMessage(target,
-                                        ChatColor.RED + plugin.myLocale(target.getUniqueId()).coopRemoved.replace("[name]", player.getName()));
+                                        ChatColor.RED + plugin.myLocale(target.getUniqueId()).coopRemoved.replace("[name]",
+                                                player.getName()));
                             } else {
                                 plugin.getMessages().setMessage(targetPlayerUUID,
-                                        ChatColor.RED + plugin.myLocale(targetPlayerUUID).coopRemoved.replace("[name]", player.getName()));
+                                        ChatColor.RED + plugin.myLocale(targetPlayerUUID).coopRemoved.replace("[name]",
+                                                player.getName()));
                             }
                             Util.sendMessage(player, ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).coopRemoveSuccess
                                     .replace("[name]", plugin.getPlayers().getName(targetPlayerUUID)));
@@ -2884,7 +3017,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                             plugin.getLogger().info(player.getName() + " expelled " + target.getName() + " from their island.");
                             // Yes they are
                             Util.sendMessage(player,
-                                    ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).expelSuccess.replace("[name]", target.getName()));
+                                    ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).expelSuccess.replace("[name]",
+                                            target.getName()));
                         } else if (!coop) {
                             // No they're not
                             Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).expelNotOnIsland);
@@ -2912,10 +3046,12 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                         if (coop) {
                             if (target != null && target.isOnline()) {
                                 Util.sendMessage(target.getPlayer(),
-                                        ChatColor.RED + plugin.myLocale(target.getUniqueId()).coopRemoved.replace("[name]", player.getName()));
+                                        ChatColor.RED + plugin.myLocale(target.getUniqueId()).coopRemoved.replace("[name]",
+                                                player.getName()));
                             } else {
                                 plugin.getMessages().setMessage(targetPlayerUUID,
-                                        ChatColor.RED + plugin.myLocale(targetPlayerUUID).coopRemoved.replace("[name]", player.getName()));
+                                        ChatColor.RED + plugin.myLocale(targetPlayerUUID).coopRemoved.replace("[name]",
+                                                player.getName()));
                             }
                             Util.sendMessage(player, ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).coopRemoveSuccess
                                     .replace("[name]", plugin.getPlayers().getName(targetPlayerUUID)));
@@ -2943,7 +3079,9 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                         }
                         // Target cannot be on the same team
                         if (plugin.getPlayers().inTeam(playerUUID) && plugin.getPlayers().inTeam(targetPlayerUUID)) {
-                            if (plugin.getPlayers().getTeamLeader(playerUUID).equals(plugin.getPlayers().getTeamLeader(targetPlayerUUID))) {
+                            if (plugin.getPlayers()
+                                    .getTeamLeader(playerUUID)
+                                    .equals(plugin.getPlayers().getTeamLeader(targetPlayerUUID))) {
                                 // Same team!
                                 Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).banNotTeamMember);
                                 return true;
@@ -2951,7 +3089,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                         }
                         // Check that the player is not banned already
                         if (plugin.getPlayers().isBanned(playerUUID, targetPlayerUUID)) {
-                            Util.sendMessage(player, ChatColor.RED + plugin.myLocale(playerUUID).banAlreadyBanned.replace("[name]", split[1]));
+                            Util.sendMessage(player,
+                                    ChatColor.RED + plugin.myLocale(playerUUID).banAlreadyBanned.replace("[name]", split[1]));
                             return true;
                         }
                         // Check online/offline status
@@ -2960,20 +3099,23 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                         OfflinePlayer offlineTarget = plugin.getServer().getOfflinePlayer(targetPlayerUUID);
                         // Target cannot be op
                         if (offlineTarget.isOp()) {
-                            Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).banFail.replace("[name]", split[1]));
+                            Util.sendMessage(player,
+                                    ChatColor.RED + plugin.myLocale(player.getUniqueId()).banFail.replace("[name]", split[1]));
                             return true;
                         }
                         if (target != null) {
                             // Do not ban players with the mod.noban permission
                             if (VaultHelper.checkPerm(target, Settings.PERMPREFIX + "admin.noban")) {
-                                Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).banFail.replace("[name]", split[1]));
+                                Util.sendMessage(player,
+                                        ChatColor.RED + plugin.myLocale(player.getUniqueId()).banFail.replace("[name]", split[1]));
                                 return true;
                             }
                             // Remove them from the coop list
                             boolean coop = CoopPlay.getInstance().removeCoopPlayer(player, target);
                             if (coop) {
                                 Util.sendMessage(target,
-                                        ChatColor.RED + plugin.myLocale(target.getUniqueId()).coopRemoved.replace("[name]", player.getName()));
+                                        ChatColor.RED + plugin.myLocale(target.getUniqueId()).coopRemoved.replace("[name]",
+                                                player.getName()));
                                 Util.sendMessage(player, ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).coopRemoveSuccess
                                         .replace("[name]", target.getName()));
                             }
@@ -2992,7 +3134,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                             }
                             // Notifications
                             // Target
-                            Util.sendMessage(target, ChatColor.RED + plugin.myLocale(targetPlayerUUID).banBanned.replace("[name]", player.getName()));
+                            Util.sendMessage(target,
+                                    ChatColor.RED + plugin.myLocale(targetPlayerUUID).banBanned.replace("[name]", player.getName()));
                         } else {
                             // Offline notification
                             plugin.getMessages().setMessage(targetPlayerUUID,
@@ -3001,10 +3144,13 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                         // Console
                         plugin.getLogger().info(player.getName() + " banned " + split[1] + " from their island.");
                         // Player
-                        Util.sendMessage(player, ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).banSuccess.replace("[name]", split[1]));
+                        Util.sendMessage(player,
+                                ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).banSuccess.replace("[name]", split[1]));
                         // Tell team
                         plugin.getMessages()
-                                .tellTeam(playerUUID, ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).banSuccess.replace("[name]", split[1]));
+                                .tellTeam(playerUUID,
+                                        ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).banSuccess.replace("[name]",
+                                                split[1]));
                         plugin.getMessages().tellOfflineTeam(playerUUID,
                                 ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).banSuccess.replace("[name]", split[1]));
                         // Ban the sucker
@@ -3030,7 +3176,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                         }
                         // Check that the player is actually banned
                         if (!plugin.getPlayers().isBanned(playerUUID, targetPlayerUUID)) {
-                            Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).banNotBanned.replace("[name]", split[1]));
+                            Util.sendMessage(player,
+                                    ChatColor.RED + plugin.myLocale(player.getUniqueId()).banNotBanned.replace("[name]", split[1]));
                             return true;
                         }
                         // Notifications
@@ -3040,7 +3187,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                         if (target != null) {
                             // Online
                             Util.sendMessage(target,
-                                    ChatColor.RED + plugin.myLocale(target.getUniqueId()).banLifted.replace("[name]", player.getName()));
+                                    ChatColor.RED + plugin.myLocale(target.getUniqueId()).banLifted.replace("[name]",
+                                            player.getName()));
                         } else {
                             plugin.getMessages().setMessage(targetPlayerUUID,
                                     ChatColor.GREEN + plugin.myLocale(targetPlayerUUID).banLifted.replace("[name]", player.getName()));
@@ -3089,7 +3237,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                 // If the player leader tries to kick or remove
                                 // themselves
                                 if (player.getUniqueId().equals(targetPlayer)) {
-                                    Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).leaveerrorLeadersCannotLeave);
+                                    Util.sendMessage(player,
+                                            ChatColor.RED + plugin.myLocale(player.getUniqueId()).leaveerrorLeadersCannotLeave);
                                     return true;
                                 }
                                 // Try to kick player
@@ -3100,7 +3249,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                 }
                                 // Log the location that this player left so they
                                 // cannot join again before the cool down ends
-                                plugin.getPlayers().startInviteCoolDownTimer(targetPlayer, plugin.getPlayers().getIslandLocation(playerUUID));
+                                plugin.getPlayers()
+                                        .startInviteCoolDownTimer(targetPlayer, plugin.getPlayers().getIslandLocation(playerUUID));
                                 if (Settings.resetChallenges) {
                                     // Reset the player's challenge status
                                     plugin.getPlayers().resetAllChallenges(targetPlayer, false);
@@ -3114,7 +3264,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                 if (target != null) {
                                     // plugin.getLogger().info("DEBUG: player is online");
                                     Util.sendMessage(target,
-                                            ChatColor.RED + plugin.myLocale(targetPlayer).kicknameRemovedYou.replace("[name]", player.getName()));
+                                            ChatColor.RED + plugin.myLocale(targetPlayer).kicknameRemovedYou.replace("[name]",
+                                                    player.getName()));
                                     // Clear any coop inventories
                                     // CoopPlay.getInstance().returnAllInventories(target);
                                     // Remove any of the target's coop invitees and
@@ -3173,7 +3324,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                 plugin.getWarpSignsListener().removeWarp(targetPlayer);
                                 // Tell leader they removed the player
                                 Util.sendMessage(player,
-                                        ChatColor.RED + plugin.myLocale(player.getUniqueId()).kicknameRemoved.replace("[name]", split[1]));
+                                        ChatColor.RED + plugin.myLocale(player.getUniqueId()).kicknameRemoved.replace("[name]",
+                                                split[1]));
                                 //removePlayerFromTeam(targetPlayer, teamLeader);
                                 teamMembers.remove(targetPlayer);
                                 if (teamMembers.size() < 2) {
@@ -3185,7 +3337,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                 plugin.getPlayers().save(targetPlayer);
                             } else {
                                 plugin.getLogger()
-                                        .warning("Player " + player.getName() + " failed to remove " + plugin.getPlayers().getName(targetPlayer));
+                                        .warning("Player " + player.getName() + " failed to remove " + plugin.getPlayers()
+                                                .getName(targetPlayer));
                                 Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).kickerrorNotPartOfTeam);
                             }
                             return true;
@@ -3201,17 +3354,22 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                 return true;
                             }
                             if (targetPlayer.equals(playerUUID)) {
-                                Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).makeLeadererrorGeneralError);
+                                Util.sendMessage(player,
+                                        ChatColor.RED + plugin.myLocale(player.getUniqueId()).makeLeadererrorGeneralError);
                                 return true;
                             }
                             if (!plugin.getPlayers().inTeam(player.getUniqueId())) {
-                                Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).makeLeadererrorYouMustBeInTeam);
+                                Util.sendMessage(player,
+                                        ChatColor.RED + plugin.myLocale(player.getUniqueId()).makeLeadererrorYouMustBeInTeam);
                                 return true;
                             }
 
                             if (plugin.getPlayers().getMembers(player.getUniqueId()).size() > 2) {
-                                Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).makeLeadererrorRemoveAllPlayersFirst);
-                                plugin.getLogger().info(player.getName() + " tried to transfer his island, but failed because >2 people in a team");
+                                Util.sendMessage(player,
+                                        ChatColor.RED + plugin.myLocale(player.getUniqueId()).makeLeadererrorRemoveAllPlayersFirst);
+                                plugin.getLogger()
+                                        .info(player.getName()
+                                                + " tried to transfer his island, but failed because >2 people in a team");
                                 return true;
                             }
 
@@ -3248,7 +3406,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                         Player target = plugin.getServer().getPlayer(targetPlayer);
                                         if (target == null) {
                                             plugin.getMessages()
-                                                    .setMessage(targetPlayer, plugin.myLocale(player.getUniqueId()).makeLeaderyouAreNowTheOwner);
+                                                    .setMessage(targetPlayer,
+                                                            plugin.myLocale(player.getUniqueId()).makeLeaderyouAreNowTheOwner);
 
                                         } else {
                                             // Online
@@ -3261,7 +3420,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                             Island islandByOwner = plugin.getGrid().getIsland(targetPlayer);
                                             if (islandByOwner.getProtectionSize() == 0) {
                                                 plugin.getLogger().warning(
-                                                        "Player " + player.getName() + "'s island had a protection range of 0. Setting to default "
+                                                        "Player " + player.getName()
+                                                                + "'s island had a protection range of 0. Setting to default "
                                                                 + range);
                                                 islandByOwner.setProtectionSize(range);
                                             }
@@ -3271,11 +3431,15 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                                         // Ignore
                                                         break;
                                                     } else {
-                                                        String[] spl = perms.getPermission().split(Settings.PERMPREFIX + "island.range.");
+                                                        String[] spl = perms.getPermission()
+                                                                .split(Settings.PERMPREFIX + "island.range.");
                                                         if (spl.length > 1) {
                                                             if (!NumberUtils.isDigits(spl[1])) {
-                                                                plugin.getLogger().severe("Player " + player.getName() + " has permission: " + perms
-                                                                        .getPermission() + " <-- the last part MUST be a number! Ignoring...");
+                                                                plugin.getLogger()
+                                                                        .severe("Player " + player.getName() + " has permission: "
+                                                                                + perms
+                                                                                .getPermission()
+                                                                                + " <-- the last part MUST be a number! Ignoring...");
 
                                                             } else {
                                                                 hasARangePerm = true;
@@ -3295,12 +3459,15 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
 
                                                 // Range can go up or down
                                                 if (range != islandByOwner.getProtectionSize()) {
-                                                    Util.sendMessage(player, ChatColor.GOLD + plugin.myLocale(targetPlayer).adminSetRangeUpdated
-                                                            .replace("[number]", String.valueOf(range)));
-                                                    Util.sendMessage(target, ChatColor.GOLD + plugin.myLocale(targetPlayer).adminSetRangeUpdated
-                                                            .replace("[number]", String.valueOf(range)));
+                                                    Util.sendMessage(player,
+                                                            ChatColor.GOLD + plugin.myLocale(targetPlayer).adminSetRangeUpdated
+                                                                    .replace("[number]", String.valueOf(range)));
+                                                    Util.sendMessage(target,
+                                                            ChatColor.GOLD + plugin.myLocale(targetPlayer).adminSetRangeUpdated
+                                                                    .replace("[number]", String.valueOf(range)));
                                                     plugin.getLogger().info(
-                                                            "Makeleader: Island protection range changed from " + islandByOwner.getProtectionSize()
+                                                            "Makeleader: Island protection range changed from "
+                                                                    + islandByOwner.getProtectionSize()
                                                                     + " to "
                                                                     + range + " for " + player.getName() + " due to permission.");
                                                 }
@@ -3311,12 +3478,15 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                         return true;
                                     }
                                     Util.sendMessage(player,
-                                            ChatColor.RED + plugin.myLocale(player.getUniqueId()).makeLeadererrorThatPlayerIsNotInTeam);
+                                            ChatColor.RED + plugin.myLocale(
+                                                    player.getUniqueId()).makeLeadererrorThatPlayerIsNotInTeam);
                                 } else {
-                                    Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).makeLeadererrorNotYourIsland);
+                                    Util.sendMessage(player,
+                                            ChatColor.RED + plugin.myLocale(player.getUniqueId()).makeLeadererrorNotYourIsland);
                                 }
                             } else {
-                                Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).makeLeadererrorGeneralError);
+                                Util.sendMessage(player,
+                                        ChatColor.RED + plugin.myLocale(player.getUniqueId()).makeLeadererrorGeneralError);
                             }
                             return true;
                         } else {
@@ -3366,7 +3536,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
         player.teleport(actualWarp);
         if (pvp) {
             Util.sendMessage(player,
-                    ChatColor.BOLD + "" + ChatColor.RED + plugin.myLocale(player.getUniqueId()).igs.get(SettingsFlag.PVP) + " " + plugin
+                    ChatColor.BOLD + "" + ChatColor.RED + plugin.myLocale(player.getUniqueId()).igs.get(SettingsFlag.PVP) + " "
+                            + plugin
                             .myLocale(player.getUniqueId()).igsAllowed);
             if (plugin.getServer().getVersion().contains("(MC: 1.8") || plugin.getServer().getVersion().contains("(MC: 1.7")) {
                 player.getWorld().playSound(player.getLocation(), Sound.valueOf("ARROW_HIT"), 1F, 1F);
@@ -3410,7 +3581,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                     player.openInventory(inv);
                 } else {
                     plugin.getLogger()
-                            .severe("There are no valid schematics available for " + player.getName() + "! Check config.yml schematicsection.");
+                            .severe("There are no valid schematics available for " + player.getName()
+                                    + "! Check config.yml schematicsection.");
                 }
             } else {
                 // No panel
@@ -3579,7 +3751,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                 if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.go")) {
                     options.add("go");
                 }
-                if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.name") && plugin.getPlayers().hasIsland(player.getUniqueId())) {
+                if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.name") && plugin.getPlayers()
+                        .hasIsland(player.getUniqueId())) {
                     options.add("name");
                 }
                 options.add("about"); //No permission needed. :-) Indeed.
@@ -3680,8 +3853,9 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                     String[] spl = perms.getPermission().split(Settings.PERMPREFIX + "island.maxhomes.");
                                     if (spl.length > 1) {
                                         if (!NumberUtils.isDigits(spl[1])) {
-                                            plugin.getLogger().severe("Player " + player.getName() + " has permission: " + perms.getPermission()
-                                                    + " <-- the last part MUST be a number! Ignoring...");
+                                            plugin.getLogger()
+                                                    .severe("Player " + player.getName() + " has permission: " + perms.getPermission()
+                                                            + " <-- the last part MUST be a number! Ignoring...");
                                         } else {
                                             maxHomes = Math.max(maxHomes, Integer.valueOf(spl[1]));
                                         }

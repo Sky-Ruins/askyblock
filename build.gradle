@@ -18,6 +18,7 @@ repositories {
 }
 
 dependencies {
+    compile 'com.flowpowered:flow-nbt:+'
     compileOnly 'org.spigotmc:spigot:+'
     compileOnly 'com.neolumia:vault-api:+'
 }

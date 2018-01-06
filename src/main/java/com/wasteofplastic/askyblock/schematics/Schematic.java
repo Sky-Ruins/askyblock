@@ -33,7 +33,9 @@ import com.wasteofplastic.org.jnbt.NBTInputStream;
 import com.wasteofplastic.org.jnbt.ShortTag;
 import com.wasteofplastic.org.jnbt.StringTag;
 import com.wasteofplastic.org.jnbt.Tag;
+
 import net.milkbowl.vault.economy.EconomyResponse;
+
 import org.bukkit.Art;
 import org.bukkit.Bukkit;
 import org.bukkit.DyeColor;
@@ -639,6 +641,26 @@ public class Schematic {
     }
 
     /**
+     * Get child tag of a NBT structure.
+     *
+     * @param items The parent tag map
+     * @param key The name of the tag to get
+     * @param expected The expected type of the tag
+     * @return child tag casted to the expected type
+     */
+    private static <T extends Tag> T getChildTag(Map<String, Tag> items, String key, Class<T> expected) throws
+            IllegalArgumentException {
+        if (!items.containsKey(key)) {
+            throw new IllegalArgumentException("Schematic file is missing a \"" + key + "\" tag");
+        }
+        Tag tag = items.get(key);
+        if (!expected.isInstance(tag)) {
+            throw new IllegalArgumentException(key + " tag is not of tag type " + expected.getName());
+        }
+        return expected.cast(tag);
+    }
+
+    /**
      * This method prepares to pastes a schematic.
      *
      * @param blocks
@@ -751,25 +773,6 @@ public class Schematic {
      */
     public Map<BlockVector, Map<String, Tag>> getTileEntitiesMap() {
         return tileEntitiesMap;
-    }
-
-    /**
-     * Get child tag of a NBT structure.
-     *
-     * @param items The parent tag map
-     * @param key The name of the tag to get
-     * @param expected The expected type of the tag
-     * @return child tag casted to the expected type
-     */
-    private static <T extends Tag> T getChildTag(Map<String, Tag> items, String key, Class<T> expected) throws IllegalArgumentException {
-        if (!items.containsKey(key)) {
-            throw new IllegalArgumentException("Schematic file is missing a \"" + key + "\" tag");
-        }
-        Tag tag = items.get(key);
-        if (!expected.isInstance(tag)) {
-            throw new IllegalArgumentException(key + " tag is not of tag type " + expected.getName());
-        }
-        return expected.cast(tag);
     }
 
     /**
@@ -1243,7 +1246,8 @@ public class Schematic {
             //plugin.getLogger().info("DEBUG: view dist = " + plugin.getServer().getViewDistance());
             if (player.getWorld().equals(world)) {
                 //plugin.getLogger().info("DEBUG: same world");
-                int distSq = (int) ((player.getLocation().distanceSquared(loc) - (Settings.islandDistance * Settings.islandDistance) / 16));
+                int distSq = (int) ((player.getLocation().distanceSquared(loc)
+                        - (Settings.islandDistance * Settings.islandDistance) / 16));
                 //plugin.getLogger().info("DEBUG:  distsq = " + distSq);
                 if (plugin.getServer().getViewDistance() * plugin.getServer().getViewDistance() < distSq) {
                     //plugin.getLogger().info("DEBUG: teleporting");
@@ -1270,18 +1274,21 @@ public class Schematic {
                             // "\"}");
                             plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(),
                                     "minecraft:title " + player.getName() + " subtitle {\"text\":\"" + plugin
-                                            .myLocale(player.getUniqueId()).islandSubTitle.replace("[player]", player.getName()) + "\", \"color\":\""
+                                            .myLocale(player.getUniqueId()).islandSubTitle.replace("[player]", player.getName())
+                                            + "\", \"color\":\""
                                             + plugin.myLocale(player.getUniqueId()).islandSubTitleColor + "\"}");
                         }
                         if (!plugin.myLocale(player.getUniqueId()).islandTitle.isEmpty()) {
                             //plugin.getLogger().info("DEBUG: title " + player.getName() + " title {\"text\":\"" + plugin.myLocale(player
                             // .getUniqueId()).islandTitle + "\", \"color\":\"" + plugin.myLocale(player.getUniqueId()).islandTitleColor + "\"}");
                             plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(),
-                                    "minecraft:title " + player.getName() + " title {\"text\":\"" + plugin.myLocale(player.getUniqueId()).islandTitle
+                                    "minecraft:title " + player.getName() + " title {\"text\":\"" + plugin.myLocale(
+                                            player.getUniqueId()).islandTitle
                                             .replace("[player]", player.getName()) + "\", \"color\":\"" + plugin
                                             .myLocale(player.getUniqueId()).islandTitleColor + "\"}");
                         }
-                        if (!plugin.myLocale(player.getUniqueId()).islandDonate.isEmpty() && !plugin.myLocale(player.getUniqueId()).islandURL
+                        if (!plugin.myLocale(player.getUniqueId()).islandDonate.isEmpty() && !plugin.myLocale(
+                                player.getUniqueId()).islandURL
                                 .isEmpty()) {
                             //plugin.getLogger().info("DEBUG: tellraw " + player.getName() + " {\"text\":\"" + plugin.myLocale(player.getUniqueId()
                             // ).islandDonate + "\",\"color\":\"" + plugin.myLocale(player.getUniqueId()).islandDonateColor + "\",
@@ -1289,7 +1296,8 @@ public class Schematic {
                             //                + plugin.myLocale(player.getUniqueId()).islandURL + "\"}}");
                             plugin.getServer().dispatchCommand(
                                     plugin.getServer().getConsoleSender(),
-                                    "minecraft:tellraw " + player.getName() + " {\"text\":\"" + plugin.myLocale(player.getUniqueId()).islandDonate
+                                    "minecraft:tellraw " + player.getName() + " {\"text\":\"" + plugin.myLocale(
+                                            player.getUniqueId()).islandDonate
                                             .replace("[player]", player.getName()) + "\",\"color\":\"" + plugin
                                             .myLocale(player.getUniqueId()).islandDonateColor
                                             + "\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\""
@@ -1485,7 +1493,8 @@ public class Schematic {
                 //plugin.getLogger().info("DEBUG: title " + player.getName() + " subtitle {\"text\":\"" + plugin.myLocale(player.getUniqueId())
                 // .islandSubTitle + "\", \"color\":\"" + plugin.myLocale(player.getUniqueId()).islandSubTitleColor + "\"}");
                 plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(),
-                        "minecraft:title " + player.getName() + " subtitle {\"text\":\"" + plugin.myLocale(player.getUniqueId()).islandSubTitle
+                        "minecraft:title " + player.getName() + " subtitle {\"text\":\"" + plugin.myLocale(
+                                player.getUniqueId()).islandSubTitle
                                 .replace("[player]", player.getName()) + "\", \"color\":\"" + plugin
                                 .myLocale(player.getUniqueId()).islandSubTitleColor + "\"}");
             }
@@ -1493,11 +1502,14 @@ public class Schematic {
                 //plugin.getLogger().info("DEBUG: title " + player.getName() + " title {\"text\":\"" + plugin.myLocale(player.getUniqueId())
                 // .islandTitle + "\", \"color\":\"" + plugin.myLocale(player.getUniqueId()).islandTitleColor + "\"}");
                 plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(),
-                        "minecraft:title " + player.getName() + " title {\"text\":\"" + plugin.myLocale(player.getUniqueId()).islandTitle
-                                .replace("[player]", player.getName()) + "\", \"color\":\"" + plugin.myLocale(player.getUniqueId()).islandTitleColor
+                        "minecraft:title " + player.getName() + " title {\"text\":\"" + plugin.myLocale(
+                                player.getUniqueId()).islandTitle
+                                .replace("[player]", player.getName()) + "\", \"color\":\"" + plugin.myLocale(
+                                player.getUniqueId()).islandTitleColor
                                 + "\"}");
             }
-            if (!plugin.myLocale(player.getUniqueId()).islandDonate.isEmpty() && !plugin.myLocale(player.getUniqueId()).islandURL.isEmpty()) {
+            if (!plugin.myLocale(player.getUniqueId()).islandDonate.isEmpty() && !plugin.myLocale(
+                    player.getUniqueId()).islandURL.isEmpty()) {
                 //plugin.getLogger().info("DEBUG: tellraw " + player.getName() + " {\"text\":\"" + plugin.myLocale(player.getUniqueId())
                 // .islandDonate + "\",\"color\":\"" + plugin.myLocale(player.getUniqueId()).islandDonateColor + "\",
                 // \"clickEvent\":{\"action\":\"open_url\",\"value\":\""
@@ -1505,7 +1517,8 @@ public class Schematic {
                 plugin.getServer().dispatchCommand(
                         plugin.getServer().getConsoleSender(),
                         "minecraft:tellraw " + player.getName() + " {\"text\":\"" + plugin.myLocale(player.getUniqueId()).islandDonate
-                                .replace("[player]", player.getName()) + "\",\"color\":\"" + plugin.myLocale(player.getUniqueId()).islandDonateColor
+                                .replace("[player]", player.getName()) + "\",\"color\":\"" + plugin.myLocale(
+                                player.getUniqueId()).islandDonateColor
                                 + "\",\"clickEvent\":{\"action\":\"open_url\",\"value\":\""
                                 + plugin.myLocale(player.getUniqueId()).islandURL + "\"}}");
             }
@@ -1595,7 +1608,8 @@ public class Schematic {
                                         + Settings.startingMoney);
                     } else {
                         plugin.getLogger().warning(
-                                "Problem trying to withdraw " + playerBalance + " from " + player.getName() + "'s account when they typed /island!");
+                                "Problem trying to withdraw " + playerBalance + " from " + player.getName()
+                                        + "'s account when they typed /island!");
                         plugin.getLogger().warning("Error from economy was: " + response.errorMessage);
                     }
                 } else {
@@ -1608,7 +1622,8 @@ public class Schematic {
                                         + Settings.startingMoney);
                     } else {
                         plugin.getLogger().warning(
-                                "Problem trying to deposit " + playerBalance + " from " + player.getName() + "'s account when they typed /island!");
+                                "Problem trying to deposit " + playerBalance + " from " + player.getName()
+                                        + "'s account when they typed /island!");
                         plugin.getLogger().warning("Error from economy was: " + response.errorMessage);
                     }
 

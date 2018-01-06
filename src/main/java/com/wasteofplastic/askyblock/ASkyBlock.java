@@ -46,6 +46,7 @@ import com.wasteofplastic.askyblock.panels.SchematicsPanel;
 import com.wasteofplastic.askyblock.panels.SettingsPanel;
 import com.wasteofplastic.askyblock.panels.WarpPanel;
 import com.wasteofplastic.askyblock.util.VaultHelper;
+
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -121,6 +122,99 @@ public class ASkyBlock extends JavaPlugin {
      */
     public static ASkyBlock getPlugin() {
         return plugin;
+    }
+
+    /**
+     * Returns the World object for the island world named in config.yml.
+     * If the world does not exist then it is created.
+     *
+     * @return islandWorld - Bukkit World object for the ASkyBlock world
+     */
+    public static World getIslandWorld() {
+        if (islandWorld == null) {
+            //Bukkit.getLogger().info("DEBUG worldName = " + Settings.worldName);
+            //
+            if (Settings.useOwnGenerator) {
+                islandWorld = Bukkit.getServer().getWorld(Settings.worldName);
+                //Bukkit.getLogger().info("DEBUG world is " + islandWorld);
+            } else {
+                islandWorld = WorldCreator.name(Settings.worldName).type(WorldType.FLAT).environment(World.Environment.NORMAL)
+                        .generator(new ChunkGeneratorWorld())
+                        .createWorld();
+            }
+            // Make the nether if it does not exist
+            if (Settings.createNether) {
+                getNetherWorld();
+            }
+            // Multiverse configuration
+
+            if (!Settings.useOwnGenerator && Bukkit.getServer().getPluginManager().isPluginEnabled("Multiverse-Core")) {
+                Bukkit.getLogger().info("Trying to register generator with Multiverse ");
+                try {
+                    Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(),
+                            "mv import " + Settings.worldName + " normal -g " + plugin.getName());
+                    if (!Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(),
+                            "mv modify set generator " + plugin.getName() + " " + Settings.worldName)) {
+                        Bukkit.getLogger().severe("Multiverse is out of date! - Upgrade to latest version!");
+                    }
+                    if (Settings.createNether) {
+                        if (Settings.newNether) {
+                            Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(),
+                                    "mv import " + Settings.worldName + "_nether nether -g " + plugin.getName());
+                            Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(),
+                                    "mv modify set generator " + plugin.getName() + " " + Settings.worldName + "_nether");
+                        } else {
+                            Bukkit.getServer()
+                                    .dispatchCommand(Bukkit.getServer().getConsoleSender(),
+                                            "mv import " + Settings.worldName + "_nether nether");
+                        }
+                    }
+                } catch (Exception e) {
+                    Bukkit.getLogger().severe("Not successfull! Disabling " + plugin.getName() + "!");
+                    e.printStackTrace();
+                    Bukkit.getServer().getPluginManager().disablePlugin(plugin);
+                }
+            }
+
+        }
+        // Set world settings
+        if (islandWorld != null) {
+            islandWorld.setWaterAnimalSpawnLimit(Settings.waterAnimalSpawnLimit);
+            islandWorld.setMonsterSpawnLimit(Settings.monsterSpawnLimit);
+            islandWorld.setAnimalSpawnLimit(Settings.animalSpawnLimit);
+        }
+
+        return islandWorld;
+    }
+
+    /**
+     * @return the netherWorld
+     */
+    public static World getNetherWorld() {
+        if (netherWorld == null && Settings.createNether) {
+            if (Settings.useOwnGenerator) {
+                return Bukkit.getServer().getWorld(Settings.worldName + "_nether");
+            }
+            if (plugin.getServer().getWorld(Settings.worldName + "_nether") == null) {
+                Bukkit.getLogger().info("Creating " + plugin.getName() + "'s Nether...");
+            }
+            if (!Settings.newNether) {
+                netherWorld =
+                        WorldCreator.name(Settings.worldName + "_nether")
+                                .type(WorldType.NORMAL)
+                                .environment(World.Environment.NETHER)
+                                .createWorld();
+            } else {
+                netherWorld = WorldCreator.name(Settings.worldName + "_nether")
+                        .type(WorldType.FLAT)
+                        .generator(new ChunkGeneratorWorld())
+                        .environment(World.Environment.NETHER)
+                        .createWorld();
+            }
+            netherWorld.setMonsterSpawnLimit(Settings.monsterSpawnLimit);
+            netherWorld.setAnimalSpawnLimit(Settings.animalSpawnLimit);
+        }
+        return netherWorld;
     }
 
     @Override
@@ -276,7 +370,8 @@ public class ASkyBlock extends JavaPlugin {
                     // Check if the world generator is registered correctly
                     getLogger().severe("********* The Generator for " + ASkyBlock.this.getName()
                             + " is not registered so the plugin cannot start ********");
-                    getLogger().severe("If you are using your own generator or server.properties, set useowngenerator: true in config.yml");
+                    getLogger().severe(
+                            "If you are using your own generator or server.properties, set useowngenerator: true in config.yml");
                     getLogger().severe("Otherwise:");
                     getLogger().severe("Make sure you have the following in bukkit.yml (case sensitive):");
                     getLogger().severe("worlds:");
@@ -375,90 +470,9 @@ public class ASkyBlock extends JavaPlugin {
         });
     }
 
-    /**
-     * Returns the World object for the island world named in config.yml.
-     * If the world does not exist then it is created.
-     *
-     * @return islandWorld - Bukkit World object for the ASkyBlock world
-     */
-    public static World getIslandWorld() {
-        if (islandWorld == null) {
-            //Bukkit.getLogger().info("DEBUG worldName = " + Settings.worldName);
-            //
-            if (Settings.useOwnGenerator) {
-                islandWorld = Bukkit.getServer().getWorld(Settings.worldName);
-                //Bukkit.getLogger().info("DEBUG world is " + islandWorld);
-            } else {
-                islandWorld = WorldCreator.name(Settings.worldName).type(WorldType.FLAT).environment(World.Environment.NORMAL)
-                        .generator(new ChunkGeneratorWorld())
-                        .createWorld();
-            }
-            // Make the nether if it does not exist
-            if (Settings.createNether) {
-                getNetherWorld();
-            }
-            // Multiverse configuration
-
-            if (!Settings.useOwnGenerator && Bukkit.getServer().getPluginManager().isPluginEnabled("Multiverse-Core")) {
-                Bukkit.getLogger().info("Trying to register generator with Multiverse ");
-                try {
-                    Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(),
-                            "mv import " + Settings.worldName + " normal -g " + plugin.getName());
-                    if (!Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(),
-                            "mv modify set generator " + plugin.getName() + " " + Settings.worldName)) {
-                        Bukkit.getLogger().severe("Multiverse is out of date! - Upgrade to latest version!");
-                    }
-                    if (Settings.createNether) {
-                        if (Settings.newNether) {
-                            Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(),
-                                    "mv import " + Settings.worldName + "_nether nether -g " + plugin.getName());
-                            Bukkit.getServer().dispatchCommand(Bukkit.getServer().getConsoleSender(),
-                                    "mv modify set generator " + plugin.getName() + " " + Settings.worldName + "_nether");
-                        } else {
-                            Bukkit.getServer()
-                                    .dispatchCommand(Bukkit.getServer().getConsoleSender(), "mv import " + Settings.worldName + "_nether nether");
-                        }
-                    }
-                } catch (Exception e) {
-                    Bukkit.getLogger().severe("Not successfull! Disabling " + plugin.getName() + "!");
-                    e.printStackTrace();
-                    Bukkit.getServer().getPluginManager().disablePlugin(plugin);
-                }
-            }
-
-        }
-        // Set world settings
-        if (islandWorld != null) {
-            islandWorld.setWaterAnimalSpawnLimit(Settings.waterAnimalSpawnLimit);
-            islandWorld.setMonsterSpawnLimit(Settings.monsterSpawnLimit);
-            islandWorld.setAnimalSpawnLimit(Settings.animalSpawnLimit);
-        }
-
-        return islandWorld;
-    }
-
-    /**
-     * @return the netherWorld
-     */
-    public static World getNetherWorld() {
-        if (netherWorld == null && Settings.createNether) {
-            if (Settings.useOwnGenerator) {
-                return Bukkit.getServer().getWorld(Settings.worldName + "_nether");
-            }
-            if (plugin.getServer().getWorld(Settings.worldName + "_nether") == null) {
-                Bukkit.getLogger().info("Creating " + plugin.getName() + "'s Nether...");
-            }
-            if (!Settings.newNether) {
-                netherWorld =
-                        WorldCreator.name(Settings.worldName + "_nether").type(WorldType.NORMAL).environment(World.Environment.NETHER).createWorld();
-            } else {
-                netherWorld = WorldCreator.name(Settings.worldName + "_nether").type(WorldType.FLAT).generator(new ChunkGeneratorWorld())
-                        .environment(World.Environment.NETHER).createWorld();
-            }
-            netherWorld.setMonsterSpawnLimit(Settings.monsterSpawnLimit);
-            netherWorld.setAnimalSpawnLimit(Settings.animalSpawnLimit);
-        }
-        return netherWorld;
+    @Override
+    public ChunkGenerator getDefaultWorldGenerator(final String worldName, final String id) {
+        return new ChunkGeneratorWorld();
     }
 
     /**
@@ -470,11 +484,6 @@ public class ASkyBlock extends JavaPlugin {
 	    challenges = new Challenges(this);
 	}*/
         return challenges;
-    }
-
-    @Override
-    public ChunkGenerator getDefaultWorldGenerator(final String worldName, final String id) {
-        return new ChunkGeneratorWorld();
     }
 
     /**

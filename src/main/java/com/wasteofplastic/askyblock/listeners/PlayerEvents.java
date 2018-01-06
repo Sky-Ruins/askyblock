@@ -25,6 +25,7 @@ import com.wasteofplastic.askyblock.events.IslandEnterEvent;
 import com.wasteofplastic.askyblock.events.IslandExitEvent;
 import com.wasteofplastic.askyblock.util.Util;
 import com.wasteofplastic.askyblock.util.VaultHelper;
+
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
@@ -73,6 +74,35 @@ public class PlayerEvents implements Listener {
     public PlayerEvents(final ASkyBlock plugin) {
         this.plugin = plugin;
         respawn = new ArrayList<UUID>();
+    }
+
+    /**
+     * Used to prevent teleporting when falling
+     *
+     * @param uniqueId
+     */
+    public static void setFalling(UUID uniqueId) {
+        fallingPlayers.add(uniqueId);
+    }
+
+    /**
+     * Unset the falling flag
+     *
+     * @param uniqueId
+     */
+    public static void unsetFalling(UUID uniqueId) {
+        // getLogger().info("DEBUG: unset falling");
+        fallingPlayers.remove(uniqueId);
+    }
+
+    /**
+     * Used to prevent teleporting when falling
+     *
+     * @param uniqueId
+     * @return true or false
+     */
+    public static boolean isFalling(UUID uniqueId) {
+        return fallingPlayers.contains(uniqueId);
     }
 
     /**
@@ -147,7 +177,8 @@ public class PlayerEvents implements Listener {
     public void onHungerChange(final FoodLevelChangeEvent e) {
         if (DEBUG) {
             plugin.getLogger()
-                    .info(e.getEventName() + " food level = " + ((Player) e.getEntity()).getFoodLevel() + " new food level = " + e.getFoodLevel());
+                    .info(e.getEventName() + " food level = " + ((Player) e.getEntity()).getFoodLevel() + " new food level = "
+                            + e.getFoodLevel());
 
         }
         // Allow food increases
@@ -360,7 +391,6 @@ public class PlayerEvents implements Listener {
         }
     }
 
-
     /**
      * Removes temporary perms when the player log out
      *
@@ -526,7 +556,6 @@ public class PlayerEvents implements Listener {
         e.setCancelled(true);
     }
 
-
     /*
      * Prevent typing /island if falling - hard core
      * Checked if player teleports
@@ -564,25 +593,6 @@ public class PlayerEvents implements Listener {
     }
 
     /**
-     * Used to prevent teleporting when falling
-     *
-     * @param uniqueId
-     */
-    public static void setFalling(UUID uniqueId) {
-        fallingPlayers.add(uniqueId);
-    }
-
-    /**
-     * Unset the falling flag
-     *
-     * @param uniqueId
-     */
-    public static void unsetFalling(UUID uniqueId) {
-        // getLogger().info("DEBUG: unset falling");
-        fallingPlayers.remove(uniqueId);
-    }
-
-    /**
      * Prevents teleporting when falling based on setting by stopping commands
      *
      * @param e
@@ -600,23 +610,14 @@ public class PlayerEvents implements Listener {
         // Check commands
         // plugin.getLogger().info("DEBUG: falling command: '" +
         // e.getMessage().substring(1).toLowerCase() + "'");
-        if (isFalling(e.getPlayer().getUniqueId()) && (Settings.fallingCommandBlockList.contains("*") || Settings.fallingCommandBlockList
+        if (isFalling(e.getPlayer().getUniqueId()) && (Settings.fallingCommandBlockList.contains("*")
+                || Settings.fallingCommandBlockList
                 .contains(e.getMessage().substring(1).toLowerCase()))) {
             // Sorry you are going to die
             Util.sendMessage(e.getPlayer(), plugin.myLocale(e.getPlayer().getUniqueId()).errorNoPermission);
             Util.sendMessage(e.getPlayer(), plugin.myLocale(e.getPlayer().getUniqueId()).islandcannotTeleport);
             e.setCancelled(true);
         }
-    }
-
-    /**
-     * Used to prevent teleporting when falling
-     *
-     * @param uniqueId
-     * @return true or false
-     */
-    public static boolean isFalling(UUID uniqueId) {
-        return fallingPlayers.contains(uniqueId);
     }
 
     /**
@@ -744,7 +745,8 @@ public class PlayerEvents implements Listener {
                             cancel = true;
                         }
                     } else {
-                        if (!islandTo.getIgsFlag(SettingsFlag.CHORUS_FRUIT) && !islandTo.getMembers().contains(e.getPlayer().getUniqueId())) {
+                        if (!islandTo.getIgsFlag(SettingsFlag.CHORUS_FRUIT) && !islandTo.getMembers()
+                                .contains(e.getPlayer().getUniqueId())) {
                             cancel = true;
                         }
                     }
@@ -753,7 +755,8 @@ public class PlayerEvents implements Listener {
                             cancel = true;
                         }
                     } else {
-                        if (!islandFrom.getIgsFlag(SettingsFlag.CHORUS_FRUIT) && !islandFrom.getMembers().contains(e.getPlayer().getUniqueId())) {
+                        if (!islandFrom.getIgsFlag(SettingsFlag.CHORUS_FRUIT) && !islandFrom.getMembers()
+                                .contains(e.getPlayer().getUniqueId())) {
                             cancel = true;
                         }
                     }
@@ -873,7 +876,8 @@ public class PlayerEvents implements Listener {
             }
             if (islandFrom.isSpawn()) {
                 // Leaving
-                if (islandFrom.getIgsFlag(SettingsFlag.ENTER_EXIT_MESSAGES) && !plugin.myLocale(e.getPlayer().getUniqueId()).lockLeavingSpawn
+                if (islandFrom.getIgsFlag(SettingsFlag.ENTER_EXIT_MESSAGES) && !plugin.myLocale(
+                        e.getPlayer().getUniqueId()).lockLeavingSpawn
                         .isEmpty()) {
                     Util.sendEnterExit(e.getPlayer(), plugin.myLocale(e.getPlayer().getUniqueId()).lockLeavingSpawn);
                 }
@@ -884,7 +888,8 @@ public class PlayerEvents implements Listener {
                 }
             }
             if (islandTo.isSpawn()) {
-                if (islandTo.getIgsFlag(SettingsFlag.ENTER_EXIT_MESSAGES) && !plugin.myLocale(e.getPlayer().getUniqueId()).lockEnteringSpawn
+                if (islandTo.getIgsFlag(SettingsFlag.ENTER_EXIT_MESSAGES) && !plugin.myLocale(
+                        e.getPlayer().getUniqueId()).lockEnteringSpawn
                         .isEmpty()) {
                     Util.sendEnterExit(e.getPlayer(), plugin.myLocale(e.getPlayer().getUniqueId()).lockEnteringSpawn);
                 }
@@ -904,7 +909,9 @@ public class PlayerEvents implements Listener {
             // Fire entry event
             final IslandEnterEvent event2 = new IslandEnterEvent(e.getPlayer().getUniqueId(), islandTo, e.getTo());
             plugin.getServer().getPluginManager().callEvent(event2);
-        } else if (islandTo != null && islandFrom != null && (islandTo.equals(islandFrom) && !e.getFrom().getWorld().equals(e.getTo().getWorld()))) {
+        } else if (islandTo != null && islandFrom != null && (islandTo.equals(islandFrom) && !e.getFrom()
+                .getWorld()
+                .equals(e.getTo().getWorld()))) {
             if (DEBUG) {
                 plugin.getLogger().info("DEBUG: jumping from dimension to another - same island");
             }

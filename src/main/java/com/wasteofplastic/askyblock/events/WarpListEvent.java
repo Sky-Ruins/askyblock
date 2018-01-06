@@ -18,6 +18,7 @@
 package com.wasteofplastic.askyblock.events;
 
 import com.wasteofplastic.askyblock.ASkyBlock;
+
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;
 

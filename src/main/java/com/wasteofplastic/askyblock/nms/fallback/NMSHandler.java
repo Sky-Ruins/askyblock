@@ -21,6 +21,7 @@ import com.wasteofplastic.askyblock.nms.NMSAbstraction;
 import com.wasteofplastic.org.jnbt.CompoundTag;
 import com.wasteofplastic.org.jnbt.StringTag;
 import com.wasteofplastic.org.jnbt.Tag;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -69,7 +70,8 @@ public class NMSHandler implements NMSAbstraction {
 
     @SuppressWarnings("deprecation")
     @Override
-    public ItemStack setPotion(Material itemMaterial, Tag itemTags,
+    public ItemStack setPotion(
+            Material itemMaterial, Tag itemTags,
             ItemStack chestItem) {
         // Try some backwards compatibility with new 1.9 schematics
         Map<String, Tag> contents = (Map<String, Tag>) ((CompoundTag) itemTags).getValue().get("tag").getValue();

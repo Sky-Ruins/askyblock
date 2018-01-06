@@ -22,7 +22,9 @@ import com.wasteofplastic.askyblock.events.MiniShopEvent;
 import com.wasteofplastic.askyblock.events.MiniShopEvent.TransactionType;
 import com.wasteofplastic.askyblock.util.Util;
 import com.wasteofplastic.askyblock.util.VaultHelper;
+
 import net.milkbowl.vault.economy.EconomyResponse;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -180,9 +182,11 @@ public class ControlPanel implements Listener {
                             Material material = Material.matchMaterial(icon[0]);
                             if (material == null) {
                                 material = Material.PAPER;
-                                plugin.getLogger().severe("Error in controlpanel.yml " + icon[0] + " is an unknown material, using paper.");
+                                plugin.getLogger()
+                                        .severe("Error in controlpanel.yml " + icon[0] + " is an unknown material, using paper.");
                             }
-                            String description = ChatColor.translateAlternateColorCodes('&', buttons.getString(item + ".description", ""));
+                            String description = ChatColor.translateAlternateColorCodes('&',
+                                    buttons.getString(item + ".description", ""));
                             String command = buttons.getString(item + ".command", "").replace("[island]", Settings.ISLANDCOMMAND);
                             String nextSection = buttons.getString(item + ".nextsection", "");
                             ItemStack i = new ItemStack(material);
@@ -358,7 +362,8 @@ public class ControlPanel implements Listener {
                                     // item.getQuantity() + " " +
                                     // item.getDescription() + " for " +
                                     // VaultHelper.econ.format(item.getPrice());
-                                    message = plugin.myLocale().minishopYouBought.replace("[number]", Integer.toString(item.getQuantity()));
+                                    message = plugin.myLocale().minishopYouBought.replace("[number]",
+                                            Integer.toString(item.getQuantity()));
                                     message = message.replace("[description]", item.getDescription());
                                     message = message.replace("[price]", VaultHelper.econ.format(item.getPrice()));
                                     player.getInventory().addItem(item.getItemClean());

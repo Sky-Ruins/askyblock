@@ -21,6 +21,7 @@ import com.wasteofplastic.askyblock.commands.Challenges;
 import com.wasteofplastic.askyblock.util.SpawnEgg1_9;
 import com.wasteofplastic.askyblock.util.Util;
 import com.wasteofplastic.askyblock.util.VaultHelper;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.EntityType;
@@ -80,7 +81,9 @@ public class MiniShopItem {
                     if (material.equals(Material.MONSTER_EGG)) {
                         try {
                             EntityType type = EntityType.valueOf(extra.toUpperCase());
-                            if (Bukkit.getServer().getVersion().contains("(MC: 1.8") || Bukkit.getServer().getVersion().contains("(MC: 1.7")) {
+                            if (Bukkit.getServer().getVersion().contains("(MC: 1.8") || Bukkit.getServer()
+                                    .getVersion()
+                                    .contains("(MC: 1.7")) {
                                 item = new SpawnEgg(type).toItemStack(quantity);
                             } else {
                                 try {
@@ -92,7 +95,8 @@ public class MiniShopItem {
                                 ItemMeta meta = item.getItemMeta();
                             }
                         } catch (Exception e) {
-                            Bukkit.getLogger().severe("Spawn eggs must be described by name. Try one of these (not all are possible):");
+                            Bukkit.getLogger()
+                                    .severe("Spawn eggs must be described by name. Try one of these (not all are possible):");
                             for (EntityType type : EntityType.values()) {
                                 if (type.isSpawnable() && type.isAlive()) {
                                     Bukkit.getLogger().severe(type.toString());
@@ -134,7 +138,8 @@ public class MiniShopItem {
                 buyAndSell.add(ASkyBlock.getPlugin().myLocale().minishopBuy + " " + quantity + " @ " + VaultHelper.econ.format(price));
             }
             if (sellPrice > 0D) {
-                buyAndSell.add(ASkyBlock.getPlugin().myLocale().minishopSell + " " + quantity + " @ " + VaultHelper.econ.format(sellPrice));
+                buyAndSell.add(
+                        ASkyBlock.getPlugin().myLocale().minishopSell + " " + quantity + " @ " + VaultHelper.econ.format(sellPrice));
             }
             if (price < 0D && sellPrice < 0D) {
                 buyAndSell.add(ASkyBlock.getPlugin().myLocale().minishopOutOfStock);
@@ -150,7 +155,9 @@ public class MiniShopItem {
             for (PotionType c : PotionType.values()) {
                 ASkyBlock.getPlugin().getLogger().info(c.name());
             }
-            ASkyBlock.getPlugin().getLogger().info("Potions can also be EXTENDED, SPLASH or EXTENDEDSPLASH, example WATER_BREATHING:EXTENDED");
+            ASkyBlock.getPlugin()
+                    .getLogger()
+                    .info("Potions can also be EXTENDED, SPLASH or EXTENDEDSPLASH, example WATER_BREATHING:EXTENDED");
         }
         // If there's no description, then set it.
         if (description == null) {

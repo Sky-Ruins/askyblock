@@ -19,6 +19,7 @@ package com.wasteofplastic.askyblock;
 import com.wasteofplastic.askyblock.events.TeamJoinEvent;
 import com.wasteofplastic.askyblock.events.TeamLeaveEvent;
 import com.wasteofplastic.askyblock.util.Util;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
@@ -181,20 +182,26 @@ public class Players {
         for (String challenge : Settings.challengeList) {
             // If they are in the list, then use the value, otherwise use false
             challengeList
-                    .put(challenge.toLowerCase(), playerInfo.getBoolean("challenges.status." + challenge.toLowerCase().replace(".", "[dot]"), false));
+                    .put(challenge.toLowerCase(),
+                            playerInfo.getBoolean("challenges.status." + challenge.toLowerCase().replace(".", "[dot]"), false));
             challengeListTimes
-                    .put(challenge.toLowerCase(), playerInfo.getInt("challenges.times." + challenge.toLowerCase().replace(".", "[dot]"), 0));
+                    .put(challenge.toLowerCase(),
+                            playerInfo.getInt("challenges.times." + challenge.toLowerCase().replace(".", "[dot]"), 0));
             challengeListTimestamp
-                    .put(challenge.toLowerCase(), playerInfo.getLong("challenges.timestamp." + challenge.toLowerCase().replace(".", "[dot]"), 0));
+                    .put(challenge.toLowerCase(),
+                            playerInfo.getLong("challenges.timestamp." + challenge.toLowerCase().replace(".", "[dot]"), 0));
         }
         for (String challenge : Settings.challengeLevels) {
             // If they are in the list, then use the value, otherwise use false
             challengeList
-                    .put(challenge.toLowerCase(), playerInfo.getBoolean("challenges.status." + challenge.toLowerCase().replace(".", "[dot]"), false));
+                    .put(challenge.toLowerCase(),
+                            playerInfo.getBoolean("challenges.status." + challenge.toLowerCase().replace(".", "[dot]"), false));
             challengeListTimes
-                    .put(challenge.toLowerCase(), playerInfo.getInt("challenges.times." + challenge.toLowerCase().replace(".", "[dot]"), 0));
+                    .put(challenge.toLowerCase(),
+                            playerInfo.getInt("challenges.times." + challenge.toLowerCase().replace(".", "[dot]"), 0));
             challengeListTimestamp
-                    .put(challenge.toLowerCase(), playerInfo.getLong("challenges.timestamp." + challenge.toLowerCase().replace(".", "[dot]"), 0));
+                    .put(challenge.toLowerCase(),
+                            playerInfo.getLong("challenges.timestamp." + challenge.toLowerCase().replace(".", "[dot]"), 0));
         }
         // Load reset limit
         this.resetsLeft = playerInfo.getInt("resetsLeft", Settings.resetLimit);
@@ -228,7 +235,8 @@ public class Players {
                         kickedList.put(l, date);
                     }
                 } catch (Exception e) {
-                    plugin.getLogger().severe("Error in player " + playerName + "'s yml config when loading invite timeout - skipping");
+                    plugin.getLogger()
+                            .severe("Error in player " + playerName + "'s yml config when loading invite timeout - skipping");
                 }
             }
         }
@@ -449,7 +457,8 @@ public class Players {
             if (teamLeader == null) {
                 // No, so just clear everything
                 inTeam = false;
-                plugin.getLogger().warning(playerName + " was listed as in a team, but has no team island or team leader. Removing from team.");
+                plugin.getLogger()
+                        .warning(playerName + " was listed as in a team, but has no team island or team leader. Removing from team.");
             } else {
                 // See if the team leader thinks this player is on their team
                 if (plugin.getPlayers().getMembers(teamLeader).contains(uuid)) {
@@ -463,7 +472,8 @@ public class Players {
                     teamLeader = null;
                     plugin.getLogger()
                             .warning(
-                                    playerName + " was listed as in a team, but the team leader does not have them on the team. Removing from team.");
+                                    playerName
+                                            + " was listed as in a team, but the team leader does not have them on the team. Removing from team.");
                 }
             }
         }
@@ -483,6 +493,15 @@ public class Players {
     }
 
     /**
+     * Stores the home location of the player in a String format
+     *
+     * @param l a Bukkit location
+     */
+    public void setHomeLocation(final Location l) {
+        setHomeLocation(l, 1);
+    }
+
+    /**
      * Gets the home location by number.
      *
      * @param number
@@ -497,15 +516,6 @@ public class Players {
     }
 
     /**
-     * Stores the home location of the player in a String format
-     *
-     * @param l a Bukkit location
-     */
-    public void setHomeLocation(final Location l) {
-        setHomeLocation(l, 1);
-    }
-
-    /**
      * Stores the numbered home location of the player. Numbering starts at 1.
      *
      * @param location
@@ -517,7 +527,8 @@ public class Players {
         } else {
             // Make the location x,y,z integer, but keep the yaw and pitch
             homeLocations.put(number,
-                    new Location(location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ(), location.getYaw(),
+                    new Location(location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ(),
+                            location.getYaw(),
                             location.getPitch()));
         }
     }

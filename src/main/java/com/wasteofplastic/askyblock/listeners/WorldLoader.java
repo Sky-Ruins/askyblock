@@ -19,6 +19,7 @@ package com.wasteofplastic.askyblock.listeners;
 
 import com.wasteofplastic.askyblock.ASkyBlock;
 import com.wasteofplastic.askyblock.Settings;
+
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -47,7 +48,9 @@ public class WorldLoader implements Listener {
         if (DEBUG) {
             plugin.getLogger().info("DEBUG: " + event.getEventName() + " : " + event.getWorld().getName());
         }
-        if (event.getWorld().getName().equals(Settings.worldName) || event.getWorld().getName().equals(Settings.worldName + "_nether")) {
+        if (event.getWorld().getName().equals(Settings.worldName) || event.getWorld()
+                .getName()
+                .equals(Settings.worldName + "_nether")) {
             return;
         }
         // Load the world

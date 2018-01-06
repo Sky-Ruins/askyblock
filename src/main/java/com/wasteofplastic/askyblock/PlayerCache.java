@@ -18,6 +18,7 @@ package com.wasteofplastic.askyblock;
 
 import com.google.common.collect.Lists;
 import com.wasteofplastic.askyblock.util.VaultHelper;
+
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 

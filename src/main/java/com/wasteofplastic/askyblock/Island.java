@@ -3,6 +3,7 @@ package com.wasteofplastic.askyblock;
 import com.google.common.collect.HashMultiset;
 import com.google.common.collect.Multiset;
 import com.wasteofplastic.askyblock.util.Util;
+
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -113,6 +114,32 @@ public class Island implements Cloneable {
     }
 
     /**
+     * Add a new island using the island center method
+     */
+    public Island(ASkyBlock plugin, int x, int z) {
+        this(plugin, x, z, null);
+    }
+
+    public Island(ASkyBlock plugin, int x, int z, UUID owner) {
+        this.plugin = plugin;
+        this.minX = x - Settings.islandDistance / 2;
+        this.minZ = z - Settings.islandDistance / 2;
+        this.minProtectedX = x - Settings.islandProtectionRange / 2;
+        this.minProtectedZ = z - Settings.islandProtectionRange / 2;
+        this.y = Settings.islandHeight;
+        this.islandDistance = Settings.islandDistance;
+        this.protectionRange = Settings.islandProtectionRange;
+        this.world = ASkyBlock.getIslandWorld();
+        this.center = new Location(world, x, y, z);
+        this.createdDate = new Date().getTime();
+        this.updatedDate = createdDate;
+        this.password = "";
+        this.votes = 0;
+        this.owner = owner;
+        setIgsDefaults();
+    }
+
+    /**
      * Sets the settings for the island.
      */
     public void setSettings(String settings, List<String> settingsKey) {
@@ -174,32 +201,6 @@ public class Island implements Cloneable {
      */
     public void setIgsFlag(SettingsFlag flag, boolean value) {
         this.igs.put(flag, value);
-    }
-
-    /**
-     * Add a new island using the island center method
-     */
-    public Island(ASkyBlock plugin, int x, int z) {
-        this(plugin, x, z, null);
-    }
-
-    public Island(ASkyBlock plugin, int x, int z, UUID owner) {
-        this.plugin = plugin;
-        this.minX = x - Settings.islandDistance / 2;
-        this.minZ = z - Settings.islandDistance / 2;
-        this.minProtectedX = x - Settings.islandProtectionRange / 2;
-        this.minProtectedZ = z - Settings.islandProtectionRange / 2;
-        this.y = Settings.islandHeight;
-        this.islandDistance = Settings.islandDistance;
-        this.protectionRange = Settings.islandProtectionRange;
-        this.world = ASkyBlock.getIslandWorld();
-        this.center = new Location(world, x, y, z);
-        this.createdDate = new Date().getTime();
-        this.updatedDate = createdDate;
-        this.password = "";
-        this.votes = 0;
-        this.owner = owner;
-        setIgsDefaults();
     }
 
     @Override
@@ -381,7 +382,8 @@ public class Island implements Cloneable {
             ownerString = "spawn";
             if (spawnPoint != null) {
                 return center.getBlockX() + ":" + center.getBlockY() + ":" + center.getBlockZ() + ":" + protectionRange + ":"
-                        + islandDistance + ":" + ownerString + ":" + locked + ":" + purgeProtected + ":SP:" + Util.getStringLocation(spawnPoint);
+                        + islandDistance + ":" + ownerString + ":" + locked + ":" + purgeProtected + ":SP:" + Util.getStringLocation(
+                        spawnPoint);
             }
             return center.getBlockX() + ":" + center.getBlockY() + ":" + center.getBlockZ() + ":" + protectionRange + ":"
                     + islandDistance + ":" + ownerString + ":" + locked + ":" + purgeProtected;
@@ -453,7 +455,8 @@ public class Island implements Cloneable {
      */
     public List<UUID> getMembers() {
         // Add any coop members for this island
-        List<UUID> result = new ArrayList<>(CoopPlay.getInstance().getCoopPlayers(center.toVector().toLocation(ASkyBlock.getIslandWorld())));
+        List<UUID> result = new ArrayList<>(
+                CoopPlay.getInstance().getCoopPlayers(center.toVector().toLocation(ASkyBlock.getIslandWorld())));
         if (Settings.createNether && Settings.newNether && ASkyBlock.getNetherWorld() != null) {
             result.addAll(CoopPlay.getInstance().getCoopPlayers(center.toVector().toLocation(ASkyBlock.getNetherWorld())));
         }

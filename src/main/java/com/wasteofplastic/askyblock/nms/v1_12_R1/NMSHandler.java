@@ -22,12 +22,14 @@ import com.wasteofplastic.org.jnbt.CompoundTag;
 import com.wasteofplastic.org.jnbt.ListTag;
 import com.wasteofplastic.org.jnbt.StringTag;
 import com.wasteofplastic.org.jnbt.Tag;
+
 import net.minecraft.server.v1_12_R1.BlockPosition;
 import net.minecraft.server.v1_12_R1.IBlockData;
 import net.minecraft.server.v1_12_R1.NBTTagCompound;
 import net.minecraft.server.v1_12_R1.NBTTagList;
 import net.minecraft.server.v1_12_R1.NBTTagString;
 import net.minecraft.server.v1_12_R1.TileEntityFlowerPot;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -162,7 +164,7 @@ public class NMSHandler implements NMSAbstraction {
     /* (non-Javadoc)
      * @see com.wasteofplastic.acidisland.nms.NMSAbstraction#setPotion(com.wasteofplastic.org.jnbt.Tag)
      */
-    @SuppressWarnings({ "unchecked" })
+    @SuppressWarnings({"unchecked"})
     @Override
     public ItemStack setPotion(Material material, Tag itemTags, ItemStack chestItem) {
         Map<String, Tag> cont = (Map<String, Tag>) ((CompoundTag) itemTags).getValue();

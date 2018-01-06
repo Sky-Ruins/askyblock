@@ -4,7 +4,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Animals;
-import org.bukkit.entity.Creature;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Guardian;
@@ -26,7 +25,7 @@ public class AcidTask {
     /**
      * Runs repeating tasks to deliver acid damage to mobs, etc.
      */
-    public AcidTask(final ASkyBlock plugin) {
+    AcidTask(final ASkyBlock plugin) {
         this.plugin = plugin;
         itemsInWater = new HashSet<>();
         if (Settings.mobAcidDamage > 0D || Settings.animalAcidDamage > 0D) {
@@ -38,23 +37,19 @@ public class AcidTask {
                         continue;
                     }
 
-                    final Creature creature = current;
-
                     if (current instanceof Monster && Settings.mobAcidDamage > 0D) {
                         if ((current.getLocation().getBlock().getType() == Material.WATER)
                                 || (current.getLocation().getBlock().getType() == Material.STATIONARY_WATER)) {
-                            ((Monster) current).damage(Settings.mobAcidDamage);
-                            // getLogger().info("Killing monster");
+                            Monster monster = (Monster) current;
+                            monster.damage(Settings.mobAcidDamage);
                         }
                     } else if (current instanceof Animals && Settings.animalAcidDamage > 0D) {
                         if (current.getLocation().getBlock().getType() == Material.WATER
                                 || current.getLocation().getBlock().getType() == Material.STATIONARY_WATER) {
-                            if (!current.getType().equals(EntityType.CHICKEN)) {
-                                ((Animals) current).damage(Settings.animalAcidDamage);
-                            } else if (Settings.damageChickens) {
-                                ((Animals) current).damage(Settings.animalAcidDamage);
+                            if (!current.getType().equals(EntityType.CHICKEN) || Settings.damageChickens) {
+                                Animals animal = (Animals) current;
+                                animal.damage(Settings.animalAcidDamage);
                             }
-                            // getLogger().info("Killing animal");
                         }
                     }
                 }

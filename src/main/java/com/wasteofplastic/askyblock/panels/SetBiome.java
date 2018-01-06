@@ -3,6 +3,7 @@ package com.wasteofplastic.askyblock.panels;
 import com.wasteofplastic.askyblock.ASkyBlock;
 import com.wasteofplastic.askyblock.Island;
 import com.wasteofplastic.askyblock.Settings;
+
 import org.bukkit.ChunkSnapshot;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -70,8 +71,10 @@ public class SetBiome {
                 // Get the chunks
                 //plugin.getLogger().info("DEBUG: get the chunks");
                 List<ChunkSnapshot> chunkSnapshot = new ArrayList<ChunkSnapshot>();
-                for (int x = island.getMinProtectedX() / 16; x <= (island.getMinProtectedX() + island.getProtectionSize() - 1) / 16; x++) {
-                    for (int z = island.getMinProtectedZ() / 16; z <= (island.getMinProtectedZ() + island.getProtectionSize() - 1) / 16; z++) {
+                for (int x = island.getMinProtectedX() / 16; x <= (island.getMinProtectedX() + island.getProtectionSize() - 1) / 16;
+                        x++) {
+                    for (int z = island.getMinProtectedZ() / 16;
+                            z <= (island.getMinProtectedZ() + island.getProtectionSize() - 1) / 16; z++) {
                         boolean loaded = world.getChunkAt(x, z).isLoaded();
                         chunkSnapshot.add(world.getChunkAt(x, z).getChunkSnapshot());
                         if (!loaded) {
@@ -95,7 +98,8 @@ public class SetBiome {
                                     // Check if it is snow, ice or water
                                     for (int yy = world.getMaxHeight() - 1; yy >= Settings.seaHeight; yy--) {
                                         int type = chunk.getBlockTypeId(x, yy, z);
-                                        if (type == Material.ICE.getId() || type == Material.SNOW.getId() || type == Material.SNOW_BLOCK.getId()
+                                        if (type == Material.ICE.getId() || type == Material.SNOW.getId()
+                                                || type == Material.SNOW_BLOCK.getId()
                                                 || type == Material.WATER.getId() || type == Material.STATIONARY_WATER.getId()) {
                                             //System.out.println("DEBUG: offending block found " + Material.getMaterial(type) + " @ " + (chunk.getX
                                             // ()*16 + x) + " " + yy + " " + (chunk.getZ()*16 + z));
@@ -119,7 +123,8 @@ public class SetBiome {
                                 public void run() {
                                     //plugin.getLogger().info("DEBUG: Running sync task");
                                     for (Entry<Vector, Integer> entry : blocks.entrySet()) {
-                                        if (entry.getValue() == Material.WATER.getId() || entry.getValue() == Material.STATIONARY_WATER.getId()) {
+                                        if (entry.getValue() == Material.WATER.getId() || entry.getValue() == Material.STATIONARY_WATER
+                                                .getId()) {
                                             if (biomeType.equals(Biome.HELL)) {
                                                 // Remove water from Hell
                                                 entry.getKey().toLocation(world).getBlock().setType(Material.AIR);

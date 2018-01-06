@@ -17,6 +17,7 @@
 package com.wasteofplastic.askyblock;
 
 import com.wasteofplastic.askyblock.Island.SettingsFlag;
+
 import org.bukkit.Material;
 import org.bukkit.block.Biome;
 import org.bukkit.entity.EntityType;
@@ -253,6 +254,7 @@ public class Settings {
     public static boolean silenceCommandFeedback;
     public static long inviteTimeout;
     protected static boolean levelLogging;
+
     // Constants
     // Game Type ASKYBLOCK or ACIDISLAND
     public enum GameType {

@@ -6,6 +6,7 @@ import com.wasteofplastic.askyblock.Island.SettingsFlag;
 import com.wasteofplastic.askyblock.Settings;
 import com.wasteofplastic.askyblock.util.Util;
 import com.wasteofplastic.askyblock.util.VaultHelper;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -75,8 +76,10 @@ public class EntityLimits implements Listener {
             return;
         }
         // We only care about spawning and breeding
-        if (e.getSpawnReason() != SpawnReason.SPAWNER && e.getSpawnReason() != SpawnReason.BREEDING && e.getSpawnReason() != SpawnReason.EGG
-                && e.getSpawnReason() != SpawnReason.DISPENSE_EGG && e.getSpawnReason() != SpawnReason.SPAWNER_EGG && !e.getSpawnReason().name()
+        if (e.getSpawnReason() != SpawnReason.SPAWNER && e.getSpawnReason() != SpawnReason.BREEDING
+                && e.getSpawnReason() != SpawnReason.EGG
+                && e.getSpawnReason() != SpawnReason.DISPENSE_EGG && e.getSpawnReason() != SpawnReason.SPAWNER_EGG
+                && !e.getSpawnReason().name()
                 .contains("BABY")) {
             if (DEBUG2) {
                 plugin.getLogger().info("Not Spawner or breeding");
@@ -119,7 +122,8 @@ public class EntityLimits implements Listener {
                         for (ItemStack itemInHand : Util.getPlayerInHandItems((Player) entity)) {
                             if (itemInHand != null) {
                                 Material type = itemInHand.getType();
-                                if (type == Material.EGG || type == Material.MONSTER_EGG || type == Material.WHEAT || type == Material.CARROT_ITEM
+                                if (type == Material.EGG || type == Material.MONSTER_EGG || type == Material.WHEAT
+                                        || type == Material.CARROT_ITEM
                                         || type == Material.SEEDS) {
                                     if (DEBUG2) {
                                         plugin.getLogger().info("Player used egg or did breeding ");
@@ -140,7 +144,8 @@ public class EntityLimits implements Listener {
         // Nether check
         if (Settings.createNether && Settings.newNether && ASkyBlock.getNetherWorld() != null) {
             for (int x = island.getMinProtectedX() / 16; x <= (island.getMinProtectedX() + island.getProtectionSize() - 1) / 16; x++) {
-                for (int z = island.getMinProtectedZ() / 16; z <= (island.getMinProtectedZ() + island.getProtectionSize() - 1) / 16; z++) {
+                for (int z = island.getMinProtectedZ() / 16; z <= (island.getMinProtectedZ() + island.getProtectionSize() - 1) / 16;
+                        z++) {
                     for (Entity entity : ASkyBlock.getNetherWorld().getChunkAt(x, z).getEntities()) {
                         if (entity instanceof Animals || entity.getType().equals(EntityType.SQUID)) {
                             if (DEBUG2) {
@@ -160,7 +165,8 @@ public class EntityLimits implements Listener {
                                 && e.getSpawnReason() != SpawnReason.DISPENSE_EGG) {
                             for (ItemStack itemInHand : Util.getPlayerInHandItems(((Player) entity))) {
                                 Material type = itemInHand.getType();
-                                if (type == Material.EGG || type == Material.MONSTER_EGG || type == Material.WHEAT || type == Material.CARROT_ITEM
+                                if (type == Material.EGG || type == Material.MONSTER_EGG || type == Material.WHEAT
+                                        || type == Material.CARROT_ITEM
                                         || type == Material.SEEDS) {
                                     if (!culprits.contains((Player) entity)) {
                                         culprits.add(((Player) entity));
@@ -181,7 +187,8 @@ public class EntityLimits implements Listener {
                 for (Player player : culprits) {
                     Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).moblimitsError
                             .replace("[number]", String.valueOf(Settings.breedingLimit)));
-                    plugin.getLogger().warning(player.getName() + " was trying to use " + Util.getPlayerInHandItems(player).toString());
+                    plugin.getLogger()
+                            .warning(player.getName() + " was trying to use " + Util.getPlayerInHandItems(player).toString());
                 }
             }
         }
@@ -302,8 +309,10 @@ public class EntityLimits implements Listener {
                         int count = island.getTileEntityCount(e.getBlock().getType(), e.getBlock().getWorld());
                         if (Settings.limitedBlocks.get(type) <= count) {
                             Util.sendMessage(e.getPlayer(),
-                                    ChatColor.RED + (plugin.myLocale(e.getPlayer().getUniqueId()).entityLimitReached.replace("[entity]",
-                                            Util.prettifyText(type))).replace("[number]", String.valueOf(Settings.limitedBlocks.get(type))));
+                                    ChatColor.RED + (plugin.myLocale(e.getPlayer().getUniqueId()).entityLimitReached.replace(
+                                            "[entity]",
+                                            Util.prettifyText(type))).replace("[number]",
+                                            String.valueOf(Settings.limitedBlocks.get(type))));
                             e.setCancelled(true);
                             return;
                         }
@@ -372,8 +381,10 @@ public class EntityLimits implements Listener {
                         //plugin.getLogger().info("DEBUG: count is "+ count);
                         if (Settings.limitedBlocks.get(type) <= count) {
                             Util.sendMessage(e.getPlayer(),
-                                    ChatColor.RED + (plugin.myLocale(e.getPlayer().getUniqueId()).entityLimitReached.replace("[entity]",
-                                            Util.prettifyText(type))).replace("[number]", String.valueOf(Settings.limitedBlocks.get(type))));
+                                    ChatColor.RED + (plugin.myLocale(e.getPlayer().getUniqueId()).entityLimitReached.replace(
+                                            "[entity]",
+                                            Util.prettifyText(type))).replace("[number]",
+                                            String.valueOf(Settings.limitedBlocks.get(type))));
                             e.setCancelled(true);
                             return;
                         }
@@ -450,8 +461,10 @@ public class EntityLimits implements Listener {
                         int count = island.getTileEntityCount(Material.valueOf(type), e.getEntity().getWorld());
                         if (Settings.limitedBlocks.get(type) <= count) {
                             Util.sendMessage(e.getPlayer(),
-                                    ChatColor.RED + (plugin.myLocale(e.getPlayer().getUniqueId()).entityLimitReached.replace("[entity]",
-                                            Util.prettifyText(type))).replace("[number]", String.valueOf(Settings.limitedBlocks.get(type))));
+                                    ChatColor.RED + (plugin.myLocale(e.getPlayer().getUniqueId()).entityLimitReached.replace(
+                                            "[entity]",
+                                            Util.prettifyText(type))).replace("[number]",
+                                            String.valueOf(Settings.limitedBlocks.get(type))));
                             e.setCancelled(true);
                             return;
                         }
@@ -533,7 +546,8 @@ public class EntityLimits implements Listener {
         //plugin.getLogger().info("DEBUG: time = " + ((System.nanoTime() - time)*0.000000001));
         if (pop >= limit) {
             plugin.getLogger().warning(
-                    "Island at " + island.getCenter().getBlockX() + "," + island.getCenter().getBlockZ() + " hit the island villager limit of "
+                    "Island at " + island.getCenter().getBlockX() + "," + island.getCenter().getBlockZ()
+                            + " hit the island villager limit of "
                             + limit);
             //plugin.getLogger().info("Stopped villager spawning on island " + island.getCenter());
             // Get all players in the area
@@ -542,7 +556,8 @@ public class EntityLimits implements Listener {
                 if (player instanceof Player) {
                     Player p = (Player) player;
                     Util.sendMessage(p,
-                            ChatColor.RED + plugin.myLocale(island.getOwner()).villagerLimitError.replace("[number]", String.valueOf(limit)));
+                            ChatColor.RED + plugin.myLocale(island.getOwner()).villagerLimitError.replace("[number]",
+                                    String.valueOf(limit)));
                 }
             }
             plugin.getMessages().tellTeam(island.getOwner(),
@@ -613,7 +628,10 @@ public class EntityLimits implements Listener {
                     // Check if the player is at the limit
                     if (atLimit(island, bypass, e.getVehicle())) {
                         e.setCancelled(true);
-                        for (Entity ent : e.getVehicle().getLocation().getWorld().getNearbyEntities(e.getVehicle().getLocation(), 5, 5, 5)) {
+                        for (Entity ent : e.getVehicle()
+                                .getLocation()
+                                .getWorld()
+                                .getNearbyEntities(e.getVehicle().getLocation(), 5, 5, 5)) {
                             if (ent instanceof Player) {
                                 Util.sendMessage((Player) ent, ChatColor.RED
                                         + (plugin.myLocale(player.getUniqueId()).entityLimitReached.replace("[entity]",

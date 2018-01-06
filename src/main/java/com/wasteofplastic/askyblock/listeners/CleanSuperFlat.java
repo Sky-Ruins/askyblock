@@ -18,6 +18,7 @@
 package com.wasteofplastic.askyblock.listeners;
 
 import com.wasteofplastic.askyblock.ASkyBlock;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.event.EventHandler;
@@ -45,7 +46,8 @@ public class CleanSuperFlat implements Listener {
         }
         if (e.getChunk().getBlock(0, 0, 0).getType().equals(Material.BEDROCK)) {
             e.getWorld().regenerateChunk(e.getChunk().getX(), e.getChunk().getZ());
-            Bukkit.getLogger().warning("Regenerating superflat chunk at " + (e.getChunk().getX() * 16) + "," + (e.getChunk().getZ() * 16));
+            Bukkit.getLogger()
+                    .warning("Regenerating superflat chunk at " + (e.getChunk().getX() * 16) + "," + (e.getChunk().getZ() * 16));
         }
     }
 
