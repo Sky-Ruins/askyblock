@@ -1,20 +1,3 @@
-/*******************************************************************************
- * This file is part of ASkyBlock.
- *
- *     ASkyBlock is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     ASkyBlock is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with ASkyBlock.  If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-
 package com.wasteofplastic.askyblock;
 
 import com.wasteofplastic.askyblock.util.MapUtil;
@@ -114,7 +97,7 @@ public class TopTen implements Listener {
      * Runs asynchronously from the main thread.
      */
     public static void topTenCreate(final CommandSender sender) {
-        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, () -> {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
             // This map is a list of owner and island level
             YamlConfiguration player = new YamlConfiguration();
             int index = 0;
@@ -154,7 +137,7 @@ public class TopTen implements Listener {
             // Save the top ten
             topTenSave();
 
-            plugin.getServer().getScheduler().runTask(plugin, () -> {
+            Bukkit.getScheduler().runTask(plugin, () -> {
                 if (sender != null) {
                     Util.sendMessage(sender, ChatColor.YELLOW + plugin.myLocale().adminTopTenfinished);
                 } else {
@@ -178,7 +161,7 @@ public class TopTen implements Listener {
             return;
         }
         // Try and see if the player is online
-        Player player = plugin.getServer().getPlayer(ownerUUID);
+        Player player = Bukkit.getPlayer(ownerUUID);
         if (player != null) {
             // Online
             if (!player.hasPermission(Settings.PERMPREFIX + "intopten")) {
@@ -233,7 +216,7 @@ public class TopTen implements Listener {
             while (it.hasNext()) {
                 Map.Entry<UUID, Long> m = it.next();
                 UUID playerUUID = m.getKey();
-                Player entry = plugin.getServer().getPlayer(playerUUID);
+                Player entry = Bukkit.getPlayer(playerUUID);
                 boolean show = true;
                 if (entry != null) {
                     if (!entry.hasPermission(Settings.PERMPREFIX + "intopten")) {
@@ -295,7 +278,7 @@ public class TopTen implements Listener {
                     plugin.getLogger().info("DEBUG: " + i + ": " + playerUUID);
                 }
                 // Remove from TopTen if the player is online and has the permission
-                Player entry = plugin.getServer().getPlayer(playerUUID);
+                Player entry = Bukkit.getPlayer(playerUUID);
                 boolean show = true;
                 if (entry != null) {
                     if (!entry.hasPermission(Settings.PERMPREFIX + "intopten")) {

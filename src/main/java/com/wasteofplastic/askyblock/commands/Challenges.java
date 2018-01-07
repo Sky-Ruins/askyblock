@@ -415,7 +415,7 @@ public class Challenges implements CommandExecutor, TabCompleter {
                                 // Fire event
                                 ChallengeLevelCompleteEvent event = new ChallengeLevelCompleteEvent(player, oldLevel, newLevel,
                                         rewardedItems);
-                                plugin.getServer().getPluginManager().callEvent(event);
+                                Bukkit.getPluginManager().callEvent(event);
                                 // Save player
                                 plugin.getPlayers().save(player.getUniqueId());
                             }
@@ -456,7 +456,7 @@ public class Challenges implements CommandExecutor, TabCompleter {
                     ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).challengesyouHaveCompleted.replace("[challenge]",
                             challengeName));
             if (Settings.broadcastMessages) {
-                for (Player p : plugin.getServer().getOnlinePlayers()) {
+                for (Player p : Bukkit.getOnlinePlayers()) {
                     Util.sendMessage(p,
                             ChatColor.GOLD + plugin.myLocale(p.getUniqueId()).challengesnameHasCompleted.replace("[name]",
                                     player.getName())
@@ -546,7 +546,7 @@ public class Challenges implements CommandExecutor, TabCompleter {
         final ChallengeCompleteEvent event =
                 new ChallengeCompleteEvent(player, challenge, permList, itemRewards, moneyReward, expReward, rewardText,
                         rewardedItems);
-        plugin.getServer().getPluginManager().callEvent(event);
+        Bukkit.getPluginManager().callEvent(event);
         return true;
     }
 
@@ -572,8 +572,8 @@ public class Challenges implements CommandExecutor, TabCompleter {
             }
             // Substitute in any references to player
             try {
-                if (!plugin.getServer()
-                        .dispatchCommand(plugin.getServer().getConsoleSender(), cmd.replace("[player]", player.getName()))) {
+                if (!Bukkit
+                        .dispatchCommand(Bukkit.getConsoleSender(), cmd.replace("[player]", player.getName()))) {
                     plugin.getLogger().severe("Problem executing challenge reward commands - skipping!");
                     plugin.getLogger().severe("Command was : " + cmd);
                 }
@@ -614,7 +614,7 @@ public class Challenges implements CommandExecutor, TabCompleter {
                     if (!leftOvers.isEmpty()) {
                         player.getWorld().dropItemNaturally(player.getLocation(), leftOvers.get(0));
                     }
-                    if (plugin.getServer().getVersion().contains("(MC: 1.8") || plugin.getServer().getVersion().contains("(MC: 1.7")) {
+                    if (Bukkit.getVersion().contains("(MC: 1.8") || Bukkit.getVersion().contains("(MC: 1.7")) {
                         player.getWorld().playSound(player.getLocation(), Sound.valueOf("ITEM_PICKUP"), 1F, 1F);
                     } else {
                         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1F, 1F);
@@ -692,7 +692,7 @@ public class Challenges implements CommandExecutor, TabCompleter {
                             }
                         }
                     }
-                    if (plugin.getServer().getVersion().contains("(MC: 1.8") || plugin.getServer().getVersion().contains("(MC: 1.7")) {
+                    if (Bukkit.getVersion().contains("(MC: 1.8") || Bukkit.getVersion().contains("(MC: 1.7")) {
                         player.getWorld().playSound(player.getLocation(), Sound.valueOf("ITEM_PICKUP"), 1F, 1F);
                     } else {
                         player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ITEM_PICKUP, 1F, 1F);
@@ -974,7 +974,7 @@ public class Challenges implements CommandExecutor, TabCompleter {
                     challengeList.put(level, t);
                 }
             } else {
-                plugin.getServer()
+                Bukkit
                         .getLogger()
                         .severe("Level (" + level + ") for challenge " + s + " does not exist. Check challenges.yml.");
             }
@@ -1287,7 +1287,7 @@ public class Challenges implements CommandExecutor, TabCompleter {
                             if (i != null && i.getType().toString().contains("POTION")) {
                                 //plugin.getLogger().info("DEBUG:6 part potion check!");
                                 // POTION:NAME:<LEVEL>:<EXTENDED>:<SPLASH/LINGER>:QTY
-                                if (plugin.getServer().getVersion().contains("(MC: 1.8") || plugin.getServer()
+                                if (Bukkit.getVersion().contains("(MC: 1.8") || Bukkit
                                         .getVersion()
                                         .contains("(MC: 1.7")) {
                                     // Test potion
@@ -1884,7 +1884,7 @@ public class Challenges implements CommandExecutor, TabCompleter {
                     }
                     // Check POTION for V1.9 - for some reason, it must be declared as WATER otherwise comparison later causes an NPE
                     if (icon.getType().name().contains("POTION")) {
-                        if (!plugin.getServer().getVersion().contains("(MC: 1.8") && !plugin.getServer()
+                        if (!Bukkit.getVersion().contains("(MC: 1.8") && !Bukkit
                                 .getVersion()
                                 .contains("(MC: 1.7")) {
                             PotionMeta potionMeta = (PotionMeta) icon.getItemMeta();
@@ -1900,7 +1900,7 @@ public class Challenges implements CommandExecutor, TabCompleter {
                     }
                     // Check POTION for V1.9 - for some reason, it must be declared as WATER otherwise comparison later causes an NPE
                     if (icon.getType().name().contains("POTION")) {
-                        if (!plugin.getServer().getVersion().contains("(MC: 1.8") && !plugin.getServer()
+                        if (!Bukkit.getVersion().contains("(MC: 1.8") && !Bukkit
                                 .getVersion()
                                 .contains("(MC: 1.7")) {
                             PotionMeta potionMeta = (PotionMeta) icon.getItemMeta();
@@ -1965,7 +1965,7 @@ public class Challenges implements CommandExecutor, TabCompleter {
                                 challengeName.substring(0, 1).toUpperCase() + challengeName.substring(1)));
         // Remove extraneous info
         ItemMeta im = icon.getItemMeta();
-        if (!plugin.getServer().getVersion().contains("1.7")) {
+        if (!Bukkit.getVersion().contains("1.7")) {
             im.addItemFlags(ItemFlag.HIDE_ATTRIBUTES);
             im.addItemFlags(ItemFlag.HIDE_DESTROYS);
             im.addItemFlags(ItemFlag.HIDE_PLACED_ON);
@@ -1975,7 +1975,7 @@ public class Challenges implements CommandExecutor, TabCompleter {
         if (Settings.addCompletedGlow && plugin.getPlayers().checkChallenge(player.getUniqueId(), challengeName)) {
             // Complete! Make the icon glow
             im.addEnchant(Enchantment.ARROW_DAMAGE, 0, true);
-            if (!plugin.getServer().getVersion().contains("1.7")) {
+            if (!Bukkit.getVersion().contains("1.7")) {
                 im.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             }
             complete = true;

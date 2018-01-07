@@ -1,20 +1,3 @@
-/*******************************************************************************
- * This file is part of ASkyBlock.
- *
- *     ASkyBlock is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     ASkyBlock is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with ASkyBlock.  If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-
 package com.wasteofplastic.askyblock;
 
 import com.wasteofplastic.askyblock.util.Util;
@@ -144,7 +127,7 @@ public class SafeSpotTeleport {
             final ChunkSnapshot spawnChunkFinal = spawnChunk;
             final Location spawnLocFinal = spawnLoc;
 
-            plugin.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
 
                 /**
                  * Returns true if the location is a safe one.
@@ -211,7 +194,9 @@ public class SafeSpotTeleport {
                         }
                     }
                     return false;
-                }                @SuppressWarnings("deprecation")
+                }
+
+                @SuppressWarnings("deprecation")
                 @Override
                 public void run() {
                     // Find a safe spot, defined as a solid block, with 2 air spaces above it
@@ -292,7 +277,7 @@ public class SafeSpotTeleport {
                         z = spawnLocFinal.getBlockZ() - spawnChunkFinal.getZ() * 16;
                         if (checkBlock(spawnChunkFinal, x, y, z, worldHeight)) {
                             // Return to main thread and teleport the player
-                            plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
+                            Bukkit.getScheduler().runTask(plugin, new Runnable() {
 
                                 @Override
                                 public void run() {
@@ -313,7 +298,7 @@ public class SafeSpotTeleport {
                         final Vector spot = new Vector((16 * safeChunk.getX()) + 0.5D, 1, (16 * safeChunk.getZ()) + 0.5D).add(
                                 safeSpotInChunk);
                         // Return to main thread and teleport the player
-                        plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
+                        Bukkit.getScheduler().runTask(plugin, new Runnable() {
 
                             @Override
                             public void run() {
@@ -329,7 +314,7 @@ public class SafeSpotTeleport {
                         });
                     } else {
                         // We did not find a spot
-                        plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
+                        Bukkit.getScheduler().runTask(plugin, new Runnable() {
 
                             @Override
                             public void run() {
@@ -367,7 +352,7 @@ public class SafeSpotTeleport {
     private NMSAbstraction checkVersion() throws ClassNotFoundException, IllegalArgumentException,
     SecurityException, InstantiationException, IllegalAccessException, InvocationTargetException,
     NoSuchMethodException {
-	String serverPackageName = plugin.getServer().getClass().getPackage().getName();
+	String serverPackageName = Bukkit.getClass().getPackage().getName();
 	String pluginPackageName = plugin.getClass().getPackage().getName();
 	String version = serverPackageName.substring(serverPackageName.lastIndexOf('.') + 1);
 	Class<?> clazz;

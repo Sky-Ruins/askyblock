@@ -83,7 +83,7 @@ public class IslandGuard1_9 implements Listener {
         if (!Settings.allowPushing) {
             // try to remove the team from the scoreboard
             try {
-                ScoreboardManager manager = plugin.getServer().getScoreboardManager();
+                ScoreboardManager manager = Bukkit.getScoreboardManager();
                 if (manager != null) {
                     Scoreboard scoreboard = manager.getMainScoreboard();
                     if (scoreboard != null) {
@@ -505,7 +505,7 @@ public class IslandGuard1_9 implements Listener {
             UUID uuid = ((Player) projectile.getShooter()).getUniqueId();
             // Store it and remove it when the effect is gone
             thrownPotions.put(e.getAreaEffectCloud().getEntityId(), uuid);
-            plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable() {
+            Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
 
                 @Override
                 public void run() {
@@ -613,7 +613,7 @@ public class IslandGuard1_9 implements Listener {
      * @return true if allowed
      */
     private boolean actionAllowed(UUID uuid, Location location, SettingsFlag flag) {
-        Player player = plugin.getServer().getPlayer(uuid);
+        Player player = Bukkit.getPlayer(uuid);
         if (player == null) {
             return actionAllowed(location, flag);
         }

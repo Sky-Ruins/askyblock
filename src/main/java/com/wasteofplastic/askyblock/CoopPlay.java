@@ -1,20 +1,3 @@
-/*******************************************************************************
- * This file is part of ASkyBlock.
- *
- *     ASkyBlock is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     ASkyBlock is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with ASkyBlock.  If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-
 package com.wasteofplastic.askyblock;
 
 import com.wasteofplastic.askyblock.events.CoopJoinEvent;
@@ -32,10 +15,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -88,7 +69,7 @@ public class CoopPlay {
                     return;
                 }
 
-                Player player = plugin.getServer().getPlayer(uuid);
+                Player player = Bukkit.getPlayer(uuid);
                 String msg = plugin.myLocale().coopInvited.replace("[name]", requester.getName())
                         .replace("[player]", newPlayer.getName());
                 if (player != null) {
@@ -107,7 +88,7 @@ public class CoopPlay {
         }
 
         final CoopJoinEvent event = new CoopJoinEvent(newPlayer.getUniqueId(), coopIsland, requester.getUniqueId());
-        plugin.getServer().getPluginManager().callEvent(event);
+        Bukkit.getPluginManager().callEvent(event);
         if (event.isCancelled()) {
             return false;
         }
@@ -137,7 +118,7 @@ public class CoopPlay {
             Island coopIsland = plugin.getGrid().getIsland(requester.getUniqueId());
             if (coopIsland != null) {
                 final CoopLeaveEvent event = new CoopLeaveEvent(targetPlayerUUID, requester.getUniqueId(), coopIsland);
-                plugin.getServer().getPluginManager().callEvent(event);
+                Bukkit.getPluginManager().callEvent(event);
                 if (!event.isCancelled()) {
                     removed = coopPlayers.get(targetPlayerUUID).remove(coopIsland.getCenter()) != null;
                 }
@@ -269,27 +250,21 @@ public class CoopPlay {
      */
     public void clearMyInvitedCoops(Player clearer) {
         Island coopIsland = plugin.getGrid().getIsland(clearer.getUniqueId());
-        for (UUID uuid : coopPlayers.keySet()) {
-            Iterator<Entry<Location, UUID>> en = coopPlayers.get(uuid).entrySet().iterator();
-            while (en.hasNext()) {
-                Entry<Location, UUID> entry = en.next();
-                if (entry.getValue().equals(clearer.getUniqueId())) {
-                    final CoopLeaveEvent event = new CoopLeaveEvent(uuid, clearer.getUniqueId(), coopIsland);
-                    plugin.getServer().getPluginManager().callEvent(event);
-                    if (!event.isCancelled()) {
-                        Player target = plugin.getServer().getPlayer(uuid);
-                        if (target != null) {
-                            Util.sendMessage(target,
-                                    ChatColor.RED + plugin.myLocale(uuid).coopRemoved.replace("[name]", clearer.getName()));
-                        } else {
-                            plugin.getMessages().setMessage(uuid,
-                                    ChatColor.RED + plugin.myLocale(uuid).coopRemoved.replace("[name]", clearer.getName()));
-                        }
-                        en.remove();
+        coopPlayers.keySet().forEach(uuid -> coopPlayers.get(uuid).forEach((key, value) -> {
+            if (value.equals(clearer.getUniqueId())) {
+                final CoopLeaveEvent event = new CoopLeaveEvent(uuid, clearer.getUniqueId(), coopIsland);
+                Bukkit.getPluginManager().callEvent(event);
+                if (!event.isCancelled()) {
+                    Player target = Bukkit.getPlayer(uuid);
+                    String msg = plugin.myLocale(uuid).coopRemoved.replace("[name]", clearer.getName());
+                    if (target != null) {
+                        Util.sendMessage(target, ChatColor.RED + msg);
+                    } else {
+                        plugin.getMessages().setMessage(uuid, ChatColor.RED + msg);
                     }
                 }
             }
-        }
+        }));
     }
 
     /**

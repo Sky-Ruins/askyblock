@@ -1,20 +1,3 @@
-/*******************************************************************************
- * This file is part of ASkyBlock.
- *
- *     ASkyBlock is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     ASkyBlock is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with ASkyBlock.  If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-
 package com.wasteofplastic.askyblock.panels;
 
 import com.google.common.collect.BiMap;
@@ -209,7 +192,7 @@ public class SettingsPanel implements Listener {
                             pvpCoolDown.remove(player.getUniqueId());
                         }
                         // Warn players on the island
-                        for (Player p : plugin.getServer().getOnlinePlayers()) {
+                        for (Player p : Bukkit.getOnlinePlayers()) {
                             if (island.onIsland(p.getLocation())) {
                                 if (flag.equals(SettingsFlag.NETHER_PVP)) {
                                     Util.sendMessage(p,
@@ -223,7 +206,7 @@ public class SettingsPanel implements Listener {
                                                     + plugin.myLocale(p.getUniqueId()).igsAllowed);
                                 }
 
-                                if (plugin.getServer().getVersion().contains("(MC: 1.8") || plugin.getServer()
+                                if (Bukkit.getVersion().contains("(MC: 1.8") || Bukkit
                                         .getVersion()
                                         .contains("(MC: 1.7")) {
                                     player.getWorld().playSound(player.getLocation(), Sound.valueOf("ARROW_HIT"), 1F, 1F);
@@ -237,7 +220,7 @@ public class SettingsPanel implements Listener {
                         // Update warp signs
                         final List<UUID> members = island.getMembers();
                         // Run one tick later because text gets updated at the end of tick
-                        plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
+                        Bukkit.getScheduler().runTask(plugin, new Runnable() {
 
                             @Override
                             public void run() {
@@ -258,7 +241,7 @@ public class SettingsPanel implements Listener {
                         // Update warp signs
                         final List<UUID> members = island.getMembers();
                         // Run one tick later because text gets updated at the end of tick
-                        plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
+                        Bukkit.getScheduler().runTask(plugin, new Runnable() {
 
                             @Override
                             public void run() {
@@ -269,7 +252,7 @@ public class SettingsPanel implements Listener {
                             }
                         });
                         // Warn players of change
-                        for (Player p : plugin.getServer().getOnlinePlayers()) {
+                        for (Player p : Bukkit.getOnlinePlayers()) {
                             if (island.onIsland(p.getLocation())) {
                                 // Deactivate PVP
                                 if (flag.equals(SettingsFlag.NETHER_PVP)) {
@@ -282,7 +265,7 @@ public class SettingsPanel implements Listener {
                                             ChatColor.GREEN + plugin.myLocale(p.getUniqueId()).igs.get(SettingsFlag.PVP) + " " + plugin
                                                     .myLocale(p.getUniqueId()).igsDisallowed);
                                 }
-                                if (plugin.getServer().getVersion().contains("(MC: 1.8") || plugin.getServer()
+                                if (Bukkit.getVersion().contains("(MC: 1.8") || Bukkit
                                         .getVersion()
                                         .contains("(MC: 1.7")) {
                                     p.getWorld().playSound(p.getLocation(), Sound.valueOf("FIREWORK_TWINKLE"), 1F, 1F);

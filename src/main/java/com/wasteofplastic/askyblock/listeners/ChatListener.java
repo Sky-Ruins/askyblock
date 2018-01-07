@@ -1,20 +1,3 @@
-/*******************************************************************************
- * This file is part of ASkyBlock.
- *
- *     ASkyBlock is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     ASkyBlock is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with ASkyBlock.  If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-
 package com.wasteofplastic.askyblock.listeners;
 
 import com.wasteofplastic.askyblock.ASkyBlock;
@@ -68,7 +51,7 @@ public class ChatListener implements Listener {
         this.playerChallengeLevels = new ConcurrentHashMap<UUID, String>();
         this.plugin = plugin;
         // Add all online player Levels
-        for (Player player : plugin.getServer().getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             playerLevels.put(player.getUniqueId(), String.valueOf(plugin.getPlayers().getIslandLevel(player.getUniqueId())));
             playerChallengeLevels.put(player.getUniqueId(), plugin.getChallenges().getChallengeLevel(player));
         }
@@ -155,7 +138,7 @@ public class ChatListener implements Listener {
                         + message;
             }
             for (UUID teamMember : teamMembers) {
-                Player teamPlayer = plugin.getServer().getPlayer(teamMember);
+                Player teamPlayer = Bukkit.getPlayer(teamMember);
                 if (teamPlayer != null) {
                     Util.sendMessage(teamPlayer, message);
                     if (!teamMember.equals(playerUUID)) {
@@ -165,7 +148,7 @@ public class ChatListener implements Listener {
             }
             // Spy function
             if (onLine) {
-                for (Player onlinePlayer : plugin.getServer().getOnlinePlayers()) {
+                for (Player onlinePlayer : Bukkit.getOnlinePlayers()) {
                     if (spies.contains(onlinePlayer.getUniqueId()) && onlinePlayer.hasPermission(Settings.PERMPREFIX + "mod.spy")) {
                         Util.sendMessage(onlinePlayer, ChatColor.RED + "[TCSpy] " + ChatColor.WHITE + message);
                     }

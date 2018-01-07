@@ -1,20 +1,3 @@
-/*******************************************************************************
- * This file is part of ASkyBlock.
- *
- *     ASkyBlock is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     ASkyBlock is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with ASkyBlock.  If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-
 package com.wasteofplastic.askyblock.listeners;
 
 import com.wasteofplastic.askyblock.ASkyBlock;
@@ -187,7 +170,7 @@ public class AcidInventory implements Listener {
             if (!nms.isPotion(e.getItem())) {
                 plugin.getLogger().info(e.getPlayer().getName() + " " + plugin.myLocale().drankAcidAndDied);
                 if (!Settings.muteDeathMessages) {
-                    for (Player p : plugin.getServer().getOnlinePlayers()) {
+                    for (Player p : Bukkit.getOnlinePlayers()) {
                         Util.sendMessage(p, e.getPlayer().getName() + " " + plugin.myLocale(p.getUniqueId()).drankAcid);
                     }
                 }
@@ -265,7 +248,7 @@ public class AcidInventory implements Listener {
                 || lastBlock.getType().equals(Material.CAULDRON)) {
             // They *may* have filled a bottle with water
             // Check inventory for POTIONS in a tick
-            plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
+            Bukkit.getScheduler().runTask(plugin, new Runnable() {
                 @Override
                 public void run() {
                     // plugin.getLogger().info("Checking inventory");

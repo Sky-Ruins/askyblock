@@ -108,7 +108,7 @@ public class Players {
         // Load in from YAML file
         this.playerName = playerInfo.getString("playerName", "");
         if (playerName.isEmpty()) {
-            Player player = plugin.getServer().getPlayer(uuid);
+            Player player = Bukkit.getPlayer(uuid);
             if (player != null && player.hasMetadata("NPC")) {
                 //plugin.getLogger().info("DEBUG: Entity is NPC");
                 playerName = player.getUniqueId().toString();
@@ -116,7 +116,7 @@ public class Players {
                 playerName = uuid.toString();
                 //plugin.getLogger().info("DEBUG: Entity is player");
                 try {
-                    OfflinePlayer offlinePlayer = plugin.getServer().getOfflinePlayer(uuid);
+                    OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(uuid);
                     if (offlinePlayer != null && offlinePlayer.getName() != null) {
                         playerName = offlinePlayer.getName();
                     }

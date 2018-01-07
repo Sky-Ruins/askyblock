@@ -888,7 +888,7 @@ public class Schematic {
     		World world = loc.getWorld();
 
     	    player.teleport(world.getSpawnLocation());
-    	    plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable() {
+    	    Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
 
     		@Override
     		public void run() {
@@ -1243,18 +1243,18 @@ public class Schematic {
             plugin.getPlayers().setInTeleport(player.getUniqueId(), true);
             //player.setInvulnerable(true);
             // Check distance. If it's too close, warp to spawn to try to clear the client's cache
-            //plugin.getLogger().info("DEBUG: view dist = " + plugin.getServer().getViewDistance());
+            //plugin.getLogger().info("DEBUG: view dist = " + Bukkit.getViewDistance());
             if (player.getWorld().equals(world)) {
                 //plugin.getLogger().info("DEBUG: same world");
                 int distSq = (int) ((player.getLocation().distanceSquared(loc)
                         - (Settings.islandDistance * Settings.islandDistance) / 16));
                 //plugin.getLogger().info("DEBUG:  distsq = " + distSq);
-                if (plugin.getServer().getViewDistance() * plugin.getServer().getViewDistance() < distSq) {
+                if (Bukkit.getViewDistance() * Bukkit.getViewDistance() < distSq) {
                     //plugin.getLogger().info("DEBUG: teleporting");
                     player.teleport(world.getSpawnLocation());
                 }
             }
-            plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable() {
+            Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
 
                 @Override
                 public void run() {
@@ -1272,7 +1272,7 @@ public class Schematic {
                             //plugin.getLogger().info("DEBUG: title " + player.getName() + " subtitle {\"text\":\"" + plugin.myLocale(player
                             // .getUniqueId()).islandSubTitle + "\", \"color\":\"" + plugin.myLocale(player.getUniqueId()).islandSubTitleColor +
                             // "\"}");
-                            plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(),
+                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
                                     "minecraft:title " + player.getName() + " subtitle {\"text\":\"" + plugin
                                             .myLocale(player.getUniqueId()).islandSubTitle.replace("[player]", player.getName())
                                             + "\", \"color\":\""
@@ -1281,7 +1281,7 @@ public class Schematic {
                         if (!plugin.myLocale(player.getUniqueId()).islandTitle.isEmpty()) {
                             //plugin.getLogger().info("DEBUG: title " + player.getName() + " title {\"text\":\"" + plugin.myLocale(player
                             // .getUniqueId()).islandTitle + "\", \"color\":\"" + plugin.myLocale(player.getUniqueId()).islandTitleColor + "\"}");
-                            plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(),
+                            Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
                                     "minecraft:title " + player.getName() + " title {\"text\":\"" + plugin.myLocale(
                                             player.getUniqueId()).islandTitle
                                             .replace("[player]", player.getName()) + "\", \"color\":\"" + plugin
@@ -1294,8 +1294,8 @@ public class Schematic {
                             // ).islandDonate + "\",\"color\":\"" + plugin.myLocale(player.getUniqueId()).islandDonateColor + "\",
                             // \"clickEvent\":{\"action\":\"open_url\",\"value\":\""
                             //                + plugin.myLocale(player.getUniqueId()).islandURL + "\"}}");
-                            plugin.getServer().dispatchCommand(
-                                    plugin.getServer().getConsoleSender(),
+                            Bukkit.dispatchCommand(
+                                    Bukkit.getConsoleSender(),
                                     "minecraft:tellraw " + player.getName() + " {\"text\":\"" + plugin.myLocale(
                                             player.getUniqueId()).islandDonate
                                             .replace("[player]", player.getName()) + "\",\"color\":\"" + plugin
@@ -1492,7 +1492,7 @@ public class Schematic {
             if (!plugin.myLocale(player.getUniqueId()).islandSubTitle.isEmpty()) {
                 //plugin.getLogger().info("DEBUG: title " + player.getName() + " subtitle {\"text\":\"" + plugin.myLocale(player.getUniqueId())
                 // .islandSubTitle + "\", \"color\":\"" + plugin.myLocale(player.getUniqueId()).islandSubTitleColor + "\"}");
-                plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(),
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
                         "minecraft:title " + player.getName() + " subtitle {\"text\":\"" + plugin.myLocale(
                                 player.getUniqueId()).islandSubTitle
                                 .replace("[player]", player.getName()) + "\", \"color\":\"" + plugin
@@ -1501,7 +1501,7 @@ public class Schematic {
             if (!plugin.myLocale(player.getUniqueId()).islandTitle.isEmpty()) {
                 //plugin.getLogger().info("DEBUG: title " + player.getName() + " title {\"text\":\"" + plugin.myLocale(player.getUniqueId())
                 // .islandTitle + "\", \"color\":\"" + plugin.myLocale(player.getUniqueId()).islandTitleColor + "\"}");
-                plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(),
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
                         "minecraft:title " + player.getName() + " title {\"text\":\"" + plugin.myLocale(
                                 player.getUniqueId()).islandTitle
                                 .replace("[player]", player.getName()) + "\", \"color\":\"" + plugin.myLocale(
@@ -1514,8 +1514,8 @@ public class Schematic {
                 // .islandDonate + "\",\"color\":\"" + plugin.myLocale(player.getUniqueId()).islandDonateColor + "\",
                 // \"clickEvent\":{\"action\":\"open_url\",\"value\":\""
                 //                + plugin.myLocale(player.getUniqueId()).islandURL + "\"}}");
-                plugin.getServer().dispatchCommand(
-                        plugin.getServer().getConsoleSender(),
+                Bukkit.dispatchCommand(
+                        Bukkit.getConsoleSender(),
                         "minecraft:tellraw " + player.getName() + " {\"text\":\"" + plugin.myLocale(player.getUniqueId()).islandDonate
                                 .replace("[player]", player.getName()) + "\",\"color\":\"" + plugin.myLocale(
                                 player.getUniqueId()).islandDonateColor

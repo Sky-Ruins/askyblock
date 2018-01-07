@@ -1,20 +1,3 @@
-/*******************************************************************************
- * This file is part of ASkyBlock.
- *
- *     ASkyBlock is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     ASkyBlock is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with ASkyBlock.  If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-
 package com.wasteofplastic.askyblock;
 
 import com.wasteofplastic.askyblock.util.Util;
@@ -127,7 +110,7 @@ public class Messages {
         List<UUID> teamMembers = plugin.getPlayers().getMembers(teamLeader);
         for (UUID member : teamMembers) {
             // getLogger().info("DEBUG: trying UUID " + member.toString());
-            if (plugin.getServer().getPlayer(member) == null) {
+            if (Bukkit.getPlayer(member) == null) {
                 // Offline player
                 setMessage(member, message);
             }
@@ -143,7 +126,7 @@ public class Messages {
      */
     public boolean setMessage(UUID playerUUID, String message) {
         // getLogger().info("DEBUG: received message - " + message);
-        Player player = plugin.getServer().getPlayer(playerUUID);
+        Player player = Bukkit.getPlayer(playerUUID);
         // Check if player is online
         if (player != null) {
             if (player.isOnline()) {
@@ -208,9 +191,9 @@ public class Messages {
         List<UUID> teamMembers = plugin.getPlayers().getMembers(teamLeader);
         for (UUID member : teamMembers) {
             // getLogger().info("DEBUG: trying UUID " + member.toString());
-            if (!member.equals(playerUUID) && plugin.getServer().getPlayer(member) != null) {
+            if (!member.equals(playerUUID) && Bukkit.getPlayer(member) != null) {
                 // Online player
-                Util.sendMessage(plugin.getServer().getPlayer(member), message);
+                Util.sendMessage(Bukkit.getPlayer(member), message);
             }
         }
     }

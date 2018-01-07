@@ -615,7 +615,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
             // Fire event
             final Island island = plugin.getGrid().getIsland(teamLeader);
             final IslandJoinEvent event = new IslandJoinEvent(playerUUID, island);
-            plugin.getServer().getPluginManager().callEvent(event);
+            Bukkit.getPluginManager().callEvent(event);
         }
         return true;
     }
@@ -653,7 +653,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
             plugin.getPlayers().setIslandLocation(playerUUID, null);
             plugin.getPlayers().setTeamIslandLocation(playerUUID, null);
             if (!makeLeader) {
-                OfflinePlayer offlinePlayer = plugin.getServer().getOfflinePlayer(playerUUID);
+                OfflinePlayer offlinePlayer = Bukkit.getOfflinePlayer(playerUUID);
                 if (offlinePlayer.isOnline()) {
                     // Check perms
                     if (!((Player) offlinePlayer).hasPermission(Settings.PERMPREFIX + "command.leaveexempt")) {
@@ -676,7 +676,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
             if (teamLeader != null) {
                 final Island island = plugin.getGrid().getIsland(teamLeader);
                 final IslandLeaveEvent event = new IslandLeaveEvent(playerUUID, island);
-                plugin.getServer().getPluginManager().callEvent(event);
+                Bukkit.getPluginManager().callEvent(event);
             }
         } else {
             // Ex-Leaders keeps their island, but the rest of the team members are
@@ -879,7 +879,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
         plugin.getGrid().saveGrid();
         // Done - fire event
         final IslandNewEvent event = new IslandNewEvent(player, schematic, myIsland);
-        plugin.getServer().getPluginManager().callEvent(event);
+        Bukkit.getPluginManager().callEvent(event);
         //plugin.getLogger().info("DEBUG: Done! " + (System.nanoTime()- time) * 0.000001);
     }
 
@@ -890,7 +890,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
      * @param player
      */
     private void pastePartner(final Schematic schematic, final Location loc, final Player player) {
-        plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable() {
+        Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
 
             @Override
             public void run() {
@@ -1262,7 +1262,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                             // Check if team members are online
                             boolean online = false;
                             for (UUID teamMember : plugin.getPlayers().getMembers(playerUUID)) {
-                                if (!teamMember.equals(playerUUID) && plugin.getServer().getPlayer(teamMember) != null) {
+                                if (!teamMember.equals(playerUUID) && Bukkit.getPlayer(teamMember) != null) {
                                     online = true;
                                 }
                             }
@@ -1379,7 +1379,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                     } else {
                         if (!island.isLocked()) {
                             // Remove any visitors
-                            for (Player target : plugin.getServer().getOnlinePlayers()) {
+                            for (Player target : Bukkit.getOnlinePlayers()) {
                                 if (target == null || target.hasMetadata("NPC") || target.isOp() || player.equals(target)
                                         || VaultHelper
                                         .checkPerm(target, Settings.PERMPREFIX + "mod.bypassprotect")) {
@@ -1602,7 +1602,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                 .replace("[seconds]", String.valueOf(Settings.resetConfirmWait)));
                         if (!confirm.containsKey(playerUUID) || !confirm.get(playerUUID)) {
                             confirm.put(playerUUID, true);
-                            plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable() {
+                            Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
                                 @Override
                                 public void run() {
                                     confirm.put(playerUUID, false);
@@ -2105,8 +2105,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                             }
                             Util.sendMessage(player,
                                     ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).inviteyouHaveJoinedAnIsland);
-                            if (plugin.getServer().getPlayer(inviteList.get(playerUUID)) != null) {
-                                Util.sendMessage(plugin.getServer().getPlayer(inviteList.get(playerUUID)),
+                            if (Bukkit.getPlayer(inviteList.get(playerUUID)) != null) {
+                                Util.sendMessage(Bukkit.getPlayer(inviteList.get(playerUUID)),
                                         ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).invitehasJoinedYourIsland
                                                 .replace("[name]", player.getName()));
                             }
@@ -2198,8 +2198,8 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                 Util.sendMessage(player,
                                         ChatColor.YELLOW + plugin.myLocale(player.getUniqueId()).leaveyouHaveLeftTheIsland);
                                 // Tell the leader if they are online
-                                if (plugin.getServer().getPlayer(teamLeader) != null) {
-                                    Player leader = plugin.getServer().getPlayer(teamLeader);
+                                if (Bukkit.getPlayer(teamLeader) != null) {
+                                    Player leader = Bukkit.getPlayer(teamLeader);
                                     Util.sendMessage(leader, ChatColor.RED + plugin.myLocale(teamLeader).leavenameHasLeftYourIsland
                                             .replace("[name]", player.getName()));
                                 } else {
@@ -2652,14 +2652,14 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                                     ChatColor.BOLD + "" + ChatColor.RED + plugin.myLocale(player.getUniqueId()).igs
                                                             .get(SettingsFlag.PVP) + " " + plugin.myLocale(
                                                             player.getUniqueId()).igsAllowed);
-                                            if (plugin.getServer().getVersion().contains("(MC: 1.8") || plugin.getServer().getVersion()
+                                            if (Bukkit.getVersion().contains("(MC: 1.8") || Bukkit.getVersion()
                                                     .contains("(MC: 1.7")) {
                                                 player.getWorld().playSound(player.getLocation(), Sound.valueOf("ARROW_HIT"), 1F, 1F);
                                             } else {
                                                 player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ARROW_HIT, 1F, 1F);
                                             }
                                         } else {
-                                            if (plugin.getServer().getVersion().contains("(MC: 1.8") || plugin.getServer().getVersion()
+                                            if (Bukkit.getVersion().contains("(MC: 1.8") || Bukkit.getVersion()
                                                     .contains("(MC: 1.7")) {
                                                 player.getWorld()
                                                         .playSound(player.getLocation(), Sound.valueOf("BAT_TAKEOFF"), 1F, 1F);
@@ -2701,7 +2701,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                         // Team invite a player command
                         if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "team.create")) {
                             // Only online players can be invited
-                            Player invitedPlayer = plugin.getServer().getPlayer(split[1]);
+                            Player invitedPlayer = Bukkit.getPlayer(split[1]);
                             if (invitedPlayer == null) {
                                 Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).errorOfflinePlayer);
                                 return true;
@@ -2800,7 +2800,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                             }
                                             // Start timeout on invite
                                             if (Settings.inviteTimeout > 0) {
-                                                plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable() {
+                                                Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
 
                                                     @Override
                                                     public void run() {
@@ -2808,13 +2808,13 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                                                 invitedPlayerUUID)
                                                                 .equals(playerUUID)) {
                                                             inviteList.remove(invitedPlayerUUID);
-                                                            if (plugin.getServer().getPlayer(playerUUID) != null) {
-                                                                Util.sendMessage(plugin.getServer().getPlayer(playerUUID),
+                                                            if (Bukkit.getPlayer(playerUUID) != null) {
+                                                                Util.sendMessage(Bukkit.getPlayer(playerUUID),
                                                                         ChatColor.YELLOW + plugin
                                                                                 .myLocale(player.getUniqueId()).inviteremovingInvite);
                                                             }
-                                                            if (plugin.getServer().getPlayer(invitedPlayerUUID) != null) {
-                                                                Util.sendMessage(plugin.getServer().getPlayer(invitedPlayerUUID),
+                                                            if (Bukkit.getPlayer(invitedPlayerUUID) != null) {
+                                                                Util.sendMessage(Bukkit.getPlayer(invitedPlayerUUID),
                                                                         ChatColor.YELLOW + plugin
                                                                                 .myLocale(player.getUniqueId()).inviteremovingInvite);
                                                             }
@@ -2869,7 +2869,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                     }
                                     // Start timeout on invite
                                     if (Settings.inviteTimeout > 0) {
-                                        plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable() {
+                                        Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
 
                                             @Override
                                             public void run() {
@@ -2877,13 +2877,13 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                                 if (inviteList.containsKey(invitedPlayerUUID) && inviteList.get(invitedPlayerUUID)
                                                         .equals(playerUUID)) {
                                                     inviteList.remove(invitedPlayerUUID);
-                                                    if (plugin.getServer().getPlayer(playerUUID) != null) {
-                                                        Util.sendMessage(plugin.getServer().getPlayer(playerUUID),
+                                                    if (Bukkit.getPlayer(playerUUID) != null) {
+                                                        Util.sendMessage(Bukkit.getPlayer(playerUUID),
                                                                 ChatColor.YELLOW + plugin.myLocale(
                                                                         player.getUniqueId()).inviteremovingInvite);
                                                     }
-                                                    if (plugin.getServer().getPlayer(invitedPlayerUUID) != null) {
-                                                        Util.sendMessage(plugin.getServer().getPlayer(invitedPlayerUUID),
+                                                    if (Bukkit.getPlayer(invitedPlayerUUID) != null) {
+                                                        Util.sendMessage(Bukkit.getPlayer(invitedPlayerUUID),
                                                                 ChatColor.YELLOW + plugin.myLocale(
                                                                         player.getUniqueId()).inviteremovingInvite);
                                                     }
@@ -2910,7 +2910,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                             return true;
                         }
                         // Only online players can be cooped
-                        Player target = plugin.getServer().getPlayer(split[1]);
+                        Player target = Bukkit.getPlayer(split[1]);
                         if (target == null) {
                             Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).errorOfflinePlayer);
                             return true;
@@ -2968,7 +2968,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                             return true;
                         }
                         // Target cannot be op
-                        Player target = plugin.getServer().getPlayer(targetPlayerUUID);
+                        Player target = Bukkit.getPlayer(targetPlayerUUID);
                         if (target != null) {
                             if (target.isOp() || VaultHelper.checkPerm(target, Settings.PERMPREFIX + "mod.bypassprotect")
                                     || VaultHelper.checkPerm(target, Settings.PERMPREFIX + "mod.bypassexpel")) {
@@ -3040,7 +3040,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                             Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).expelNotYourself);
                             return true;
                         }
-                        OfflinePlayer target = plugin.getServer().getOfflinePlayer(targetPlayerUUID);
+                        OfflinePlayer target = Bukkit.getOfflinePlayer(targetPlayerUUID);
                         // Remove them from the coop list
                         boolean coop = CoopPlay.getInstance().removeCoopPlayer(player, targetPlayerUUID);
                         if (coop) {
@@ -3094,9 +3094,9 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                             return true;
                         }
                         // Check online/offline status
-                        Player target = plugin.getServer().getPlayer(targetPlayerUUID);
+                        Player target = Bukkit.getPlayer(targetPlayerUUID);
                         // Get offline player
-                        OfflinePlayer offlineTarget = plugin.getServer().getOfflinePlayer(targetPlayerUUID);
+                        OfflinePlayer offlineTarget = Bukkit.getOfflinePlayer(targetPlayerUUID);
                         // Target cannot be op
                         if (offlineTarget.isOp()) {
                             Util.sendMessage(player,
@@ -3182,7 +3182,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                         }
                         // Notifications
                         // Online check
-                        Player target = plugin.getServer().getPlayer(targetPlayerUUID);
+                        Player target = Bukkit.getPlayer(targetPlayerUUID);
                         // Target
                         if (target != null) {
                             // Online
@@ -3193,7 +3193,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                             plugin.getMessages().setMessage(targetPlayerUUID,
                                     ChatColor.GREEN + plugin.myLocale(targetPlayerUUID).banLifted.replace("[name]", player.getName()));
                         }
-                        //OfflinePlayer offlineTarget = plugin.getServer().getOfflinePlayer(targetPlayerUUID);
+                        //OfflinePlayer offlineTarget = Bukkit.getOfflinePlayer(targetPlayerUUID);
                         // Player
                         Util.sendMessage(player,
                                 ChatColor.GREEN + plugin.myLocale(player.getUniqueId()).banLiftedSuccess.replace("[name]", split[1]));
@@ -3260,7 +3260,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                 TopTen.topTenAddEntry(playerUUID, 0);
 
                                 // If target is online
-                                Player target = plugin.getServer().getPlayer(targetPlayer);
+                                Player target = Bukkit.getPlayer(targetPlayer);
                                 if (target != null) {
                                     // plugin.getLogger().info("DEBUG: player is online");
                                     Util.sendMessage(target,
@@ -3283,7 +3283,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                                         // Some plugins may not want items to be dropped
                                                         Item drop = player.getWorld().dropItemNaturally(player.getLocation(), i);
                                                         PlayerDropItemEvent event = new PlayerDropItemEvent(target, drop);
-                                                        plugin.getServer().getPluginManager().callEvent(event);
+                                                        Bukkit.getPluginManager().callEvent(event);
                                                     } catch (Exception e) {
                                                     }
                                                 }
@@ -3403,7 +3403,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                                         addPlayertoTeam(targetPlayer, targetPlayer);
 
                                         // Check if online
-                                        Player target = plugin.getServer().getPlayer(targetPlayer);
+                                        Player target = Bukkit.getPlayer(targetPlayer);
                                         if (target == null) {
                                             plugin.getMessages()
                                                     .setMessage(targetPlayer,
@@ -3411,7 +3411,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
 
                                         } else {
                                             // Online
-                                            Util.sendMessage(plugin.getServer().getPlayer(targetPlayer),
+                                            Util.sendMessage(Bukkit.getPlayer(targetPlayer),
                                                     ChatColor.GREEN + plugin.myLocale(targetPlayer).makeLeaderyouAreNowTheOwner);
                                             // Check if new leader has a lower range permission than the island size
                                             boolean hasARangePerm = false;
@@ -3539,19 +3539,19 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                     ChatColor.BOLD + "" + ChatColor.RED + plugin.myLocale(player.getUniqueId()).igs.get(SettingsFlag.PVP) + " "
                             + plugin
                             .myLocale(player.getUniqueId()).igsAllowed);
-            if (plugin.getServer().getVersion().contains("(MC: 1.8") || plugin.getServer().getVersion().contains("(MC: 1.7")) {
+            if (Bukkit.getVersion().contains("(MC: 1.8") || Bukkit.getVersion().contains("(MC: 1.7")) {
                 player.getWorld().playSound(player.getLocation(), Sound.valueOf("ARROW_HIT"), 1F, 1F);
             } else {
                 player.getWorld().playSound(player.getLocation(), Sound.ENTITY_ARROW_HIT, 1F, 1F);
             }
         } else {
-            if (plugin.getServer().getVersion().contains("(MC: 1.8") || plugin.getServer().getVersion().contains("(MC: 1.7")) {
+            if (Bukkit.getVersion().contains("(MC: 1.8") || Bukkit.getVersion().contains("(MC: 1.7")) {
                 player.getWorld().playSound(player.getLocation(), Sound.valueOf("BAT_TAKEOFF"), 1F, 1F);
             } else {
                 player.getWorld().playSound(player.getLocation(), Sound.ENTITY_BAT_TAKEOFF, 1F, 1F);
             }
         }
-        Player warpOwner = plugin.getServer().getPlayer(foundWarp);
+        Player warpOwner = Bukkit.getPlayer(foundWarp);
         if (warpOwner != null && !warpOwner.equals(player)) {
             Util.sendMessage(warpOwner, plugin.myLocale(foundWarp).warpsPlayerWarped.replace("[name]", player.getName()));
         }
@@ -3626,7 +3626,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
             //new DeleteIslandByBlock(plugin, oldIsland);
             // Fire event
             final IslandResetEvent event = new IslandResetEvent(player, oldIsland.getCenter());
-            plugin.getServer().getPluginManager().callEvent(event);
+            Bukkit.getPluginManager().callEvent(event);
         } else {
             //plugin.getLogger().info("DEBUG oldisland = null!");
         }
@@ -3919,7 +3919,7 @@ public class IslandCmd implements CommandExecutor, TabCompleter {
                 }
                 if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "island.ban")
                         && (args[0].equalsIgnoreCase("ban"))) {
-                    for (Player banPlayer : plugin.getServer().getOnlinePlayers()) {
+                    for (Player banPlayer : Bukkit.getOnlinePlayers()) {
                         if (!banPlayer.isOp() && !VaultHelper.checkPerm(banPlayer, Settings.PERMPREFIX + "admin.noban")
                                 && !banPlayer.equals(player)
                                 && !plugin.getPlayers().getMembers(playerUUID).contains(banPlayer.getUniqueId())) {

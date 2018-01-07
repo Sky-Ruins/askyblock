@@ -1,20 +1,3 @@
-/*******************************************************************************
- * This file is part of ASkyBlock.
- *
- *     ASkyBlock is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     ASkyBlock is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with ASkyBlock.  If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-
 package com.wasteofplastic.askyblock.util;
 
 import com.wasteofplastic.askyblock.ASkyBlock;
@@ -466,14 +449,14 @@ public class Util {
      */
     public static void sendEnterExit(Player player, String message) {
         if (!Settings.showInActionBar
-                || plugin.getServer().getVersion().contains("(MC: 1.7")
-                || plugin.getServer().getVersion().contains("(MC: 1.8")
-                || plugin.getServer().getVersion().contains("(MC: 1.9")
-                || plugin.getServer().getVersion().contains("(MC: 1.10")) {
+                || Bukkit.getVersion().contains("(MC: 1.7")
+                || Bukkit.getVersion().contains("(MC: 1.8")
+                || Bukkit.getVersion().contains("(MC: 1.9")
+                || Bukkit.getVersion().contains("(MC: 1.10")) {
             sendMessage(player, message);
             return;
         }
-        plugin.getServer().dispatchCommand(plugin.getServer().getConsoleSender(),
+        Bukkit.dispatchCommand(Bukkit.getConsoleSender(),
                 "minecraft:title " + player.getName() + " actionbar {\"text\":\"" + ChatColor.stripColor(message) + "\"}");
     }
 
@@ -498,8 +481,8 @@ public class Util {
     @SuppressWarnings("deprecation")
     public static List<ItemStack> getPlayerInHandItems(Player player) {
         List<ItemStack> result = new ArrayList<ItemStack>(2);
-        if (plugin.getServer().getVersion().contains("(MC: 1.7")
-                || plugin.getServer().getVersion().contains("(MC: 1.8")) {
+        if (Bukkit.getVersion().contains("(MC: 1.7")
+                || Bukkit.getVersion().contains("(MC: 1.8")) {
             if (player.getItemInHand() != null) {
                 result.add(player.getItemInHand());
             }
@@ -522,8 +505,8 @@ public class Util {
      * @return true if they are holding an item of type type
      */
     public static boolean playerIsHolding(Player player, Material type) {
-        if (plugin.getServer().getVersion().contains("(MC: 1.7")
-                || plugin.getServer().getVersion().contains("(MC: 1.8")) {
+        if (Bukkit.getVersion().contains("(MC: 1.7")
+                || Bukkit.getVersion().contains("(MC: 1.8")) {
             if (player.getItemInHand() != null && player.getItemInHand().getType().equals(type)) {
                 return true;
             }
@@ -539,7 +522,7 @@ public class Util {
     }
 
     public static void runCommand(final Player player, final String string) {
-        plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
+        Bukkit.getScheduler().runTask(plugin, new Runnable() {
 
             @Override
             public void run() {

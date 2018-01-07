@@ -113,7 +113,7 @@ public class WarpSigns implements Listener {
             Entry<UUID, Location> en = it.next();
             if (en.getValue().equals(loc)) {
                 // Inform player
-                Player p = plugin.getServer().getPlayer(en.getKey());
+                Player p = Bukkit.getPlayer(en.getKey());
                 if (p != null) {
                     // Inform the player
                     Util.sendMessage(p, ChatColor.RED + plugin.myLocale(p.getUniqueId()).warpssignRemoved);
@@ -144,7 +144,7 @@ public class WarpSigns implements Listener {
 	if (reloadPanel) {
 	    // This is not done on shutdown
 	    if (Settings.useWarpPanel && plugin.getWarpPanel() != null) {
-		plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
+		Bukkit.getScheduler().runTask(plugin, new Runnable() {
 
 		    @Override
 		    public void run() {
@@ -269,7 +269,7 @@ public class WarpSigns implements Listener {
         saveWarpList();
         // Update warp signs
         // Run one tick later because text gets updated at the end of tick
-        plugin.getServer().getScheduler().runTask(plugin, () -> {
+        Bukkit.getScheduler().runTask(plugin, () -> {
             plugin.getWarpPanel().addWarp(playerUUID);
             plugin.getWarpPanel().updatePanel();
             Bukkit.getPluginManager().callEvent(new WarpCreateEvent(plugin, loc, playerUUID));
@@ -285,7 +285,7 @@ public class WarpSigns implements Listener {
         saveWarpList();
         // Update warp signs
         // Run one tick later because text gets updated at the end of tick
-        plugin.getServer().getScheduler().runTask(plugin, () -> plugin.getWarpPanel().updatePanel());
+        Bukkit.getScheduler().runTask(plugin, () -> plugin.getWarpPanel().updatePanel());
     }
 
     public Location getWarp(UUID playerUUID) {
@@ -366,7 +366,7 @@ public class WarpSigns implements Listener {
             } else {
                 UUID uuid = en.getKey();
                 // If never played, will be zero
-                long lastPlayed = plugin.getServer().getOfflinePlayer(uuid).getLastPlayed();
+                long lastPlayed = Bukkit.getOfflinePlayer(uuid).getLastPlayed();
                 // This aims to avoid the chance that players logged off at exactly the same time
                 if (!map.isEmpty() && map.containsKey(lastPlayed)) {
                     lastPlayed = map.firstKey() - 1;
@@ -378,7 +378,7 @@ public class WarpSigns implements Listener {
         Collection<UUID> result = map.descendingMap().values();
         // Fire event
         WarpListEvent event = new WarpListEvent(plugin, result);
-        plugin.getServer().getPluginManager().callEvent(event);
+        Bukkit.getPluginManager().callEvent(event);
         // Get the result of any changes by listeners
         result = event.getWarps();
         return result;
