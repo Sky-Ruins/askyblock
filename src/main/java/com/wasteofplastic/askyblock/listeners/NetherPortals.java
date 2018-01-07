@@ -91,9 +91,9 @@ public class NetherPortals implements Listener {
             event.setCancelled(true);
             // Same action for all worlds except the end itself
             if (!event.getFrom().getWorld().getEnvironment().equals(Environment.THE_END)) {
-                if (plugin.getServer().getWorld(Settings.worldName + "_the_end") != null) {
+                if (Bukkit.getWorld(Settings.worldName + "_the_end") != null) {
                     // The end exists
-                    Location end_place = plugin.getServer().getWorld(Settings.worldName + "_the_end").getSpawnLocation();
+                    Location end_place = Bukkit.getWorld(Settings.worldName + "_the_end").getSpawnLocation();
                     event.getEntity().teleport(end_place);
                     if (DEBUG) {
                         plugin.getLogger().info("DEBUG: Result teleported " + event.getEntityType() + " to " + end_place);
@@ -175,10 +175,10 @@ public class NetherPortals implements Listener {
             case END_PORTAL:
                 // Same action for all worlds except the end itself
                 if (!event.getFrom().getWorld().getEnvironment().equals(Environment.THE_END)) {
-                    if (plugin.getServer().getWorld(Settings.worldName + "_the_end") != null) {
+                    if (Bukkit.getWorld(Settings.worldName + "_the_end") != null) {
                         // The end exists
                         event.setCancelled(true);
-                        Location end_place = plugin.getServer().getWorld(Settings.worldName + "_the_end").getSpawnLocation();
+                        Location end_place = Bukkit.getWorld(Settings.worldName + "_the_end").getSpawnLocation();
                         if (GridManager.isSafeLocation(end_place)) {
                             event.getPlayer().teleport(end_place);
                             // event.getPlayer().sendBlockChange(end_place,
@@ -233,7 +233,7 @@ public class NetherPortals implements Listener {
                                 // Fire entry event
                                 Island islandTo = plugin.getGrid().getIslandAt(dest);
                                 final IslandEnterEvent event2 = new IslandEnterEvent(event.getPlayer().getUniqueId(), islandTo, dest);
-                                plugin.getServer().getPluginManager().callEvent(event2);
+                                Bukkit.getPluginManager().callEvent(event2);
                             } else {
                                 event.setCancelled(true);
                                 new SafeSpotTeleport(plugin, event.getPlayer(), plugin.getPlayers().getIslandLocation(playerUUID), 1);
@@ -241,7 +241,7 @@ public class NetherPortals implements Listener {
                                 Island islandTo = plugin.getGrid().getIslandAt(plugin.getPlayers().getIslandLocation(playerUUID));
                                 final IslandEnterEvent event2 = new IslandEnterEvent(event.getPlayer().getUniqueId(), islandTo,
                                         plugin.getPlayers().getIslandLocation(playerUUID));
-                                plugin.getServer().getPluginManager().callEvent(event2);
+                                Bukkit.getPluginManager().callEvent(event2);
                             }
                         } else {
                             // Home world is nether

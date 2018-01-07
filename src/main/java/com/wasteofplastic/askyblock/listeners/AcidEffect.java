@@ -1,20 +1,3 @@
-/*******************************************************************************
- * This file is part of ASkyBlock.
- *
- *     ASkyBlock is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     ASkyBlock is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with ASkyBlock.  If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-
 package com.wasteofplastic.askyblock.listeners;
 
 import com.wasteofplastic.askyblock.ASkyBlock;
@@ -229,7 +212,7 @@ public class AcidEffect implements Listener {
                                     // Check they are still in this world
                                 } else {
                                     player.damage((Settings.rainDamage - Settings.rainDamage * getDamageReduced(player)));
-                                    if (plugin.getServer().getVersion().contains("(MC: 1.8") || plugin.getServer().getVersion()
+                                    if (Bukkit.getVersion().contains("(MC: 1.8") || Bukkit.getVersion()
                                             .contains("(MC: 1.7")) {
                                         player.getWorld().playSound(playerLoc, Sound.valueOf("FIZZ"), 3F, 3F);
                                     } else {
@@ -292,7 +275,7 @@ public class AcidEffect implements Listener {
                     // Apply damage if there is any
                     if (Settings.acidDamage > 0D) {
                         player.damage((Settings.acidDamage - Settings.acidDamage * getDamageReduced(player)));
-                        if (plugin.getServer().getVersion().contains("(MC: 1.8") || plugin.getServer()
+                        if (Bukkit.getVersion().contains("(MC: 1.8") || Bukkit
                                 .getVersion()
                                 .contains("(MC: 1.7")) {
                             player.getWorld().playSound(playerLoc, Sound.valueOf("FIZZ"), 3F, 3F);

@@ -27,6 +27,7 @@ import org.bukkit.block.Block;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.scheduler.BukkitRunnable;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -40,8 +41,7 @@ import java.util.Set;
  */
 public class DeleteIslandChunk {
 
-    private Set<Pair> chunksToClear = new HashSet<Pair>();
-    //private HashMap<Location, Material> blocksToClear = new HashMap<Location,Material>();
+    private Set<Pair> chunksToClear = new HashSet<>();
     private NMSAbstraction nms = null;
 
     public DeleteIslandChunk(final ASkyBlock plugin, final Island island) {
@@ -54,115 +54,79 @@ public class DeleteIslandChunk {
         if (Settings.islandDistance - island.getProtectionSize() < 16) {
             cleanUpBlocks = true;
         }
-        int range = island.getProtectionSize() / 2 * +1;
-        final int minx = island.getMinProtectedX();
-        final int minz = island.getMinProtectedZ();
-        final int maxx = island.getMinProtectedX() + island.getProtectionSize();
-        final int maxz = island.getMinProtectedZ() + island.getProtectionSize();
-        // plugin.getLogger().info("DEBUG: protection limits are: " + minx +
-        // ", " + minz + " to " + maxx + ", " + maxz );
+        int range = island.getProtectionSize() / 2;
+        int minProtectedX = island.getMinProtectedX(), minProtectedZ = island.getMinProtectedZ();
+        final int minx = minProtectedX, minz = minProtectedZ;
+        final int maxx = minProtectedX + island.getProtectionSize(), maxz = minProtectedZ + island.getProtectionSize();
+
+        int blockX = island.getCenter().getBlockX(), blockZ = island.getCenter().getBlockZ();
         int islandSpacing = Settings.islandDistance - island.getProtectionSize();
-        int minxX = (island.getCenter().getBlockX() - range - islandSpacing);
-        int minzZ = (island.getCenter().getBlockZ() - range - islandSpacing);
-        int maxxX = (island.getCenter().getBlockX() + range + islandSpacing);
-        int maxzZ = (island.getCenter().getBlockZ() + range + islandSpacing);
-        // plugin.getLogger().info("DEBUG: absolute max limits are: " + minxX +
-        // ", " + minzZ + " to " + maxxX + ", " + maxzZ );
-        // get the chunks for these locations
+        int minxX = (blockX - range - islandSpacing), minzZ = (blockZ - range - islandSpacing);
+        int maxxX = (blockX + range + islandSpacing), maxzZ = (blockZ + range + islandSpacing);
+
         final Chunk minChunk = world.getBlockAt(minx, 0, minz).getChunk();
         final Chunk maxChunk = world.getBlockAt(maxx, 0, maxz).getChunk();
-
-        // Find out what chunks are within the island protection range
-        // plugin.getLogger().info("DEBUG: chunk limits are: " +
-        // (minChunk.getBlock(0, 0, 0).getLocation().getBlockX()) + ", " +
-        // (minChunk.getBlock(0, 0, 0).getLocation().getBlockZ())
-        // + " to " + (maxChunk.getBlock(15, 0, 15).getLocation().getBlockX()) +
-        // ", " + (maxChunk.getBlock(15, 0, 15).getLocation().getBlockZ()));
 
         for (int x = minChunk.getX(); x <= maxChunk.getX(); x++) {
             for (int z = minChunk.getZ(); z <= maxChunk.getZ(); z++) {
                 boolean regen = true;
 
-                if (world.getChunkAt(x, z).getBlock(0, 0, 0).getX() < minxX) {
-                    // plugin.getLogger().info("DEBUG: min x coord is less than absolute min! "
-                    // + minxX);
+                Chunk chunk = world.getChunkAt(x, z);
+                if (chunk.getBlock(0, 0, 0).getX() < minxX || chunk.getBlock(0, 0, 0).getZ() < minzZ
+                        || chunk.getBlock(15, 0, 15).getX() > maxxX || chunk.getBlock(15, 0, 15).getZ() > maxzZ) {
                     regen = false;
                 }
-                if (world.getChunkAt(x, z).getBlock(0, 0, 0).getZ() < minzZ) {
-                    // plugin.getLogger().info("DEBUG: min z coord is less than absolute min! "
-                    // + minzZ);
-                    regen = false;
-                }
-                if (world.getChunkAt(x, z).getBlock(15, 0, 15).getX() > maxxX) {
-                    // plugin.getLogger().info("DEBUG: max x coord is more than absolute max! "
-                    // + maxxX);
-                    regen = false;
-                }
-                if (world.getChunkAt(x, z).getBlock(15, 0, 15).getZ() > maxzZ) {
-                    // plugin.getLogger().info("DEBUG: max z coord in chunk is more than absolute max! "
-                    // + maxzZ);
-                    regen = false;
-                }
+
                 if (regen) {
                     world.regenerateChunk(x, z);
+                    World islandWorld = ASkyBlock.getIslandWorld();
                     if (Settings.newNether && Settings.createNether) {
-                        if (world.equals(ASkyBlock.getIslandWorld())) {
+                        if (world.equals(islandWorld)) {
                             ASkyBlock.getNetherWorld().regenerateChunk(x, z);
                         }
                         if (world.equals(ASkyBlock.getNetherWorld())) {
-                            ASkyBlock.getIslandWorld().regenerateChunk(x, z);
+                            islandWorld.regenerateChunk(x, z);
                         }
                     }
-                } else {
-                    // Add to clear up list if requested
-                    if (cleanUpBlocks) {
-                        chunksToClear.add(new Pair(x, z));
-                    }
+                } else if (cleanUpBlocks) {
+                    chunksToClear.add(new Pair(x, z));
                 }
             }
         }
-        // Remove from grid
         plugin.getGrid().deleteIsland(island.getCenter());
         // Clear up any chunks
         if (!chunksToClear.isEmpty()) {
             try {
                 nms = Util.checkVersion();
-            } catch (Exception ex) {
+            } catch (ClassNotFoundException | InstantiationException | InvocationTargetException | NoSuchMethodException | IllegalAccessException e) {
                 plugin.getLogger().warning("Cannot clean up blocks because there is no NMS acceleration available");
                 return;
             }
+
             plugin.getLogger().info("Island delete: There are " + chunksToClear.size() + " chunks that need to be cleared up.");
-            plugin.getLogger().info("Clean rate is " + Settings.cleanRate + " chunks per second. Should take ~" + Math
-                    .round(chunksToClear.size() / Settings.cleanRate) + "s");
+            plugin.getLogger().info("Clean rate is " + Settings.cleanRate + " chunks per second. Should take ~"
+                    + Math.round(chunksToClear.size() / Settings.cleanRate) + "s");
+
             new BukkitRunnable() {
-                @SuppressWarnings("deprecation")
                 @Override
                 public void run() {
                     Iterator<Pair> it = chunksToClear.iterator();
                     int count = 0;
                     while (it.hasNext() && count++ < Settings.cleanRate) {
                         Pair pair = it.next();
-                        //plugin.getLogger().info("DEBUG: There are " + chunksToClear.size() + " chunks that need to be cleared up");
-                        //plugin.getLogger().info("DEBUG: Deleting chunk " + pair.getLeft() + ", " + pair.getRight());                       
-                        // Check if coords are in island space
                         for (int x = 0; x < 16; x++) {
                             for (int z = 0; z < 16; z++) {
                                 int xCoord = pair.getLeft() * 16 + x;
                                 int zCoord = pair.getRight() * 16 + z;
                                 if (island.inIslandSpace(xCoord, zCoord)) {
-                                    //plugin.getLogger().info(xCoord + "," + zCoord + " is in island space - deleting column");
-                                    // Delete all the blocks here
                                     for (int y = 0; y < ASkyBlock.getIslandWorld().getMaxHeight(); y++) {
-                                        // Overworld
                                         Block b = ASkyBlock.getIslandWorld().getBlockAt(xCoord, y, zCoord);
                                         Material bt = b.getType();
                                         Material setTo = Material.AIR;
-                                        // Split depending on below or above water line
                                         if (y < Settings.seaHeight) {
                                             setTo = Material.STATIONARY_WATER;
                                         }
-                                        // Grab anything out of containers (do that it is
-                                        // destroyed)                                  
+
                                         switch (bt) {
                                             case CHEST:
                                             case TRAPPED_CHEST:
@@ -185,15 +149,13 @@ public class DeleteIslandChunk {
                                                 nms.setBlockSuperFast(b, setTo.getId(), (byte) 0, false);
                                                 break;
                                         }
-                                        // Nether, if it exists
+
                                         if (Settings.newNether && Settings.createNether
                                                 && y < ASkyBlock.getNetherWorld().getMaxHeight() - 8) {
                                             b = ASkyBlock.getNetherWorld().getBlockAt(xCoord, y, zCoord);
                                             bt = b.getType();
-                                            if (!b.equals(Material.AIR)) {
+                                            if (bt != Material.AIR) {
                                                 setTo = Material.AIR;
-                                                // Grab anything out of containers (do that it is
-                                                // destroyed)                                  
                                                 switch (bt) {
                                                     case CHEST:
                                                     case TRAPPED_CHEST:
@@ -218,7 +180,7 @@ public class DeleteIslandChunk {
                     }
                     if (chunksToClear.isEmpty()) {
                         plugin.getLogger().info("Finished island deletion");
-                        this.cancel();
+                        cancel();
                     }
                 }
             }.runTaskTimer(plugin, 0L, 20L);

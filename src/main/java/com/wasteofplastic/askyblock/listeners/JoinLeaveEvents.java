@@ -409,7 +409,7 @@ public class JoinLeaveEvents implements Listener {
             if (DEBUG) {
                 plugin.getLogger().info("DEBUG: Messages waiting!");
             }
-            plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable() {
+            Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
                 @Override
                 public void run() {
                     Util.sendMessage(player, ChatColor.AQUA + plugin.myLocale(playerUUID).newsHeadline);

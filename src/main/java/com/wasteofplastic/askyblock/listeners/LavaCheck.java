@@ -140,7 +140,7 @@ public class LavaCheck implements Listener {
             final Material prev = to.getType();
             // plugin.getLogger().info("To material was " +
             // to.getType().toString());
-            plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
+            Bukkit.getScheduler().runTask(plugin, new Runnable() {
                 @Override
                 public void run() {
                     // plugin.getLogger().info("To material is after 1 tick " +
@@ -148,7 +148,7 @@ public class LavaCheck implements Listener {
                     if ((prev.equals(Material.WATER) || prev.equals(Material.STATIONARY_WATER)) && to.getType()
                             .equals(Material.STONE)) {
                         to.setType(prev);
-                        if (plugin.getServer().getVersion().contains("(MC: 1.8") || plugin.getServer()
+                        if (Bukkit.getVersion().contains("(MC: 1.8") || Bukkit
                                 .getVersion()
                                 .contains("(MC: 1.7")) {
                             to.getWorld().playSound(to.getLocation(), Sound.valueOf("FIZZ"), 1F, 2F);
@@ -226,7 +226,7 @@ public class LavaCheck implements Listener {
                     //prevMat.add(r.getType());
                 }
                 // Check if they became cobblestone next tick
-                plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
+                Bukkit.getScheduler().runTask(plugin, new Runnable() {
                     @Override
                     public void run() {
                         Iterator<Block> blockIt = prevBlock.iterator();

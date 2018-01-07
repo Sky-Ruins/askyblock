@@ -354,7 +354,7 @@ public class IslandGuard implements Listener {
             }
             // Fire entry event
             final IslandEnterEvent event = new IslandEnterEvent(player.getUniqueId(), islandTo, e.getTo());
-            plugin.getServer().getPluginManager().callEvent(event);
+            Bukkit.getPluginManager().callEvent(event);
         } else if (islandTo == null && islandFrom != null) {
             // Leaving
             if (islandFrom.isSpawn()) {
@@ -374,7 +374,7 @@ public class IslandGuard implements Listener {
             }
             // Fire exit event
             final IslandExitEvent event = new IslandExitEvent(player.getUniqueId(), islandFrom, e.getFrom());
-            plugin.getServer().getPluginManager().callEvent(event);
+            Bukkit.getPluginManager().callEvent(event);
         } else if (islandTo != null && islandFrom != null && !islandTo.equals(islandFrom)) {
             // Adjacent islands or overlapping protections
             if (islandFrom.isSpawn()) {
@@ -400,10 +400,10 @@ public class IslandGuard implements Listener {
             }
             // Fire exit event
             final IslandExitEvent event = new IslandExitEvent(player.getUniqueId(), islandFrom, e.getFrom());
-            plugin.getServer().getPluginManager().callEvent(event);
+            Bukkit.getPluginManager().callEvent(event);
             // Fire entry event
             final IslandEnterEvent event2 = new IslandEnterEvent(player.getUniqueId(), islandTo, e.getTo());
-            plugin.getServer().getPluginManager().callEvent(event2);
+            Bukkit.getPluginManager().callEvent(event2);
         }
     }
 
@@ -504,7 +504,7 @@ public class IslandGuard implements Listener {
             }
             // Fire entry event
             final IslandEnterEvent event = new IslandEnterEvent(e.getPlayer().getUniqueId(), islandTo, e.getTo());
-            plugin.getServer().getPluginManager().callEvent(event);
+            Bukkit.getPluginManager().callEvent(event);
         } else if (islandTo == null && islandFrom != null) {
             // Leaving
             if (islandFrom.isSpawn()) {
@@ -524,7 +524,7 @@ public class IslandGuard implements Listener {
             }
             // Fire exit event
             final IslandExitEvent event = new IslandExitEvent(e.getPlayer().getUniqueId(), islandFrom, e.getFrom());
-            plugin.getServer().getPluginManager().callEvent(event);
+            Bukkit.getPluginManager().callEvent(event);
         } else if (islandTo != null && islandFrom != null && !islandTo.equals(islandFrom)) {
             // Adjacent islands or overlapping protections
             if (islandFrom.isSpawn()) {
@@ -550,10 +550,10 @@ public class IslandGuard implements Listener {
             }
             // Fire exit event
             final IslandExitEvent event = new IslandExitEvent(e.getPlayer().getUniqueId(), islandFrom, e.getFrom());
-            plugin.getServer().getPluginManager().callEvent(event);
+            Bukkit.getPluginManager().callEvent(event);
             // Fire entry event
             final IslandEnterEvent event2 = new IslandEnterEvent(e.getPlayer().getUniqueId(), islandTo, e.getTo());
-            plugin.getServer().getPluginManager().callEvent(event2);
+            Bukkit.getPluginManager().callEvent(event2);
         }
     }
 
@@ -1306,7 +1306,7 @@ public class IslandGuard implements Listener {
                 if (actionAllowed(p, dumpBlock.getLocation(), SettingsFlag.BUCKET)) {
                     // Check if biome is Nether and then allow water placement but fizz the water
                     if (e.getBlockClicked().getBiome().equals(Biome.HELL)) {
-                        if (plugin.getServer().getVersion().contains("(MC: 1.8") || plugin.getServer()
+                        if (Bukkit.getVersion().contains("(MC: 1.8") || Bukkit
                                 .getVersion()
                                 .contains("(MC: 1.7")) {
                             if (e.getPlayer().getItemInHand().getType().equals(Material.WATER_BUCKET)) {
@@ -1358,7 +1358,7 @@ public class IslandGuard implements Listener {
         // e.getItem().getType().toString());
         if (e.getItem().getType().equals(Material.WATER_BUCKET)) {
             e.setCancelled(true);
-            if (plugin.getServer().getVersion().contains("(MC: 1.8") || plugin.getServer().getVersion().contains("(MC: 1.7")) {
+            if (Bukkit.getVersion().contains("(MC: 1.8") || Bukkit.getVersion().contains("(MC: 1.7")) {
                 e.getBlock().getWorld().playSound(e.getBlock().getLocation(), Sound.valueOf("FIZZ"), 1F, 2F);
             } else {
                 e.getBlock().getWorld().playSound(e.getBlock().getLocation(), Sound.ENTITY_CREEPER_PRIMED, 1F, 2F);
@@ -2634,7 +2634,7 @@ public class IslandGuard implements Listener {
                         if (!tntBlocks.contains(e.getBlock().getLocation())) {
                             Util.sendMessage(shooter, ChatColor.RED + plugin.myLocale(shooter.getUniqueId()).islandProtected);
                             tntBlocks.add(e.getBlock().getLocation());
-                            plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable() {
+                            Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
 
                                 @Override
                                 public void run() {
@@ -2670,7 +2670,7 @@ public class IslandGuard implements Listener {
                 return;
             }
             for (UUID member : island.getMembers()) {
-                if (plugin.getServer().getPlayer(member) != null) {
+                if (Bukkit.getPlayer(member) != null) {
                     return;
                 }
             }

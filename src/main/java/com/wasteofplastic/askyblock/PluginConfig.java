@@ -659,7 +659,7 @@ public class PluginConfig {
         // try to remove the team from the scoreboard
         if (Settings.allowPushing) {
             try {
-                ScoreboardManager manager = plugin.getServer().getScoreboardManager();
+                ScoreboardManager manager = Bukkit.getScoreboardManager();
                 if (manager != null) {
                     Scoreboard scoreboard = manager.getMainScoreboard();
                     if (scoreboard != null) {

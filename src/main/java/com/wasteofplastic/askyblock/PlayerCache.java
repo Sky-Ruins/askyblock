@@ -47,7 +47,7 @@ public class PlayerCache {
         this.plugin = plugin;
         // final Collection<? extends Player> serverPlayers =
         // Bukkit.getServer().getOnlinePlayers();
-        for (Player p : plugin.getServer().getOnlinePlayers()) {
+        for (Player p : Bukkit.getOnlinePlayers()) {
             if (p.getUniqueId() != null) {
                 try {
                     final Players playerInf = new Players(plugin, p.getUniqueId());
@@ -77,7 +77,7 @@ public class PlayerCache {
      */
     public List<UUID> getOnlineCachedPlayers() {
         List<UUID> list = Lists.newArrayList();
-        for (Player p : plugin.getServer().getOnlinePlayers()) {
+        for (Player p : Bukkit.getOnlinePlayers()) {
             if (playerCache.containsKey(p.getUniqueId())) {
                 list.add(p.getUniqueId());
             }
@@ -552,8 +552,8 @@ public class PlayerCache {
             }
         }
         // Try the server
-        if (adminCheck && plugin.getServer().getOfflinePlayer(string) != null) {
-            return plugin.getServer().getOfflinePlayer(string).getUniqueId();
+        if (adminCheck && Bukkit.getOfflinePlayer(string) != null) {
+            return Bukkit.getOfflinePlayer(string).getUniqueId();
         }
         return null;
     }
@@ -775,7 +775,7 @@ public class PlayerCache {
         addPlayer(playerUUID);
         addPlayer(targetUUID);
         // Check if the target player has a permission bypass (admin.noban)
-        Player target = plugin.getServer().getPlayer(targetUUID);
+        Player target = Bukkit.getPlayer(targetUUID);
         if (target != null && VaultHelper.checkPerm(target, Settings.PERMPREFIX + "admin.noban")) {
             return false;
         }

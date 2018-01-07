@@ -84,7 +84,7 @@ public class SetBiome {
                 }
                 //plugin.getLogger().info("DEBUG: size of chunk ss = " + chunkSnapshot.size());
                 final List<ChunkSnapshot> finalChunk = chunkSnapshot;
-                plugin.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
+                Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
 
                     @SuppressWarnings("deprecation")
                     @Override
@@ -117,7 +117,7 @@ public class SetBiome {
                             //plugin.getLogger().info("DEBUG: There are blocks to remove "  + blocksToRemove.size());
                             final HashMap<Vector, Integer> blocks = blocksToRemove;
                             // Kick of a sync task
-                            plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
+                            Bukkit.getScheduler().runTask(plugin, new Runnable() {
 
                                 @Override
                                 public void run() {

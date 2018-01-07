@@ -1,20 +1,3 @@
-/*******************************************************************************
- * This file is part of ASkyBlock.
- *
- *     ASkyBlock is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     ASkyBlock is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with ASkyBlock.  If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-
 package com.wasteofplastic.askyblock;
 
 import com.wasteofplastic.askyblock.commands.Challenges;
@@ -48,12 +31,8 @@ public class ASkyBlockAPI {
     private static ASkyBlockAPI instance;
     private ASkyBlock plugin;
 
-
-    protected ASkyBlockAPI(ASkyBlock plugin) {
+    ASkyBlockAPI(ASkyBlock plugin) {
         this.plugin = plugin;
-        if (DEBUG) {
-            Bukkit.getLogger().info("DEBUG: API constructed");
-        }
         instance = this;
     }
 
@@ -64,68 +43,62 @@ public class ASkyBlockAPI {
         if (DEBUG) {
             Bukkit.getLogger().info("DEBUG: ASkyBlock API, getInstance()");
         }
-        if (instance == null)
-        // Initialize the API
-        {
+        if (instance == null) {
             new ASkyBlockAPI(ASkyBlock.getPlugin());
         }
         return instance;
     }
 
     /**
-     * @param playerUUID
      * @return Map of all of the known challenges with a boolean marking
      * them as complete (true) or incomplete (false). This is a view of the
      * challenges map that only allows read operations.
      */
-    public Map<String, Boolean> getChallengeStatus(UUID playerUUID) {
-        return Collections.unmodifiableMap(plugin.getPlayers().getChallengeStatus(playerUUID));
+    public Map<String, Boolean> getChallengeStatus(UUID uuid) {
+        return Collections.unmodifiableMap(plugin.getPlayers().getChallengeStatus(uuid));
     }
 
     /**
-     * @param playerUUID
      * @return Map of all of the known challenges and how many times each
      * one has been completed. This is a view of the challenges
      * map that only allows read operations.
      */
-    public Map<String, Integer> getChallengeTimes(UUID playerUUID) {
-        return Collections.unmodifiableMap(plugin.getPlayers().getChallengeTimes(playerUUID));
+    public Map<String, Integer> getChallengeTimes(UUID uuid) {
+        return Collections.unmodifiableMap(plugin.getPlayers().getChallengeTimes(uuid));
     }
 
-    public Location getHomeLocation(UUID playerUUID) {
-        return plugin.getPlayers().getHomeLocation(playerUUID, 1);
+    public Location getHomeLocation(UUID uuid) {
+        return plugin.getPlayers().getHomeLocation(uuid, 1);
     }
 
     /**
-     * @param playerUUID
      * @return the last level calculated for the island or zero if none.
      * @deprecated Island level is now a long and the int value may not be accurate for very large values.
-     * Use getLongIslandLevel(UUID playerUUID) instead.
+     * Use getLongIslandLevel(UUID uuid) instead.
      *
      * Returns the island level from the last time it was calculated. Note this
      * does not calculate the island level.
      */
-    public int getIslandLevel(UUID playerUUID) {
-        return (int) plugin.getPlayers().getIslandLevel(playerUUID);
+    public int getIslandLevel(UUID uuid) {
+        return (int) plugin.getPlayers().getIslandLevel(uuid);
     }
 
     /**
      * Returns the island level from the last time it was calculated. Note this
      * does not calculate the island level.
      *
-     * @param playerUUID
      * @return the last level calculated for the island or zero if none.
      */
-    public long getLongIslandLevel(UUID playerUUID) {
+    public long getLongIslandLevel(UUID uuid) {
         if (DEBUG) {
-            Bukkit.getLogger().info("DEBUG: getIslandLevel. playerUUID = " + playerUUID);
+            Bukkit.getLogger().info("DEBUG: getIslandLevel. uuid = " + uuid);
             if (plugin == null) {
                 Bukkit.getLogger().info("DEBUG: plugin is null");
             } else if (plugin.getPlayers() == null) {
                 Bukkit.getLogger().info("DEBUG: player cache object is null!");
             }
         }
-        return plugin.getPlayers().getIslandLevel(playerUUID);
+        return plugin.getPlayers().getIslandLevel(uuid);
     }
 
     /**
@@ -133,26 +106,22 @@ public class ASkyBlockAPI {
      * You will need to check if the player is in a team and individually set the level of each team member.
      * This value will be overwritten if the players run the build-in level command or if the island level
      * is calculated some other way, e.g. at login or via an admin command.
-     *
-     * @param playerUUID
-     * @param level
      */
-    public void setIslandLevel(UUID playerUUID, int level) {
-        plugin.getPlayers().setIslandLevel(playerUUID, level);
+    public void setIslandLevel(UUID uuid, int level) {
+        plugin.getPlayers().setIslandLevel(uuid, level);
     }
 
     /**
      * Calculates the island level. Only the fast calc is supported.
      * The island calculation runs async and fires an IslandLevelEvent when completed
-     * or use getIslandLevel(playerUUID). See https://gist.github.com/tastybento/e81d2403c03f2fe26642
+     * or use getIslandLevel(uuid). See https://gist.github.com/tastybento/e81d2403c03f2fe26642
      * for example code.
      *
-     * @param playerUUID
      * @return true if player has an island, false if not
      */
-    public boolean calculateIslandLevel(UUID playerUUID) {
-        if (plugin.getPlayers().hasIsland(playerUUID) || plugin.getPlayers().inTeam(playerUUID)) {
-            new LevelCalcByChunk(plugin, playerUUID, null, false);
+    public boolean calculateIslandLevel(UUID uuid) {
+        if (plugin.getPlayers().hasIsland(uuid) || plugin.getPlayers().inTeam(uuid)) {
+            new LevelCalcByChunk(plugin, uuid, null, false);
             return true;
         }
         return false;
@@ -162,18 +131,16 @@ public class ASkyBlockAPI {
      * Provides the location of the player's island, either the team island or
      * their own
      *
-     * @param playerUUID
      * @return Location of island
      */
-    public Location getIslandLocation(UUID playerUUID) {
-        return plugin.getPlayers().getIslandLocation(playerUUID);
+    public Location getIslandLocation(UUID uuid) {
+        return plugin.getPlayers().getIslandLocation(uuid);
     }
 
     /**
      * Returns the owner of an island from the location.
      * Uses the grid lookup and is quick
      *
-     * @param location
      * @return UUID of owner
      */
     public UUID getOwner(Location location) {
@@ -183,40 +150,36 @@ public class ASkyBlockAPI {
     /**
      * Get Team Leader
      *
-     * @param playerUUID
      * @return UUID of Team Leader or null if there is none. Use inTeam to
      * check.
      */
-    public UUID getTeamLeader(UUID playerUUID) {
-        return plugin.getPlayers().getTeamLeader(playerUUID);
+    public UUID getTeamLeader(UUID uuid) {
+        return plugin.getPlayers().getTeamLeader(uuid);
     }
 
     /**
      * Get a list of team members. This is a copy and changing the return value
      * will not affect the membership.
      *
-     * @param playerUUID
      * @return List of team members, including the player. Empty if there are
      * none.
      */
-    public List<UUID> getTeamMembers(UUID playerUUID) {
-        return new ArrayList<UUID>(plugin.getPlayers().getMembers(playerUUID));
+    public List<UUID> getTeamMembers(UUID uuid) {
+        return new ArrayList<>(plugin.getPlayers().getMembers(uuid));
     }
 
     /**
      * Provides location of the player's warp sign
      *
-     * @param playerUUID
      * @return Location of sign or null if one does not exist
      */
-    public Location getWarp(UUID playerUUID) {
-        return plugin.getWarpSignsListener().getWarp(playerUUID);
+    public Location getWarp(UUID uuid) {
+        return plugin.getWarpSignsListener().getWarp(uuid);
     }
 
     /**
      * Get the owner of the warp at location
      *
-     * @param location
      * @return Returns name of player or empty string if there is no warp at
      * that spot
      */
@@ -228,19 +191,17 @@ public class ASkyBlockAPI {
      * Status of island ownership. Team members do not have islands of their
      * own, only leaders do.
      *
-     * @param playerUUID
      * @return true if player has an island, false if the player does not.
      */
-    public boolean hasIsland(UUID playerUUID) {
-        return plugin.getPlayers().hasIsland(playerUUID);
+    public boolean hasIsland(UUID uuid) {
+        return plugin.getPlayers().hasIsland(uuid);
     }
 
     /**
-     * @param playerUUID
      * @return true if in a team
      */
-    public boolean inTeam(UUID playerUUID) {
-        return plugin.getPlayers().inTeam(playerUUID);
+    public boolean inTeam(UUID uuid) {
+        return plugin.getPlayers().inTeam(uuid);
     }
 
     /**
@@ -248,7 +209,6 @@ public class ASkyBlockAPI {
      * checks if the spawn island is in this area. Checks for bedrock within
      * limits and also looks in the file system. Quite processor intensive.
      *
-     * @param location
      * @return true if there is an island in that location, false if not
      */
     public boolean islandAtLocation(Location location) {
@@ -260,7 +220,6 @@ public class ASkyBlockAPI {
      * players must be online.
      *
      * @param owner - owner or team member of an island
-     * @param target
      * @return true if they are on the island otherwise false.
      */
     public boolean isOnIsland(Player owner, Player target) {
@@ -276,7 +235,7 @@ public class ASkyBlockAPI {
      * @return String set of warps
      */
     public Set<UUID> listWarps() {
-        return new HashSet<UUID>(plugin.getWarpSignsListener().listWarps());
+        return new HashSet<>(plugin.getWarpSignsListener().listWarps());
     }
 
     /**
@@ -291,8 +250,6 @@ public class ASkyBlockAPI {
      * Checks if a specific location is within the protected range of an island
      * owned by the player
      *
-     * @param player
-     * @param location
      * @return true if the location is on an island owner by player
      */
     public boolean locationIsOnIsland(final Player player, final Location location) {
@@ -305,8 +262,6 @@ public class ASkyBlockAPI {
      * location of an island. The check is done to see if loc is inside the protected
      * range of any of the islands given.
      *
-     * @param islandTestLocations
-     * @param loc
      * @return the island location that is in the set of locations or null if
      * none
      */
@@ -328,8 +283,6 @@ public class ASkyBlockAPI {
     /**
      * Sets all blocks in an island to a specified biome type
      *
-     * @param islandLoc
-     * @param biomeType
      * @return true if the setting was successful
      */
     public boolean setIslandBiome(Location islandLoc, Biome biomeType) {
@@ -344,29 +297,23 @@ public class ASkyBlockAPI {
     /**
      * Sets a message for the player to receive next time they login
      *
-     * @param playerUUID
-     * @param message
      * @return true if player is offline, false if online
      */
-    public boolean setMessage(UUID playerUUID, String message) {
-        return plugin.getMessages().setMessage(playerUUID, message);
+    public boolean setMessage(UUID uuid, String message) {
+        return plugin.getMessages().setMessage(uuid, message);
     }
 
     /**
      * Sends a message to every player in the team that is offline If the player
      * is not in a team, nothing happens.
-     *
-     * @param playerUUID
-     * @param message
      */
-    public void tellOfflineTeam(UUID playerUUID, String message) {
-        plugin.getMessages().tellOfflineTeam(playerUUID, message);
+    public void tellOfflineTeam(UUID uuid, String message) {
+        plugin.getMessages().tellOfflineTeam(uuid, message);
     }
 
     /**
      * Player is in a coop or not
      *
-     * @param player
      * @return true if player is in a coop, otherwise false
      */
     public boolean isCoop(Player player) {
@@ -379,11 +326,10 @@ public class ASkyBlockAPI {
     /**
      * Find out which coop islands player is a part of
      *
-     * @param player
      * @return set of locations of islands or empty if none
      */
     public Set<Location> getCoopIslands(Player player) {
-        return new HashSet<Location>(CoopPlay.getInstance().getCoopIslands(player));
+        return new HashSet<>(CoopPlay.getInstance().getCoopIslands(player));
     }
 
     /**
@@ -407,7 +353,6 @@ public class ASkyBlockAPI {
     /**
      * Checks if a location is at spawn or not
      *
-     * @param location
      * @return true if at spawn
      */
     public boolean isAtSpawn(Location location) {
@@ -448,7 +393,7 @@ public class ASkyBlockAPI {
      * Get the top ten list
      */
     public Map<UUID, Integer> getTopTen() {
-        HashMap<UUID, Integer> result = new HashMap<UUID, Integer>();
+        Map<UUID, Integer> result = new HashMap<>();
         for (Entry<UUID, Long> en : TopTen.getTopTenList().entrySet()) {
             result.put(en.getKey(), en.getValue().intValue());
         }
@@ -461,27 +406,25 @@ public class ASkyBlockAPI {
      * @return Top ten list
      */
     public Map<UUID, Long> getLongTopTen() {
-        return new HashMap<UUID, Long>(TopTen.getTopTenList());
+        return new HashMap<>(TopTen.getTopTenList());
     }
 
     /**
-     * Obtains a copy of the island object owned by playerUUID
+     * Obtains a copy of the island object owned by uuid
      *
-     * @param playerUUID
      * @return copy of Island object
      */
-    public Island getIslandOwnedBy(UUID playerUUID) {
-        return (Island) plugin.getGrid().getIsland(playerUUID).clone();
+    public Island getIslandOwnedBy(UUID uuid) {
+        return (Island) plugin.getGrid().getIsland(uuid).clone();
     }
 
     /**
      * Returns a copy of the Island object for an island at this location or null if one does not exist
      *
-     * @param location
      * @return copy of Island object
      */
     public Island getIslandAt(Location location) {
-        return (Island) plugin.getGrid().getIslandAt(location);
+        return plugin.getGrid().getIslandAt(location);
     }
 
     /**
@@ -497,23 +440,19 @@ public class ASkyBlockAPI {
      * @return Hashmap of owned islands with owner UUID as a key
      */
     public HashMap<UUID, Island> getOwnedIslands() {
-        //System.out.println("DEBUG: getOwnedIslands");
         if (plugin.getGrid() != null) {
-            HashMap<UUID, Island> islands = plugin.getGrid().getOwnedIslands();
+            Map<UUID, Island> islands = plugin.getGrid().getOwnedIslands();
             if (islands != null) {
-                //plugin.getLogger().info("DEBUG: getOwnedIslands is not null");
-                return new HashMap<UUID, Island>(islands);
+                return new HashMap<>(islands);
             }
-            //plugin.getLogger().info("DEBUG: getOwnedIslands is null");
         }
-        return new HashMap<UUID, Island>();
+        return new HashMap<>();
 
     }
 
     /**
      * Get name of the island owned by owner
      *
-     * @param owner
      * @return Returns the name of owner's island, or the owner's name if there is none.
      */
     public String getIslandName(UUID owner) {
@@ -522,9 +461,6 @@ public class ASkyBlockAPI {
 
     /**
      * Set the island name
-     *
-     * @param owner
-     * @param name
      */
     public void setIslandName(UUID owner, String name) {
         plugin.getGrid().setIslandName(owner, name);
@@ -542,35 +478,28 @@ public class ASkyBlockAPI {
     /**
      * Get the number of resets left for this player
      *
-     * @param playerUUID
      * @return Number of resets left
      */
-    public int getResetsLeft(UUID playerUUID) {
-        return plugin.getPlayers().getResetsLeft(playerUUID);
+    public int getResetsLeft(UUID uuid) {
+        return plugin.getPlayers().getResetsLeft(uuid);
     }
 
     /**
      * Set the number of resets left for this player
-     *
-     * @param playerUUID
-     * @param resets
      */
-    public void setResetsLeft(UUID playerUUID, int resets) {
-        plugin.getPlayers().setResetsLeft(playerUUID, resets);
+    public void setResetsLeft(UUID uuid, int resets) {
+        plugin.getPlayers().setResetsLeft(uuid, resets);
     }
 
     /**
      * Find out if this player is a team leader or not. If the player is not in a team, the result will always be false.
      *
-     * @param playerUUID
      * @return true if the player is in a team and is the leader
      */
-    public boolean isLeader(UUID playerUUID) {
-        UUID leader = plugin.getPlayers().getTeamLeader(playerUUID);
-        if (leader != null && leader.equals(playerUUID)) {
-            return true;
-        }
-        return false;
+    public boolean isLeader(UUID uuid) {
+        UUID leader = plugin.getPlayers().getTeamLeader(uuid);
+        return leader != null && leader.equals(uuid);
 
     }
+
 }

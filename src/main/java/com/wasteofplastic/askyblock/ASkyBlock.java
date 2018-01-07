@@ -1,20 +1,3 @@
-/*******************************************************************************
- * This file is part of ASkyBlock.
- *
- *     ASkyBlock is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     ASkyBlock is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with ASkyBlock.  If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-
 package com.wasteofplastic.askyblock;
 
 import com.wasteofplastic.askyblock.NotSetup.Reason;
@@ -39,7 +22,6 @@ import com.wasteofplastic.askyblock.listeners.PlayerEvents;
 import com.wasteofplastic.askyblock.listeners.PlayerEvents2;
 import com.wasteofplastic.askyblock.listeners.PlayerEvents3;
 import com.wasteofplastic.askyblock.listeners.WorldEnter;
-import com.wasteofplastic.askyblock.listeners.WorldLoader;
 import com.wasteofplastic.askyblock.panels.BiomesPanel;
 import com.wasteofplastic.askyblock.panels.ControlPanel;
 import com.wasteofplastic.askyblock.panels.SchematicsPanel;
@@ -63,59 +45,39 @@ import org.bukkit.potion.PotionEffect;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 /**
  * @author tastybento
  * Main ASkyBlock class - provides an island minigame in a sea of acid
  */
-public class ASkyBlock extends JavaPlugin {
+public final class ASkyBlock extends JavaPlugin {
 
     private static final boolean DEBUG = false;
-    // This plugin
     private static ASkyBlock plugin;
-    // The ASkyBlock world
-    private static World islandWorld = null;
-    private static World netherWorld = null;
-    // Acid Item Removal Task
+    private static World islandWorld = null, netherWorld = null;
     private AcidTask acidTask;
-    // Flag indicating if a new islands is in the process of being generated or
-    // not
     private boolean newIsland = false;
-    // Player folder file
     private File playersFolder;
-    // Challenges object
     private Challenges challenges;
-    // Players object
     private PlayerCache players;
-    // Listeners
     private WarpSigns warpSignsListener;
     private LavaCheck lavaListener;
-    // Biome chooser object
     private BiomesPanel biomes;
-    // Island grid manager
     private GridManager grid;
-    // Island command object
     private IslandCmd islandCmd;
-    // Database
     private TinyDB tinyDB;
-    // Warp panel
     private WarpPanel warpPanel;
-    // Top Ten
     private TopTen topTen;
-    // Messages object
     private Messages messages;
-    // Team chat listener
     private ChatListener chatListener;
-    // Schematics panel object
     private SchematicsPanel schematicsPanel;
-    // Settings panel object
     private SettingsPanel settingsPanel;
-    // Player events listener
     private PlayerEvents playerEvents;
 
     // Localization Strings
-    private HashMap<String, ASLocale> availableLocales = new HashMap<String, ASLocale>();
+    private Map<String, ASLocale> availableLocales = new HashMap<>();
 
     /**
      * @return ASkyBlock object instance
@@ -195,7 +157,7 @@ public class ASkyBlock extends JavaPlugin {
             if (Settings.useOwnGenerator) {
                 return Bukkit.getServer().getWorld(Settings.worldName + "_nether");
             }
-            if (plugin.getServer().getWorld(Settings.worldName + "_nether") == null) {
+            if (Bukkit.getWorld(Settings.worldName + "_nether") == null) {
                 Bukkit.getLogger().info("Creating " + plugin.getName() + "'s Nether...");
             }
             if (!Settings.newNether) {
@@ -299,22 +261,12 @@ public class ASkyBlock extends JavaPlugin {
             getServer().getPluginManager().disablePlugin(this);
             return;
         }
-        // This can no longer be run in onEnable because the plugin is loaded at
-        // startup and so key variables are
-        // not known to the server. Instead it is run one tick after startup.
-        // If the world exists, load it, even without the generator
-        /*
-	if (Settings.createNether) {
-	    Bukkit.getWorld(Settings.worldName + "_nether");
-	}
-	if (Bukkit.getWorld(Settings.worldName) == null) {
-	    islandWorld = WorldCreator.name(Settings.worldName).type(WorldType.FLAT).environment(World.Environment.NORMAL).createWorld();
-	}*/
+
         // Get challenges
         challenges = new Challenges(this);
         // Set and make the player's directory if it does not exist and then
         // load players into memory
-        playersFolder = new File(getDataFolder() + File.separator + "players");
+        playersFolder = new File(getDataFolder(), "players");
         if (!playersFolder.exists()) {
             playersFolder.mkdir();
         }
@@ -352,121 +304,102 @@ public class ASkyBlock extends JavaPlugin {
         // Load messages
         messages = new Messages(this);
         messages.loadMessages();
-        // Register world load event
-        if (getServer().getVersion().contains("(MC: 1.8") || getServer().getVersion().contains("(MC: 1.7")) {
-            getServer().getPluginManager().registerEvents(new WorldLoader(this), this);
-        }
 
         // Kick off a few tasks on the next tick
         // By calling getIslandWorld(), if there is no island
         // world, it will be created
-        getServer().getScheduler().runTask(this, new Runnable() {
-            @Override
-            public void run() {
-                // Create the world if it does not exist. This is run after the
-                // server starts.
-                getIslandWorld();
-                if (!Settings.useOwnGenerator && getServer().getWorld(Settings.worldName).getGenerator() == null) {
-                    // Check if the world generator is registered correctly
-                    getLogger().severe("********* The Generator for " + ASkyBlock.this.getName()
-                            + " is not registered so the plugin cannot start ********");
-                    getLogger().severe(
-                            "If you are using your own generator or server.properties, set useowngenerator: true in config.yml");
-                    getLogger().severe("Otherwise:");
-                    getLogger().severe("Make sure you have the following in bukkit.yml (case sensitive):");
-                    getLogger().severe("worlds:");
-                    getLogger().severe("  # The next line must be the name of your world:");
-                    getLogger().severe("  " + Settings.worldName + ":");
-                    getLogger().severe("    generator: " + ASkyBlock.this.getName());
-                    if (Settings.GAMETYPE.equals(Settings.GameType.ASKYBLOCK)) {
-                        getCommand("island").setExecutor(new NotSetup(Reason.GENERATOR));
-                        getCommand("asc").setExecutor(new NotSetup(Reason.GENERATOR));
-                        getCommand("asadmin").setExecutor(new NotSetup(Reason.GENERATOR));
-                    } else {
-                        getCommand("ai").setExecutor(new NotSetup(Reason.GENERATOR));
-                        getCommand("aic").setExecutor(new NotSetup(Reason.GENERATOR));
-                        getCommand("acid").setExecutor(new NotSetup(Reason.GENERATOR));
-                    }
-                    HandlerList.unregisterAll(ASkyBlock.this);
-                    return;
+        getServer().getScheduler().runTask(this, () -> {
+            // Create the world if it does not exist. This is run after the
+            // server starts.
+            getIslandWorld();
+            if (!Settings.useOwnGenerator && getServer().getWorld(Settings.worldName).getGenerator() == null) {
+                // Check if the world generator is registered correctly
+                getLogger().severe("********* The Generator for " + ASkyBlock.this.getName()
+                        + " is not registered so the plugin cannot start ********");
+                getLogger().severe(
+                        "If you are using your own generator or server.properties, set useowngenerator: true in config.yml");
+                getLogger().severe("Otherwise:");
+                getLogger().severe("Make sure you have the following in bukkit.yml (case sensitive):");
+                getLogger().severe("worlds:");
+                getLogger().severe("  # The next line must be the name of your world:");
+                getLogger().severe("  " + Settings.worldName + ":");
+                getLogger().severe("    generator: " + ASkyBlock.this.getName());
+                if (Settings.GAMETYPE.equals(Settings.GameType.ASKYBLOCK)) {
+                    getCommand("island").setExecutor(new NotSetup(Reason.GENERATOR));
+                    getCommand("asc").setExecutor(new NotSetup(Reason.GENERATOR));
+                    getCommand("asadmin").setExecutor(new NotSetup(Reason.GENERATOR));
+                } else {
+                    getCommand("ai").setExecutor(new NotSetup(Reason.GENERATOR));
+                    getCommand("aic").setExecutor(new NotSetup(Reason.GENERATOR));
+                    getCommand("acid").setExecutor(new NotSetup(Reason.GENERATOR));
                 }
-
-                // Run game rule to keep things quiet
-                if (Settings.silenceCommandFeedback) {
-                    try {
-                        getLogger().info("Silencing command feedback for Ops...");
-                        getServer().dispatchCommand(getServer().getConsoleSender(), "minecraft:gamerule sendCommandFeedback false");
-                        getLogger().info("If you do not want this, do /gamerule sendCommandFeedback true");
-                    } catch (Exception e) {
-                    } // do nothing
-                }
-
-                // Run these one tick later to ensure worlds are loaded.
-                getServer().getScheduler().runTask(ASkyBlock.this, new Runnable() {
-                    @Override
-                    public void run() {
-                        // load the list - order matters - grid first, then top
-                        // ten to optimize upgrades
-                        // Load grid
-                        if (grid == null) {
-                            grid = new GridManager(ASkyBlock.this);
-                        }
-                        // Register events
-                        registerEvents();
-
-                        // Load TinyDb
-                        if (tinyDB == null) {
-                            tinyDB = new TinyDB(ASkyBlock.this);
-                        }
-                        // Load warps
-                        getWarpSignsListener().loadWarpList();
-                        // Load the warp panel
-                        if (Settings.useWarpPanel) {
-                            warpPanel = new WarpPanel(ASkyBlock.this);
-                            getServer().getPluginManager().registerEvents(warpPanel, ASkyBlock.this);
-                        }
-                        // Load the TopTen GUI
-                        if (!Settings.displayIslandTopTenInChat) {
-                            topTen = new TopTen(ASkyBlock.this);
-                            getServer().getPluginManager().registerEvents(topTen, ASkyBlock.this);
-                        }
-                        // Minishop - must wait for economy to load before we can use
-                        // econ
-                        getServer().getPluginManager().registerEvents(new ControlPanel(ASkyBlock.this), ASkyBlock.this);
-                        // Settings
-                        settingsPanel = new SettingsPanel(ASkyBlock.this);
-                        getServer().getPluginManager().registerEvents(settingsPanel, ASkyBlock.this);
-                        // Biomes
-                        // Load Biomes
-                        biomes = new BiomesPanel(ASkyBlock.this);
-                        getServer().getPluginManager().registerEvents(biomes, ASkyBlock.this);
-
-                        TopTen.topTenLoad();
-
-                        // Add any online players to the DB
-                        for (Player onlinePlayer : ASkyBlock.this.getServer().getOnlinePlayers()) {
-                            tinyDB.savePlayerName(onlinePlayer.getName(), onlinePlayer.getUniqueId());
-                        }
-                        if (Settings.backupDuration > 0) {
-                            new AsyncBackup(ASkyBlock.this);
-                        }
-                        // Load the coops
-                        if (Settings.persistantCoops) {
-                            CoopPlay.getInstance().loadCoops();
-                        }
-                        // Give temp permissions
-                        playerEvents.giveAllTempPerms();
-
-                        getLogger().info("All files loaded. Ready to play...");
-
-                        // Fire event
-                        getServer().getPluginManager().callEvent(new ReadyEvent());
-                    }
-                });
-                // Run acid tasks
-                acidTask = new AcidTask(ASkyBlock.this);
-
+                HandlerList.unregisterAll(this);
+                return;
             }
+
+            // Run game rule to keep things quiet
+            if (Settings.silenceCommandFeedback) {
+                getLogger().info("Silencing command feedback for Ops...");
+                getServer().dispatchCommand(getServer().getConsoleSender(), "minecraft:gamerule sendCommandFeedback false");
+                getLogger().info("If you do not want this, do /gamerule sendCommandFeedback true");
+            }
+
+            // Run these one tick later to ensure worlds are loaded.
+            getServer().getScheduler().runTask(this, () -> {
+                if (grid == null) {
+                    grid = new GridManager(this);
+                }
+
+                registerEvents();
+
+                if (tinyDB == null) {
+                    tinyDB = new TinyDB(this);
+                }
+
+                getWarpSignsListener().loadWarpList();
+                if (Settings.useWarpPanel) {
+                    warpPanel = new WarpPanel(ASkyBlock.this);
+                    getServer().getPluginManager().registerEvents(warpPanel, this);
+                }
+                // Load the TopTen GUI
+                if (!Settings.displayIslandTopTenInChat) {
+                    topTen = new TopTen(ASkyBlock.this);
+                    getServer().getPluginManager().registerEvents(topTen, this);
+                }
+
+                getServer().getPluginManager().registerEvents(new ControlPanel(this), this);
+                // Settings
+                settingsPanel = new SettingsPanel(ASkyBlock.this);
+                getServer().getPluginManager().registerEvents(settingsPanel, ASkyBlock.this);
+                // Biomes
+                // Load Biomes
+                biomes = new BiomesPanel(ASkyBlock.this);
+                getServer().getPluginManager().registerEvents(biomes, ASkyBlock.this);
+
+                TopTen.topTenLoad();
+
+                // Add any online players to the DB
+                for (Player onlinePlayer : ASkyBlock.this.getServer().getOnlinePlayers()) {
+                    tinyDB.savePlayerName(onlinePlayer.getName(), onlinePlayer.getUniqueId());
+                }
+                if (Settings.backupDuration > 0) {
+                    new AsyncBackup(ASkyBlock.this);
+                }
+                // Load the coops
+                if (Settings.persistantCoops) {
+                    CoopPlay.getInstance().loadCoops();
+                }
+                // Give temp permissions
+                playerEvents.giveAllTempPerms();
+
+                getLogger().info("All files loaded. Ready to play...");
+
+                // Fire event
+                getServer().getPluginManager().callEvent(new ReadyEvent());
+            });
+            // Run acid tasks
+            acidTask = new AcidTask(ASkyBlock.this);
+
         });
     }
 
@@ -775,7 +708,7 @@ public class ASkyBlock extends JavaPlugin {
     /**
      * @return the availableLocales
      */
-    public HashMap<String, ASLocale> getAvailableLocales() {
+    public Map<String, ASLocale> getAvailableLocales() {
         return availableLocales;
     }
 

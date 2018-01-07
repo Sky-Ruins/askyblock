@@ -1,20 +1,3 @@
-/*******************************************************************************
- * This file is part of ASkyBlock.
- *
- *     ASkyBlock is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     ASkyBlock is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with ASkyBlock.  If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-
 package com.wasteofplastic.askyblock;
 
 import com.google.common.collect.HashMultiset;
@@ -70,7 +53,7 @@ public class LevelCalcByChunk {
      * @param report - provide a report to the asker
      */
     public LevelCalcByChunk(final ASkyBlock plugin, final UUID targetPlayer, final CommandSender sender, final boolean report) {
-        //if (report && plugin.getServer().getVersion().contains("(MC: 1.7")) { 
+        //if (report && Bukkit.getVersion().contains("(MC: 1.7")) {
         //    Util.sendMessage(sender, ChatColor.RED + "This option is not available in V1.7 servers, sorry.");
         //    return;
         //}
@@ -79,7 +62,7 @@ public class LevelCalcByChunk {
         final Island island = plugin.getGrid().getIsland(targetPlayer);
         if (island != null) {
             // Get the permission multiplier if it is available
-            Player player = plugin.getServer().getPlayer(targetPlayer);
+            Player player = Bukkit.getPlayer(targetPlayer);
             int multiplier = 1;
             if (player != null) {
                 // Get permission multiplier                
@@ -141,7 +124,7 @@ public class LevelCalcByChunk {
             final Set<ChunkSnapshot> finalChunk = chunkSnapshot;
             final int worldHeight = world.getMaxHeight();
             //plugin.getLogger().info("DEBUG:world height = " +worldHeight);
-            plugin.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
 
                 @SuppressWarnings("deprecation")
                 @Override
@@ -411,7 +394,7 @@ public class LevelCalcByChunk {
                     final long pointsToNextLevel = calculatePointsToNextLevel;
 
                     // Return to main thread
-                    plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
+                    Bukkit.getScheduler().runTask(plugin, new Runnable() {
 
                         @Override
                         public void run() {
@@ -419,7 +402,7 @@ public class LevelCalcByChunk {
                             Island island = plugin.getGrid().getIsland(targetPlayer);
                             final IslandPreLevelEvent event = new IslandPreLevelEvent(targetPlayer, island, score);
                             event.setLongPointsToNextLevel(pointsToNextLevel);
-                            plugin.getServer().getPluginManager().callEvent(event);
+                            Bukkit.getPluginManager().callEvent(event);
                             long oldLevel = plugin.getPlayers().getIslandLevel(targetPlayer);
                             if (!event.isCancelled()) {
                                 //plugin.getLogger().info("DEBUG: updating player");
@@ -458,7 +441,7 @@ public class LevelCalcByChunk {
                             final IslandPostLevelEvent event3 =
                                     new IslandPostLevelEvent(targetPlayer, island, event.getLongLevel(),
                                             event.getLongPointsToNextLevel());
-                            plugin.getServer().getPluginManager().callEvent(event3);
+                            Bukkit.getPluginManager().callEvent(event3);
 
                             if (!event3.isCancelled()) {
                                 // Check that sender still is online

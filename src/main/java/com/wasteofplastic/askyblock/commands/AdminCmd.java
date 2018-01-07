@@ -1,20 +1,3 @@
-/*******************************************************************************
- * This file is part of ASkyBlock.
- *
- *     ASkyBlock is free software: you can redistribute it and/or modify
- *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License, or
- *     (at your option) any later version.
- *
- *     ASkyBlock is distributed in the hope that it will be useful,
- *     but WITHOUT ANY WARRANTY; without even the implied warranty of
- *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *     GNU General Public License for more details.
- *
- *     You should have received a copy of the GNU General Public License
- *     along with ASkyBlock.  If not, see <http://www.gnu.org/licenses/>.
- *******************************************************************************/
-
 package com.wasteofplastic.askyblock.commands;
 
 import com.google.common.collect.HashMultiset;
@@ -276,7 +259,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                         Util.sendMessage(player, ChatColor.RED + plugin.myLocale(player.getUniqueId()).errorNotOnIsland);
                         return true;
                     } else {
-                        Player owner = plugin.getServer().getPlayer(island.getOwner());
+                        Player owner = Bukkit.getPlayer(island.getOwner());
                         if (island.isLocked()) {
                             Util.sendMessage(sender, ChatColor.RED + plugin.myLocale().lockUnlocking);
                             island.setLocked(false);
@@ -312,7 +295,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                         final List<Entity> allEntities = ASkyBlock.getIslandWorld().getEntities();
                         final World islandWorld = ASkyBlock.getIslandWorld();
                         final World netherWorld = ASkyBlock.getNetherWorld();
-                        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
+                        Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
 
                             @Override
                             public void run() {
@@ -358,7 +341,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                                 final TreeMap<Integer, List<UUID>> topBreeders = topEntityIslands;
                                 final Map<UUID, Multiset<EntityType>> finalResult = result;
                                 // Now display results in sync thread
-                                plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
+                                Bukkit.getScheduler().runTask(plugin, new Runnable() {
 
                                     @Override
                                     public void run() {
@@ -615,7 +598,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                     // Give back any temporary permissions
                     plugin.getPlayerEvents().giveAllTempPerms();
                     // Reset resets if the admin changes it to or from unlimited
-                    for (Player players : plugin.getServer().getOnlinePlayers()) {
+                    for (Player players : Bukkit.getOnlinePlayers()) {
                         UUID playerUUID = players.getUniqueId();
                         if (plugin.getPlayers().hasIsland(playerUUID) || plugin.getPlayers().inTeam(playerUUID)) {
                             if (Settings.resetLimit < plugin.getPlayers().getResetsLeft(playerUUID) || (Settings.resetLimit >= 0
@@ -661,7 +644,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                         // Set the pending flag
                         asyncPending = true;
                         // Check against player files
-                        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
+                        Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
 
                             @Override
                             public void run() {
@@ -701,7 +684,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                                         writer.close();
                                         if (done % 500 == 0) {
                                             final int update = done;
-                                            plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
+                                            Bukkit.getScheduler().runTask(plugin, new Runnable() {
 
                                                 @Override
                                                 public void run() {
@@ -777,7 +760,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                         // Set the pending flag
                         asyncPending = true;
                         // Change player files
-                        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
+                        Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
 
                             @Override
                             public void run() {
@@ -785,7 +768,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                                     Util.setPlayerYamlConfig(playerFolder, "locale", Settings.defaultLanguage);
 
                                     // Run sync task
-                                    plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
+                                    Bukkit.getScheduler().runTask(plugin, new Runnable() {
 
                                         @Override
                                         public void run() {
@@ -795,7 +778,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                                     });
                                 } catch (final IOException e) {
                                     // Run sync task
-                                    plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
+                                    Bukkit.getScheduler().runTask(plugin, new Runnable() {
 
                                         @Override
                                         public void run() {
@@ -859,7 +842,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                     PluginConfig.loadPluginConfig(plugin);
                     if (split[1].equalsIgnoreCase("all")) {
                         Util.sendMessage(sender, ChatColor.GREEN + plugin.myLocale().settingsResetInProgress);
-                        plugin.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
+                        Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
 
                             @Override
                             public void run() {
@@ -871,7 +854,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                                 }
                                 plugin.getGrid().saveGrid();
                                 // Go back to non-async world
-                                plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
+                                Bukkit.getScheduler().runTask(plugin, new Runnable() {
 
                                     @Override
                                     public void run() {
@@ -890,7 +873,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                             if (split[1].equalsIgnoreCase(flag.toString())) {
                                 Util.sendMessage(sender, ChatColor.GREEN + plugin.myLocale().settingsResetInProgress);
                                 final SettingsFlag flagToSet = flag;
-                                plugin.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
+                                Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
 
                                     @Override
                                     public void run() {
@@ -902,7 +885,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                                         }
                                         plugin.getGrid().saveGrid();
                                         // Go back to non-async world
-                                        plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
+                                        Bukkit.getScheduler().runTask(plugin, new Runnable() {
 
                                             @Override
                                             public void run() {
@@ -1398,7 +1381,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
 
                                         if (removeList.size() > 0 && purgeFlag) {
                                             // Check if the player is online
-                                            if (plugin.getServer().getPlayer(removeList.get(0)) == null) {
+                                            if (Bukkit.getPlayer(removeList.get(0)) == null) {
                                                 //plugin.getLogger().info("DEBUG: player is offline");
                                                 // Check the level
                                                 if (plugin.getPlayers().getIslandLevel(removeList.get(0))
@@ -1437,7 +1420,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                     } else {
                         Island island = plugin.getGrid().getIsland(playerUUID);
                         if (island != null) {
-                            Player owner = plugin.getServer().getPlayer(island.getOwner());
+                            Player owner = Bukkit.getPlayer(island.getOwner());
                             if (island.isLocked()) {
                                 Util.sendMessage(sender, ChatColor.RED + plugin.myLocale().lockUnlocking);
                                 island.setLocked(false);
@@ -1578,7 +1561,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                         Util.sendMessage(sender, ChatColor.YELLOW + plugin.myLocale().deleteremoving.replace("[name]", split[1]));
                         // If they are online and in ASkyBlock then delete their
                         // stuff too
-                        Player target = plugin.getServer().getPlayer(playerUUID);
+                        Player target = Bukkit.getPlayer(playerUUID);
                         if (target != null) {
                             // Clear any coop inventories
                             // CoopPlay.getInstance().returnAllInventories(target);
@@ -1923,7 +1906,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                     // Actually set the biome
                     plugin.getBiomes().setIslandBiome(island, biome);
                     Util.sendMessage(sender, ChatColor.GREEN + plugin.myLocale().biomeSet.replace("[biome]", biomeName));
-                    Player targetPlayer = plugin.getServer().getPlayer(playerUUID);
+                    Player targetPlayer = Bukkit.getPlayer(playerUUID);
                     if (targetPlayer != null) {
                         // Online
                         Util.sendMessage(targetPlayer,
@@ -2056,7 +2039,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                 if (split[0].equalsIgnoreCase("team") && split[1].equalsIgnoreCase("add")) {
                     // Convert names to UUIDs
                     final UUID playerUUID = plugin.getPlayers().getUUID(split[2], true);
-                    final Player targetPlayer = plugin.getServer().getPlayer(playerUUID);
+                    final Player targetPlayer = Bukkit.getPlayer(playerUUID);
                     final UUID teamLeader = plugin.getPlayers().getUUID(split[3], true);
                     if (!plugin.getPlayers().isAKnownPlayer(playerUUID) || !plugin.getPlayers().isAKnownPlayer(teamLeader)) {
                         Util.sendMessage(sender, ChatColor.RED + plugin.myLocale().errorUnknownPlayer);
@@ -2550,7 +2533,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
             // Set the pending flag
             asyncPending = true;
             // Check against player files
-            plugin.getServer().getScheduler().runTaskAsynchronously(plugin, new Runnable() {
+            Bukkit.getScheduler().runTaskAsynchronously(plugin, new Runnable() {
 
                 @Override
                 public void run() {
@@ -2628,7 +2611,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                             //plugin.getLogger().info("DEBUG: unowned size after = " + unowned.size());
                             purgeUnownedConfirm = true;
                             purgeFlag = false;
-                            plugin.getServer().getScheduler().runTaskLater(plugin, new Runnable() {
+                            Bukkit.getScheduler().runTaskLater(plugin, new Runnable() {
 
                                 @Override
                                 public void run() {
@@ -2667,7 +2650,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                 ChatColor.GREEN + plugin.myLocale().levelislandLevel + ": " + plugin.getPlayers().getIslandLevel(playerUUID));
         // Last login
         try {
-            Date d = new Date(plugin.getServer().getOfflinePlayer(playerUUID).getLastPlayed());
+            Date d = new Date(Bukkit.getOfflinePlayer(playerUUID).getLastPlayed());
             Util.sendMessage(sender, ChatColor.GOLD + plugin.myLocale().adminInfoLastLogin + ": " + d.toString());
         } catch (Exception e) {
         }
@@ -2754,7 +2737,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                 Util.sendMessage(sender, ChatColor.YELLOW + plugin.myLocale().adminInfoBannedPlayers + ":");
                 String list = "";
                 for (UUID uuid : banList) {
-                    Player target = plugin.getServer().getPlayer(uuid);
+                    Player target = Bukkit.getPlayer(uuid);
                     if (target != null) {
                         //online
                         list += target.getName() + ", ";
@@ -3225,7 +3208,7 @@ public class AdminCmd implements CommandExecutor, TabCompleter {
                     if ((VaultHelper.checkPerm(player, Settings.PERMPREFIX + "mod.team") || player.isOp())
                             && args[0].equalsIgnoreCase("team")
                             && args[1].equalsIgnoreCase("add")) {
-                        for (Player p : plugin.getServer().getOnlinePlayers()) {
+                        for (Player p : Bukkit.getOnlinePlayers()) {
                             options.add(p.getName());
                         }
                     }

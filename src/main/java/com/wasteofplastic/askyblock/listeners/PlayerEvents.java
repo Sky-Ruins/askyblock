@@ -110,7 +110,7 @@ public class PlayerEvents implements Listener {
      */
     public void removeAllTempPerms() {
         for (Entry<UUID, List<String>> en : temporaryPerms.entrySet()) {
-            Player player = plugin.getServer().getPlayer(en.getKey());
+            Player player = Bukkit.getPlayer(en.getKey());
             if (player != null) {
                 for (String perm : en.getValue()) {
                     VaultHelper.removePerm(player, perm, ASkyBlock.getIslandWorld());
@@ -140,7 +140,7 @@ public class PlayerEvents implements Listener {
         if (DEBUG) {
             plugin.getLogger().info("DEBUG: Giving all temp perms");
         }
-        for (Player player : plugin.getServer().getOnlinePlayers()) {
+        for (Player player : Bukkit.getOnlinePlayers()) {
             if (player != null && !player.hasMetadata("NPC") && plugin.getGrid().playerIsOnIsland(player)) {
                 if (VaultHelper.checkPerm(player, Settings.PERMPREFIX + "islandfly")) {
                     if (DEBUG) {
@@ -200,7 +200,7 @@ public class PlayerEvents implements Listener {
      */
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onPlayerEnterOnIsland(IslandEnterEvent e) {
-        Player player = plugin.getServer().getPlayer(e.getPlayer());
+        Player player = Bukkit.getPlayer(e.getPlayer());
         if (player != null && !player.hasMetadata("NPC")) {
             if (DEBUG) {
                 plugin.getLogger().info("DEBUG: player entered island");
@@ -230,7 +230,7 @@ public class PlayerEvents implements Listener {
                 if (DEBUG) {
                     plugin.getLogger().info("DEBUG: player has fly");
                 }
-                plugin.getServer().getScheduler().runTask(plugin, new Runnable() {
+                Bukkit.getScheduler().runTask(plugin, new Runnable() {
 
                     @Override
                     public void run() {
@@ -280,7 +280,7 @@ public class PlayerEvents implements Listener {
             processPerms(event.getPlayer(), island);
             // Fire entry event
             final IslandEnterEvent e = new IslandEnterEvent(event.getPlayer().getUniqueId(), island, event.getPlayer().getLocation());
-            plugin.getServer().getPluginManager().callEvent(e);
+            Bukkit.getPluginManager().callEvent(e);
         }
     }
 
@@ -295,7 +295,7 @@ public class PlayerEvents implements Listener {
         if (DEBUG) {
             plugin.getLogger().info("DEBUG: island exit event");
         }
-        final Player player = plugin.getServer().getPlayer(e.getPlayer());
+        final Player player = Bukkit.getPlayer(e.getPlayer());
         if (player != null && !player.hasMetadata("NPC")) {
             if (DEBUG) {
                 plugin.getLogger().info("DEBUG: player left island. e.getLocation = " + e.getLocation());
@@ -336,7 +336,7 @@ public class PlayerEvents implements Listener {
                             plugin.getLogger().info("DEBUG: removed fly");
                         }
                     } else {
-                        plugin.getServer().getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
+                        Bukkit.getScheduler().scheduleSyncDelayedTask(plugin, new Runnable() {
 
                             @Override
                             public void run() {
@@ -422,7 +422,7 @@ public class PlayerEvents implements Listener {
         if (island != null) {
             // Fire exit event
             final IslandExitEvent e = new IslandExitEvent(event.getPlayer().getUniqueId(), island, event.getPlayer().getLocation());
-            plugin.getServer().getPluginManager().callEvent(e);
+            Bukkit.getPluginManager().callEvent(e);
         }
     }
 
@@ -728,8 +728,8 @@ public class PlayerEvents implements Listener {
                 Util.sendMessage(e.getPlayer(), ChatColor.RED + plugin.myLocale(e.getPlayer().getUniqueId()).islandProtected);
                 e.setCancelled(true);
                 return;
-            } else if (!plugin.getServer().getVersion().contains("(MC: 1.8")
-                    && !plugin.getServer().getVersion().contains("(MC: 1.7")) {
+            } else if (!Bukkit.getVersion().contains("(MC: 1.8")
+                    && !Bukkit.getVersion().contains("(MC: 1.7")) {
                 if (DEBUG) {
                     plugin.getLogger().info("DEBUG: chorus fruit check");
                 }
@@ -824,7 +824,7 @@ public class PlayerEvents implements Listener {
             }
             // Fire entry event
             final IslandEnterEvent event = new IslandEnterEvent(e.getPlayer().getUniqueId(), islandTo, e.getTo());
-            plugin.getServer().getPluginManager().callEvent(event);
+            Bukkit.getPluginManager().callEvent(event);
         } else if (islandTo == null && islandFrom != null && (islandFrom.getOwner() != null || islandFrom.isSpawn())) {
             if (DEBUG) {
                 plugin.getLogger().info("DEBUG: Leaving");
@@ -855,7 +855,7 @@ public class PlayerEvents implements Listener {
             removeTempPerms(e.getPlayer(), islandFrom, islandTo);
             // Fire exit event
             final IslandExitEvent event = new IslandExitEvent(e.getPlayer().getUniqueId(), islandFrom, e.getFrom());
-            plugin.getServer().getPluginManager().callEvent(event);
+            Bukkit.getPluginManager().callEvent(event);
         } else if (islandTo != null && islandFrom != null && !islandTo.equals(islandFrom)) {
             if (DEBUG) {
                 plugin.getLogger().info("DEBUG: jumping from one island to another - adjacent islands");
@@ -905,10 +905,10 @@ public class PlayerEvents implements Listener {
             }
             // Fire exit event
             final IslandExitEvent event = new IslandExitEvent(e.getPlayer().getUniqueId(), islandFrom, e.getFrom());
-            plugin.getServer().getPluginManager().callEvent(event);
+            Bukkit.getPluginManager().callEvent(event);
             // Fire entry event
             final IslandEnterEvent event2 = new IslandEnterEvent(e.getPlayer().getUniqueId(), islandTo, e.getTo());
-            plugin.getServer().getPluginManager().callEvent(event2);
+            Bukkit.getPluginManager().callEvent(event2);
         } else if (islandTo != null && islandFrom != null && (islandTo.equals(islandFrom) && !e.getFrom()
                 .getWorld()
                 .equals(e.getTo().getWorld()))) {
@@ -917,10 +917,10 @@ public class PlayerEvents implements Listener {
             }
             // Fire exit event
             final IslandExitEvent event = new IslandExitEvent(e.getPlayer().getUniqueId(), islandFrom, e.getFrom());
-            plugin.getServer().getPluginManager().callEvent(event);
+            Bukkit.getPluginManager().callEvent(event);
             // Fire entry event
             final IslandEnterEvent event2 = new IslandEnterEvent(e.getPlayer().getUniqueId(), islandTo, e.getTo());
-            plugin.getServer().getPluginManager().callEvent(event2);
+            Bukkit.getPluginManager().callEvent(event2);
         }
     }
 
